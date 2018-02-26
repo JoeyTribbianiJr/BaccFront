@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 
 namespace Bacc_front
 {
+	[PropertyChanged.ImplementPropertyChanged]
 	public class Desk
 	{
-		private const int player_num = 14;
+		public int CountDown { get; set; }
+		public List<BetSide> Waybill { get; set; }
+
 		public static Desk Instance
 		{
 			get
@@ -23,8 +27,9 @@ namespace Bacc_front
 
 		private Desk()
 		{
-			players = new List<Player>();
+			players = new ObservableCollection<Player>();
 			desk_amount = new Dictionary<BetSide, int>();
+			Waybill = new List<BetSide>();
 			InitPlayers();
 		}
 		private void InitPlayers()
@@ -122,9 +127,10 @@ namespace Bacc_front
 			return weight;
 		}
 
-		public List<Player> Players
+		public ObservableCollection<Player> Players
 		{
 			get { return players; }
+			set { players = value; }
 		}
 		public void AddScore(int p_index, int score)
 		{
@@ -264,12 +270,13 @@ namespace Bacc_front
 			}
 		}
 
+		private const int player_num = 14;
 		private const float BANKER_ODDS = 0.95f;
 		private const float PLAYER_ODDS = 1;
 		private const float TIE_ODDS = 8;
 		private float[] odds_map = new float[3] { BANKER_ODDS, TIE_ODDS, PLAYER_ODDS };
 
-		private List<Player> players;
+		private ObservableCollection<Player> players;
 		private Dictionary<BetSide, int> desk_amount;
 
 		private static Desk instance;

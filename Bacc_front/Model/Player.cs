@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using PropertyChanged;
 
 namespace Bacc_front
 {
@@ -22,6 +23,7 @@ namespace Bacc_front
 	}
 	public delegate int NativeCountRule(BetSide winner, Dictionary<BetSide, int> bet);
 
+	[ImplementPropertyChanged]
 	public class Player
 	{
 

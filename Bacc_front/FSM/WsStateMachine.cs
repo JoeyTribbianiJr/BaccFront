@@ -33,7 +33,7 @@ namespace WsFSM
 		{
 			if (_isTransition)
 			{
-				if(_curT.TransitionCallback ())
+				if(_curT.TransitionCallback ()) //执行耗时操作
 				{
 					DoTransition(_curT);
 				}

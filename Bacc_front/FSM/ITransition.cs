@@ -12,7 +12,7 @@ namespace WsFSM
 		IState To { get; set; }
 
 		/// <summary>
-		/// 过渡回调
+		/// 过渡回调,执行动画或者耗时操作
 		/// </summary>
 		/// <returns>回调是否执行完毕</returns>
 		bool TransitionCallback();

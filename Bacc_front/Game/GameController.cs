@@ -1,6 +1,7 @@
 ﻿
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
@@ -9,9 +10,9 @@ namespace Bacc_front
 {
 	public class GameController
 	{
-		private List<Session> sessions;
+		private ObservableCollection<Session> sessions;
 		public Session cur_session;
-		public List<Round> all_rounds;
+		public ObservableCollection<Round> all_rounds;
 		public int all_rounds_num;
 		public int round_idx;
 
@@ -33,7 +34,7 @@ namespace Bacc_front
 			all_rounds_num = Setting.Instance.GetIntSetting("all_rounds_num");
 			all_rounds = CreateRounds(all_rounds_num);
 
-			sessions = new List<Session>();
+			sessions = new ObservableCollection<Session>();
 			cur_session = new Session(0, all_rounds);
 			sessions.Add(cur_session);
 			round_idx = 0;
@@ -48,9 +49,9 @@ namespace Bacc_front
 
 		//}
 		// 1th step
-		private List<Round> CreateRounds(int rounds_num)
+		private ObservableCollection<Round> CreateRounds(int rounds_num)
 		{
-			var rounds = new List<Round>();
+			var rounds = new ObservableCollection<Round>();
 			for (int i = 0; i < rounds_num; i++)
 			{
 				var hand_cards = Deck.Instance.deal_native_hand();

@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using PropertyChanged;
 
 namespace Bacc_front
 {
@@ -19,11 +21,10 @@ namespace Bacc_front
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		//public List<Player> Players { get; set; }
-
+		Game game { get; set; }
+		public int hehe { get; set; }
 		public MainWindow()
 		{
-			//InitGame();
 			Desk.Instance.Players[6].Balance = 100;
 			Desk.Instance.Players[7].Balance = 5000;
 			Desk.Instance.Players[8].Balance = 3000;
@@ -32,12 +33,15 @@ namespace Bacc_front
 			{
 				{BetSide.banker,1000 },{BetSide.tie ,220}
 			};
+			//Left = 2160;
 			InitializeComponent();
 			Casino.DataContext = Desk.Instance;
+			InitGame();
 		}
 		private void InitGame()
 		{
-			//Players = Desk.Instance.Players;
+			game = new Game();
 		}
+
 	}
 }

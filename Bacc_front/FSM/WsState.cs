@@ -71,10 +71,7 @@ namespace WsFSM
 		public virtual void EnterCallback(IState prev)
 		{
 			_timer = 0f;
-			if (OnEnter != null)
-			{
-				OnEnter(prev);
-			}
+			OnEnter?.Invoke(prev);
 		}
 
 		public virtual void ExitCallback(IState next)

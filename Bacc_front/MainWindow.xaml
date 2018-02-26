@@ -4,8 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bacc_front"
+		WindowStyle="None"
+		AllowsTransparency="True"
+		Background="Green"
+		ResizeMode="NoResize"
         mc:Ignorable="d"
         Title="MainWindow" Height="768" Width="1024">
+		<!--WindowState="Maximized"-->
 	<Window.Resources>
 		<ResourceDictionary Source="Style.xaml">
 		</ResourceDictionary>
@@ -16,6 +21,11 @@
 				<Canvas.Background>
 					<ImageBrush ImageSource="Img/desk.bmp" />
 				</Canvas.Background>
+
+				<!--<Button Click="Button_Click">修改值</Button>-->
+				<!--<TextBlock Name="txthehe"  FontSize="20" FontWeight="UltraBold" Foreground="Red" Text="{Binding hehe}" Canvas.Left="227" Canvas.Top="51"  >432</TextBlock>-->
+				<TextBlock Name="txtCountDown"  FontSize="20" FontWeight="UltraBold" Foreground="Red" Text="{Binding CountDown}" Canvas.Left="87" Canvas.Top="24" ></TextBlock>
+
 				<Button DataContext="{Binding Players[0].Balance}" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
 				<Button DataContext="{Binding Players[1].Balance}" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
 				<Button DataContext="{Binding Players[2].Balance}" Canvas.Left="58" Canvas.Top="525" Style="{StaticResource ChipButton}" />
@@ -30,7 +40,6 @@
 				<Button DataContext="{Binding Players[11].Balance}" Canvas.Left="907" Canvas.Top="516" Style="{StaticResource ChipButton}" />
 				<Button DataContext="{Binding Players[12].Balance}" Canvas.Left="789" Canvas.Top="581" Style="{StaticResource ChipButton}" />
 				<Button DataContext="{Binding Players[13].Balance}" Canvas.Left="663" Canvas.Top="590" Style="{StaticResource ChipButton}" />
-
 
 				<Button DataContext="{Binding Players[7].BetScore[2]}" Canvas.Left="655" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
 				<Button DataContext="{Binding Players[7].BetScore[0]}" Canvas.Left="704" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
