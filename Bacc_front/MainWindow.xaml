@@ -16,15 +16,23 @@
 				<Canvas.Background>
 					<ImageBrush ImageSource="Img/desk.bmp" />
 				</Canvas.Background>
-				<Button DataContext="{Binding Players[0].Balance}"  Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" ></Button>
-				<Button DataContext="{Binding Players[6].Balance}"  Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" ></Button>
-				<Button DataContext="2000" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
-				<Button DataContext="2000" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
-				<Button DataContext="2000" Canvas.Left="58" Canvas.Top="525" Style="{StaticResource ChipButton}" />
-				<Button DataContext="2000" Canvas.Left="19" Canvas.Top="399" Style="{StaticResource ChipButton}" />
-				<Button DataContext="2000" Canvas.Left="58" Canvas.Top="286" Style="{StaticResource ChipButton}" />
-				<Button DataContext="2000" Canvas.Left="167" Canvas.Top="230" Style="{StaticResource ChipButton}" />
-				<Button DataContext="1000" Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" />
+
+				
+				<Button DataContext="{Binding Players[0].Balance}" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[1].Balance}" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[2].Balance}" Canvas.Left="58" Canvas.Top="525" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[3].Balance}" Canvas.Left="19" Canvas.Top="399" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[4].Balance}" Canvas.Left="58" Canvas.Top="286" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[5].Balance}" Canvas.Left="167" Canvas.Top="230" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[6].Balance}" Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[7].Balance}" Canvas.Left="683" Canvas.Top="227" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[8].Balance}" Canvas.Left="789" Canvas.Top="225" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[9].Balance}" Canvas.Left="888" Canvas.Top="281" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[10].Balance}" Canvas.Left="938" Canvas.Top="393" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[11].Balance}" Canvas.Left="907" Canvas.Top="516" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[12].Balance}" Canvas.Left="789" Canvas.Top="581" Style="{StaticResource ChipButton}" />
+				<Button DataContext="{Binding Players[13].Balance}" Canvas.Left="663" Canvas.Top="590" Style="{StaticResource ChipButton}" />
+
 			</Canvas>
 		</Viewbox>
 	</Grid>
