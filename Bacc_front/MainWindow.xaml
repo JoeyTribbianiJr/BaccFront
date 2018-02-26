@@ -1,0 +1,31 @@
+﻿<Window x:Class="Bacc_front.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Bacc_front"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="768" Width="1024">
+	<Window.Resources>
+		<ResourceDictionary Source="Style.xaml">
+		</ResourceDictionary>
+	</Window.Resources>
+	<Grid>
+		<Viewbox Stretch="fill">
+			<Canvas Name="Casino" Width="1024" Height="768">
+				<Canvas.Background>
+					<ImageBrush ImageSource="Img/desk.bmp" />
+				</Canvas.Background>
+				<Button DataContext="{Binding Players[0].Balance}"  Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" ></Button>
+				<Button DataContext="{Binding Players[6].Balance}"  Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" ></Button>
+				<Button DataContext="2000" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
+				<Button DataContext="2000" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
+				<Button DataContext="2000" Canvas.Left="58" Canvas.Top="525" Style="{StaticResource ChipButton}" />
+				<Button DataContext="2000" Canvas.Left="19" Canvas.Top="399" Style="{StaticResource ChipButton}" />
+				<Button DataContext="2000" Canvas.Left="58" Canvas.Top="286" Style="{StaticResource ChipButton}" />
+				<Button DataContext="2000" Canvas.Left="167" Canvas.Top="230" Style="{StaticResource ChipButton}" />
+				<Button DataContext="1000" Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" />
+			</Canvas>
+		</Viewbox>
+	</Grid>
+</Window>
