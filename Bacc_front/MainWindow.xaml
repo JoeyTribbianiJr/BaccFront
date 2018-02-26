@@ -32,7 +32,7 @@
 				<Button DataContext="{Binding Players[11].Balance}" Canvas.Left="907" Canvas.Top="516" Style="{StaticResource ChipButton}" />
 				<Button DataContext="{Binding Players[12].Balance}" Canvas.Left="789" Canvas.Top="581" Style="{StaticResource ChipButton}" />
 				<Button DataContext="{Binding Players[13].Balance}" Canvas.Left="663" Canvas.Top="590" Style="{StaticResource ChipButton}" />
-
+ 
 			</Canvas>
 		</Viewbox>
 	</Grid>
