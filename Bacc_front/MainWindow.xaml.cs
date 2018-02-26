@@ -25,6 +25,13 @@ namespace Bacc_front
 		{
 			//InitGame();
 			Desk.Instance.Players[6].Balance = 100;
+			Desk.Instance.Players[7].Balance = 5000;
+			Desk.Instance.Players[8].Balance = 3000;
+			Desk.Instance.Players[9].Balance = 6312;
+			Desk.Instance.Players[9].BetScore = new Dictionary<BetSide, int>
+			{
+				{BetSide.banker,1000 },{BetSide.tie ,220}
+			};
 			InitializeComponent();
 			Casino.DataContext = Desk.Instance;
 		}

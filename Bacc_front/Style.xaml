@@ -46,5 +46,50 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
-	
+
+	<Style x:Key="BetChipButton" TargetType="Button">
+		<Setter Property="Width" Value="37"/>
+		<Setter Property="Height" Value="35"/>
+		<Setter Property="Foreground" Value="Black"/>
+		<Setter Property="FontSize" Value="10" />
+		<Setter Property="FontStretch" Value="Medium" />
+		<Setter Property="FontWeight" Value="Black" />
+
+		<Setter Property="Content" >
+			<Setter.Value>
+				<Binding Path="." ></Binding>
+			</Setter.Value>
+		</Setter>
+
+		<Setter Property="Visibility" >
+			<Setter.Value>
+				<Binding Path="." Converter="{StaticResource ChipVisibleConverter}"></Binding>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="Background" >
+			<Setter.Value>
+				<ImageBrush ImageSource="Img/bet.bmp">
+					<!--<ImageBrush.ImageSource >
+						<Binding  Path="."  Converter="{StaticResource ChipBackgroundConverter}"></Binding>
+					</ImageBrush.ImageSource>-->
+				</ImageBrush>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Grid>
+						<Border Background="{TemplateBinding Background}">
+
+											  <!--Margin="{TemplateBinding Content,Converter={StaticResource ChipTextMarginConverter}}"-->
+							<ContentPresenter Name="BtnContent"
+											  VerticalAlignment="Center"
+											  HorizontalAlignment="Center"
+											  Content="{TemplateBinding Content}"/>
+						</Border>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 </ResourceDictionary>

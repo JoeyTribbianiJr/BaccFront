@@ -11,6 +11,10 @@ namespace Bacc_front
 		tie,
 		player
 	}
+
+	/// <summary>
+	/// 每次押注面额
+	/// </summary>
 	public enum BetDenomination
 	{
 		big = 100,
@@ -33,6 +37,7 @@ namespace Bacc_front
 		public Dictionary<BetSide, int> BetScore
 		{
 			get { return bet_score; }
+			set { bet_score = value; }
 		}
 
 		public int Id { get => id; set => id = value; }
