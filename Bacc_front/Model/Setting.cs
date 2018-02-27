@@ -135,6 +135,12 @@ namespace Bacc_front
 			//game_str_setting.Add("waybill_font", new SettingStrItem() { desc = "露单字体", value = "大字体露单", values = new string[] { "大字体露单", "小字体露单" } });
 			//game_str_setting.Add("break_machine", new SettingStrItem() { desc = "是否爆机", value = "爆机无", values = new string[] { "爆机无", "爆机有" } });
 			//game_str_setting.Add("open_3_sec", new SettingStrItem() { desc = "3秒功能开", value = "3秒功能开", values = new string[] { "3秒功能开", "3秒功能关" } });
+			game_setting.Add("open_3_sec", new SettingItem()
+			{
+				SelectedIndex = 0,
+				Type = SettingItemType.strings,
+				Values = new string[] { "3秒功能开", "3秒功能关" }
+			});
 			//game_str_setting.Add("print_waybill", new SettingStrItem() { desc = "打印露单", value = "打印露单", values = new string[] { "打印露单" } });
 			//game_str_setting.Add("single_double", new SettingStrItem() { desc = "单张牌", value = "单张牌", values = new string[] { "单张牌", "两张牌" } });
 		}

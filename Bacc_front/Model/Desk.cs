@@ -10,7 +10,9 @@ namespace Bacc_front
 	[PropertyChanged.ImplementPropertyChanged]
 	public class Desk
 	{
+        public int RoundIndex { get; set; }
 		public int CountDown { get; set; }
+        public string StateText { get; internal set; }
 		public List<BetSide> Waybill { get; set; }
 
 		public static Desk Instance
@@ -27,6 +29,8 @@ namespace Bacc_front
 
 		private Desk()
 		{
+            RoundIndex = 1;
+            CountDown = 0;
 			players = new ObservableCollection<Player>();
 			desk_amount = new Dictionary<BetSide, int>();
 			Waybill = new List<BetSide>();
@@ -132,7 +136,10 @@ namespace Bacc_front
 			get { return players; }
 			set { players = value; }
 		}
-		public void AddScore(int p_index, int score)
+
+        internal List<KeyDownModel> UserKeyDownList { get; set; }
+
+        public void AddScore(int p_index, int score)
 		{
 			players[p_index].AddScore(score);
 		}
@@ -141,6 +148,14 @@ namespace Bacc_front
 			players[p_idx].SubScore(score);
 		}
 
+		public void CalcAllPlayersEarning()
+		{
+			var winner = GetWinner(_curHandCards);
+			foreach(var player in players)
+			{
+				player.Balance += CalcPlayerEarning(winner, player.BetScore);
+			}
+		}
 		public int CalcPlayerEarning(BetSide winner, Dictionary<BetSide, int> p_bets)
 		{
 			var cost = p_bets[winner];
@@ -278,6 +293,7 @@ namespace Bacc_front
 
 		private ObservableCollection<Player> players;
 		private Dictionary<BetSide, int> desk_amount;
+		private List<Card>[] _curHandCards;
 
 		private static Desk instance;
 	}

@@ -100,7 +100,6 @@ namespace Bacc_front
 			ClearBet();
 		}
 
-
 		public void SetAmount()
 		{
 			denomination = denomination == BetDenomination.big ? BetDenomination.small : BetDenomination.big;

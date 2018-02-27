@@ -16,32 +16,46 @@ using PropertyChanged;
 
 namespace Bacc_front
 {
-	/// <summary>
-	/// MainWindow.xaml 的交互逻辑
-	/// </summary>
-	public partial class MainWindow : Window
-	{
-		Game game { get; set; }
-		public int hehe { get; set; }
-		public MainWindow()
-		{
-			Desk.Instance.Players[6].Balance = 100;
-			Desk.Instance.Players[7].Balance = 5000;
-			Desk.Instance.Players[8].Balance = 3000;
-			Desk.Instance.Players[9].Balance = 6312;
-			Desk.Instance.Players[9].BetScore = new Dictionary<BetSide, int>
-			{
-				{BetSide.banker,1000 },{BetSide.tie ,220}
-			};
-			//Left = 2160;
-			InitializeComponent();
-			Casino.DataContext = Desk.Instance;
-			InitGame();
-		}
-		private void InitGame()
-		{
-			game = new Game();
-		}
+    /// <summary>
+    /// MainWindow.xaml 的交互逻辑
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        Game game { get; set; }
+        public int hehe { get; set; }
+        public MainWindow()
+        {
+            Desk.Instance.Players[6].Balance = 100;
+            Desk.Instance.Players[7].Balance = 5000;
+            Desk.Instance.Players[8].Balance = 3000;
+            Desk.Instance.Players[9].Balance = 6312;
+            Desk.Instance.Players[9].BetScore = new Dictionary<BetSide, int>
+            {
+                {BetSide.banker,1000 },{BetSide.tie ,220}
+            };
+            //Left = 2160;
+            InitializeComponent();
+            Casino.DataContext = Desk.Instance;
+            InitGame();
+        }
+        private void InitGame()
+        {
+            game = new Game();
+        }
 
-	}
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (game._isBetting)
+            {
+                var code = (int)e.Key;
+                game.HandleKeyDown(code);
+            }
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            game.HandleKeyUp((int)e.Key);
+        }
+    }
+
 }
