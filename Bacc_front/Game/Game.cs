@@ -2,9 +2,16 @@
 using System.Collections.Generic;
 using WsUtils;
 using WsFSM;
+using System.Timers;
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Windows;
+using System.IO;
+using System.Drawing;
+using System.Net;
+using System.Net.Sockets;
+using System.Windows.Forms;
 using System.Windows.Threading;
-using System.Windows.Input;
-using System.Linq;
 
 namespace Bacc_front
 {
@@ -17,7 +24,9 @@ namespace Bacc_front
     public class Game
     {
         #region 游戏参数
-        private const float rate = 0.1f;
+        private const float _frame_rate = 0.1f;
+        private float _bet_rate = 0.5f;
+        private bool _continuously_bet = false;
         public bool _is3SecOn = false;
         public bool _isBetting = false;
         public bool _isIn3 = false;
@@ -26,20 +35,29 @@ namespace Bacc_front
         public DispatcherTimer dTimer;
         public int Counter { get; set; }
         public List<List<int>> keymap = new List<List<int>>();
+        public NetServer scr_transfer;
         #endregion
+
+        #region 游戏初始化
         public Game()
         {
             InitFsm();
 
-            dTimer = new DispatcherTimer();
-            dTimer.Interval = TimeSpan.FromSeconds(rate);
+            dTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(_frame_rate)
+            };
             dTimer.Tick += Update;
 
             dTimer.Start();
+
+            scr_transfer = new NetServer();
+            scr_transfer.StartServer();
         }
+
         private void Update(object sender, EventArgs e)
         {
-            _fsm.UpdateCallback(rate);
+            _fsm.UpdateCallback(_frame_rate);
         }
         private void InitFsm()
         {
@@ -97,32 +115,29 @@ namespace Bacc_front
             _fsm.AddState(_bettingState);
             //_fsm.AddState(_accountingState);
         }
-
-        internal void HandleKeyUp(int key)
+        bool InitGame()
         {
-            _betKeyDownList.RemoveAll(k => k.keycode == key);
-        }
-
-        internal void HandleKeyDown(int key)
-        {
-            if (_all_userkeys_lst.Contains(key))
+            _betKeyDownList = new List<KeyDownModel>();
+            //每场几局
+            _roundNumPerSession = Setting.Instance.GetIntSetting("round_num_per_session");
+            Desk.Instance. Waybill = new ObservableCollection<WhoWin>();
+            for (int i = 0; i < _roundNumPerSession; i++)
             {
-                if(_bet_userkeys_lst.Contains(key))
-                {
-                    _betKeyDownList.Add(new KeyDownModel(key));
-                }
-                else
-                {
-                    HandleOptionKey(key);
-                }
+                Desk.Instance.Waybill.Add(new WhoWin());
             }
-        }
 
-        private void HandleOptionKey(int key)
-        {
-            throw new NotImplementedException();
+            //押注时间有几秒
+            _betTime = Setting.Instance.GetIntSetting("bet_tm");
+            _betTime = 10;
+            _is3SecOn = Setting.Instance.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
+
+            //提前几秒通知服务器押注结束
+            _send_to_svr = 5;
+
+            InitKeymap();
+            _isLoaded = true;
+            return true;
         }
-        #region 游戏初始化
         /// <summary>
         /// 初始化键盘映射
         /// </summary>
@@ -151,34 +166,163 @@ namespace Bacc_front
             }
 
             _bet_userkeys_lst = new List<int>();
+            _bet_userkeys_map = new List<List<int>>();
             _opt_userkeys_map = new List<List<int>>();
-            foreach(var map in keymap)
+            foreach (var map in keymap)
             {
                 _bet_userkeys_lst.AddRange(map.GetRange(0, 3));
-                _opt_userkeys_map.Add(map.GetRange(2,3));
+
+                _bet_userkeys_map.Add(map.GetRange(0, 3));
+                _opt_userkeys_map.Add(map.GetRange(3, 3));
             }
-            
+
+        }
+        #endregion
+        #region 键盘回调
+        /// <summary>
+        /// 松开按键回调
+        /// </summary>
+        /// <param name="key"></param>
+        internal void HandleKeyUp(int key)
+        {
+            if (_continuously_bet)
+            {
+                _betKeyDownList.RemoveAll(k => k.keycode == key);
+            }
+        }
+        /// <summary>
+        /// 按下按键回调
+        /// </summary>
+        /// <param name="key"></param>
+        internal void HandleKeyDown(int key)
+        {
+            if (_all_userkeys_lst.Contains(key))
+            {
+                if (_bet_userkeys_lst.Contains(key))
+                {
+                    if (_continuously_bet) //如果不是连续押分，直接执行
+                    {
+                        _betKeyDownList.Add(new KeyDownModel(key));
+                    }
+                    //连续押分要缓存按键
+                    HandleBetKey(key);
+                }
+                else
+                {
+                    HandleOptionKey(key);
+                }
+            }
+        }
+        /// <summary>
+        /// 连续押注按键处理，在每一帧执行
+        /// </summary>
+        private void HandleBetKeyList()
+        {
+            foreach (var keydown in _betKeyDownList)
+            {
+                //第一次按键 或 在_bet_rate时间内未松开
+                if (keydown.timer == 0 || keydown.timer >= _bet_rate)
+                {
+                    HandleBetKey(keydown.keycode);
+                    keydown.timer = 0;
+                }
+                keydown.timer += _frame_rate;
+            }
+        }
+        /// <summary>
+        /// 玩家押注
+        /// </summary>
+        /// <param name="key"></param>
+        private void HandleBetKey(int key)
+        {
+            var p_idx = GetBetUser(key, out KeyFunc func);
+            var player = Desk.Instance.Players[p_idx];
+
+            if (Desk.Instance.CanHeBet(player, (BetSide)func))
+            {
+                player.Bet((BetSide)func);
+            }
+        }
+        /// <summary>
+        /// 玩家配置
+        /// </summary>
+        /// <param name="key"></param>
+        private void HandleOptionKey(int key)
+        {
+            var p_idx = GetOptUser(key, out KeyFunc func);
+            var player = Desk.Instance.Players[p_idx];
+            switch (func)
+            {
+                //设置押注面额
+                case KeyFunc.toggle_denomination:
+                    {
+                        player.SetDenomination();
+                        break;
+                    }
+                //取消所有押注
+                case KeyFunc.cancle_bet:
+                    {
+                        if (Desk.Instance.CanHeCancleBet(player))
+                        {
+                            player.CancleBet();
+                        }
+                        break;
+                    }
+                //是否隐藏压了哪家
+                case KeyFunc.hide_bet:
+                    {
+                        player.SetHide();
+                        break;
+                    }
+            }
+        }
+        /// <summary>
+        /// 获取按下押注键的玩家
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns>玩家索引</returns>
+        int GetBetUser(int key, out KeyFunc func)
+        {
+            func = KeyFunc.bet_bank;
+            int p_idx = 0, f_idx = 0;
+            for (int i = 0; i < _bet_userkeys_map.Count; i++)
+            {
+                var map = _bet_userkeys_map[i];
+                f_idx = map.IndexOf(key);
+                if (f_idx > -1)
+                {
+                    func = (KeyFunc)f_idx;
+                    return p_idx;
+                }
+                p_idx++;
+            }
+            return -1;
+        }
+        /// <summary>
+        /// 获取按下配置键的玩家索引
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        int GetOptUser(int key, out KeyFunc func)
+        {
+            func = KeyFunc.bet_bank;
+            var f_idx = 0;
+            int p_idx = 0;
+            for (int i = 0; i < _opt_userkeys_map.Count; i++)
+            {
+                var map = _opt_userkeys_map[i];
+                f_idx = map.IndexOf(key);
+                if (f_idx > -1)
+                {
+                    func = (KeyFunc)(f_idx + 3);
+                    return p_idx;
+                }
+                p_idx++;
+            }
+            return -1;
         }
         #endregion
 
-        bool InitGame()
-        {
-            //每场几局
-            _roundNumPerSession = Setting.Instance.GetIntSetting("round_num_per_session");
-            _roundNumPerSession = 3;
-
-            //押注时间有几秒
-            _betTime = Setting.Instance.GetIntSetting("bet_tm");
-            _betTime = 10;
-            _is3SecOn = Setting.Instance.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
-
-            //提前几秒通知服务器押注结束
-            _send_to_svr = 5;
-
-            InitKeymap();
-            _isLoaded = true;
-            return true;
-        }
         private bool IsGameInited()
         {
             return _isLoaded = true;
@@ -233,6 +377,7 @@ namespace Bacc_front
         /// <param name="f"></param>
         private void Bet(float f)
         {
+            HandleBetKeyList();
             _betTimer = _bettingState.Timer;
             SetCountDownWithFloat(_betTimer, _betTime);
             SetStateText("押注中");
@@ -305,7 +450,9 @@ namespace Bacc_front
         /// <param name="state"></param>
         private void GetWinner(IState state)
         {
-            var winner = Desk.Instance.GetWinner(_curHandCards);
+            //var winner = Desk.Instance.GetWinner(_curHandCards);
+            Desk.Instance.CalcAllPlayersEarning();
+            Desk.Instance.ClearDeskAmount();
             if (Desk.Instance.RoundIndex >= _roundNumPerSession)
             {
                 _sessionOver = true;
@@ -414,14 +561,16 @@ namespace Bacc_front
 
             if (singleDouble == "单张牌")
             {
-                _curHandCards = Desk.Instance.DealSingleCard();
+               Desk.Instance. _curHandCards = Desk.Instance.DealSingleCard();
                 OpenSingle();
             }
             if (singleDouble == "两张牌")
             {
-                _curHandCards = Desk.Instance.DealTwoCard();
+                Desk.Instance. _curHandCards = Desk.Instance.DealTwoCard();
                 OpenTwo();
             }
+
+            
         }
         private void OpenSingle()
         {
@@ -544,12 +693,22 @@ namespace Bacc_front
         private bool _isLoading;
         private bool _animating = false;
         private bool _animationDone;
-        private List<Card>[] _curHandCards;
         private List<int> _all_userkeys_lst;    //所有要监听的按键,查询用
-        private List<int>_bet_userkeys_lst;     //用于押注的按键，查询用
+        private List<int> _bet_userkeys_lst;     //用于押注的按键，查询用
+        private List<List<int>> _bet_userkeys_map;
         private List<KeyDownModel> _betKeyDownList; //按下且尚未抬起的押注按键，每一帧轮询
         private List<List<int>> _opt_userkeys_map;  //用于暗注、修改额度或者取消押注的按键
+        private Thread thread;
         #endregion
+    }
+    public enum KeyFunc
+    {
+        bet_bank = 0,
+        bet_player,
+        bet_tie,
+        toggle_denomination,
+        cancle_bet,
+        hide_bet
     }
     internal class KeyDownModel
     {

@@ -76,7 +76,7 @@ namespace Bacc_front
 
 			game_setting.Add("round_num_per_session", new SettingItem()
 			{
-				SelectedIndex = 0,
+				SelectedIndex = 2,
 				Type = SettingItemType.intager,
 				Values = new string[] { "一场局数:30", "一场局数:45", "一场局数:66" }
 			});

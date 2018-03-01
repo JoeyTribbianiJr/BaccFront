@@ -25,19 +25,42 @@ namespace Bacc_front
         public int hehe { get; set; }
         public MainWindow()
         {
-            Desk.Instance.Players[6].Balance = 100;
-            Desk.Instance.Players[7].Balance = 5000;
-            Desk.Instance.Players[8].Balance = 3000;
-            Desk.Instance.Players[9].Balance = 6312;
-            Desk.Instance.Players[9].BetScore = new Dictionary<BetSide, int>
-            {
-                {BetSide.banker,1000 },{BetSide.tie ,220}
-            };
-            //Left = 2160;
             InitializeComponent();
             Casino.DataContext = Desk.Instance;
             InitGame();
+
+            BindWaybills();
         }
+
+        private void BindWaybills()
+        {
+            var round_num = Setting.Instance.GetIntSetting("round_num_per_session");
+            var grid = this.grdBigWaybill;
+            grid.DataContext = Desk.Instance.Waybill;
+
+            for (int i = 0; i < round_num; i++)
+            {
+                Desk.Instance.Waybill.Add(new WhoWin() { Winner = 0 });
+                var block = new Button();
+                block.Style = (Style)Resources["WaybillBlock"];
+                block.Tag = i;
+                //block.Click += Button_Click;
+                grid.Children.Add(block);
+
+                Binding myBinding = new Binding();
+                myBinding.Source = Desk.Instance;
+                myBinding.Path = new PropertyPath("Waybill[" + i + "].Winner");
+                myBinding.Mode = BindingMode.TwoWay;
+                myBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                BindingOperations.SetBinding(block, DataContextProperty, myBinding);
+
+                var col = i / 6;
+                var row = i % 6;
+                Grid.SetRow(block, row);
+                Grid.SetColumn(block, col);
+            }
+        }
+
         private void InitGame()
         {
             game = new Game();
@@ -55,6 +78,14 @@ namespace Bacc_front
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
             game.HandleKeyUp((int)e.Key);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = ((Button)sender).Tag;
+            var idx = Convert.ToInt32(tag);
+            Desk.Instance.Waybill[idx] = new WhoWin() { Winner = 2 };
+            Desk.Instance.Waybill[2].Winner = 2;
         }
     }
 

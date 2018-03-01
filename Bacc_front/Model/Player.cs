@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PropertyChanged;
+using WsUtils;
 
 namespace Bacc_front
 {
@@ -21,7 +22,7 @@ namespace Bacc_front
 		big = 100,
 		small = 10
 	}
-	public delegate int NativeCountRule(BetSide winner, Dictionary<BetSide, int> bet);
+	public delegate int NativeCountRule(BetSide winner, ObservableDictionary<BetSide, int> bet);
 
 	[ImplementPropertyChanged]
 	public class Player
@@ -34,13 +35,15 @@ namespace Bacc_front
 		private int last_sub;
 		private int sub_score;
 		private bool bet_hide;
-		private Dictionary<BetSide, int> bet_score;
-
-		public Dictionary<BetSide, int> BetScore
+		private ObservableDictionary<BetSide, int> bet_score;
+		public ObservableDictionary<BetSide, int> BetScore
 		{
 			get { return bet_score; }
 			set { bet_score = value; }
 		}
+        public int BetScoreOnBank { get; set; }
+        public int BetScoreOnPlayer { get; set; }
+        public int BetScoreOnTie { get; set; }
 
 		public int Id { get => id; set => id = value; }
 		public int Balance { get => balance; set => balance = value; }
@@ -54,9 +57,13 @@ namespace Bacc_front
 
 		public event NativeCountRule count_rule;
 
-		private void ClearBet()
+		public void ClearBet()
 		{
-			bet_score = new Dictionary<BetSide, int>()  //本次押注
+            BetScoreOnBank = 0;
+            BetScoreOnPlayer = 0;
+            BetScoreOnTie = 0;
+
+            bet_score = new ObservableDictionary<BetSide, int>()
 		{
 			{BetSide.banker,0 },
 			{BetSide.player,0 },
@@ -71,7 +78,10 @@ namespace Bacc_front
 			Add_score = 0;      //总上分
 			Last_sub = 0;       //最后下分
 			Sub_score = 0;      //总下分
-			bet_score = new Dictionary<BetSide, int>()  //本次押注
+            BetScoreOnBank = 0;
+            BetScoreOnPlayer = 0;
+            BetScoreOnTie = 0;
+            bet_score = new ObservableDictionary<BetSide, int>()
 		{
 			{BetSide.banker,0 },
 			{BetSide.player,0 },
@@ -91,6 +101,21 @@ namespace Bacc_front
 
 			Balance -= add_score;
 			bet_score[side] += add_score;
+
+            Desk.Instance.UpdateDeskAmount(side, add_score);
+
+            switch (side)
+            {
+                case BetSide.banker:
+                    BetScoreOnBank += add_score;
+                    break;
+                case BetSide.player:
+                    BetScoreOnPlayer += add_score;
+                    break;
+                case BetSide.tie:
+                    BetScoreOnTie += add_score;
+                    break;
+            }
 		}
 		public void CancleBet()
 		{
@@ -98,9 +123,13 @@ namespace Bacc_front
 			Balance += cancle_score;
 
 			ClearBet();
+            foreach(var bet in bet_score)
+            {
+                Desk.Instance.UpdateDeskAmount(bet.Key, -bet.Value);
+            }
 		}
 
-		public void SetAmount()
+		public void SetDenomination()
 		{
 			denomination = denomination == BetDenomination.big ? BetDenomination.small : BetDenomination.big;
 		}

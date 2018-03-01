@@ -15,7 +15,7 @@ namespace WsUtils
 
 		public FileUtils()
 		{
-			//_syspath = Application.persistentDataPath;
+            _syspath = Environment.CurrentDirectory;
 		}
 
 		public static FileUtils getInstance()
@@ -32,32 +32,17 @@ namespace WsUtils
 		public string readStreamingFile(string name)
 		{
 			string data = "";
-			Debug.Write(data);
-			//string filePath = Application.dataPath + "/" + name;
-			//FileInfo fi = new FileInfo(filePath);
-			//if (!fi.Exists)
-			//{//Application.platform == RuntimePlatform.Android
-			//	Debug.Write("A2 Search: " + filePath + ", datapath=" + Application.dataPath + ", name=" + name);
-			//	WWW www = new WWW(filePath);
-			//	while (!www.isDone)
-			//	{
-			//	}
-			//	//if (www.error.Length < 1)
-			//	data = www.text + " ERROR:" + www.error;
-			//	//StartCoroutine(LoadWWW());
-			//}
-			//else
-			//{
-			//	//sockectLogger.doLog("not android");
-			//	StreamReader sr = null;
-			//	sr = fi.OpenText();
-			//	data = sr.ReadToEnd();
-			//	sr.Close();
-			//	sr.Dispose();
-			//}
+            string filePath = Environment.CurrentDirectory + "/Config/" + name;
+            FileInfo fi = new FileInfo(filePath);
+            
+                StreamReader sr = null;
+                sr = fi.OpenText();
+                data = sr.ReadToEnd();
+                sr.Close();
+                sr.Dispose();
 
-			//sockectLogger.doLog("Read done: " + data);
-			return data;
+            //sockectLogger.doLog("Read done: " + data);
+            return data;
 		}
 
 		public void WriteFile(string name, string info)
