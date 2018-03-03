@@ -117,7 +117,8 @@ namespace Bacc_front
                     break;
             }
 		}
-		public void CancleBet()
+
+        public void CancleBet()
 		{
 			var cancle_score = bet_score.Values.Sum();
 			Balance += cancle_score;
@@ -168,7 +169,11 @@ namespace Bacc_front
 			Last_add = Add_score;
 			Add_score = 0;
 		}
-		public void ConfirmSub()
+        public void SubAllScore()
+        {
+            SubScore(balance);
+        }
+        public void ConfirmSub()
 		{
 			Balance -= Sub_score;
 			Sub_score = 0;

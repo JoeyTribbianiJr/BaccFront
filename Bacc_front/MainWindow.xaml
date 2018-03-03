@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:Bacc_front"
         mc:Ignorable="d"
         KeyDown="Window_KeyDown"
-        
         KeyUp="Window_KeyUp"
         Title="MainWindow" Height="768" Width="1024">
     <!--WindowState="Maximized"-->
@@ -47,12 +46,14 @@
         </EventTrigger>
     </Window.Triggers>
     <Grid>
+        <!--<Button Visibility="Collapsed" Name="btnBindWaybill" Click="Button_Click"></Button>-->
         <Viewbox Stretch="fill">
             <Canvas x:Name="Casino" Width="1024" Height="768">
                 <Canvas.Background>
                     <ImageBrush ImageSource="Img/desk.bmp" />
                 </Canvas.Background>
-                <Button x:Name="button" Style="{StaticResource CardButton}" Canvas.Left="472" Canvas.Top="310" RenderTransformOrigin="0.5,0.5" >
+                <Image Name="beautyBmp"  Canvas.Left="41" Canvas.Top="10" />
+                <Button x:Name="button" Style="{StaticResource CardButton}" Canvas.Left="472" Canvas.Top="310"  >
                     <Button.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -62,11 +63,72 @@
                         </TransformGroup>
                     </Button.RenderTransform>
                 </Button>
-                <Button Click="Button_Click" Canvas.Left="193" Canvas.Top="69">测试按钮</Button>
+                <!--<Button  Canvas.Left="193" Canvas.Top="69">测试按钮</Button>-->
                 <!--<Button Click="Button_Click">修改值</Button>-->
                 <!--<TextBlock Name="txthehe"  FontSize="20" FontWeight="UltraBold" Foreground="Red" Text="{Binding hehe}" Canvas.Left="227" Canvas.Top="51"  >432</TextBlock>-->
                 <TextBlock x:Name="txtCountDown"  FontSize="20" FontWeight="UltraBold" Foreground="Red" Text="{Binding CountDown}" Canvas.Left="87" Canvas.Top="24" />
-                <TextBlock Name="txtState" FontSize="22" Foreground="Red" Text="{Binding StateTest}" Canvas.Left="291" Canvas.Top="21" ></TextBlock>
+                <TextBlock Name="txtState" FontSize="22" Foreground="Red" Text="{Binding StateText}" Canvas.Left="291" Canvas.Top="21" ></TextBlock>
+
+                <Grid Name="grdSmallWaybill" Width="300" Height="75" Canvas.Left="724" >
+                    <Grid.Background>
+                        <SolidColorBrush Color="AliceBlue" Opacity="0.3"></SolidColorBrush>
+                    </Grid.Background>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                </Grid>
+
                 <Label FontSize="22" Foreground="Red" Canvas.Left="446" Canvas.Top="590">第</Label>
                 <TextBlock Name="txtRoundIndex" FontSize="22" Foreground="Red" Text="{Binding RoundIndex}" TextAlignment="Center" Width="50" Canvas.Left="492" Canvas.Top="596" ></TextBlock>
                 <Label FontSize="22" Foreground="Red" Canvas.Left="557" Canvas.Top="589">局</Label>
@@ -131,10 +193,7 @@
                 <Button DataContext="{Binding Players[6].BetScoreOnTie}" Canvas.Left="226" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
                 <Button DataContext="{Binding Players[6].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
                 <Button DataContext="{Binding Players[6].BetScoreOnPlayer}" Canvas.Left="329" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
-                <!--<Grid Width="23" Background="Blue"
-					  Height="23" Canvas.Left="390" Canvas.Top="442"></Grid>
-				<Grid Width="23" Background="Red"
-					  Height="23" Canvas.Left="390" Canvas.Top="467"/>-->
+
                 <Grid  x:Name="grdBigWaybill" 
 								   Width="242" Height="132" Canvas.Left="390" Canvas.Top="442">
                     <Grid.RowDefinitions>
@@ -158,7 +217,14 @@
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-
+                </Grid>
+                <Grid Width="135" Background="Blue"
+					  Height="52" Canvas.Left="321" Canvas.Top="712">
+                    <TextBlock Name="txtBanker"></TextBlock>
+                </Grid>
+                <Grid Width="135" Background="Red"
+					  Height="56" Canvas.Left="557" Canvas.Top="712">
+                    <TextBlock Name="txtPlayer"></TextBlock>
                 </Grid>
             </Canvas>
         </Viewbox>

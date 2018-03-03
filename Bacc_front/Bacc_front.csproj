@@ -60,6 +60,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ControlBoard.xaml.cs">
+      <DependentUpon>ControlBoard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FSM\IState.cs" />
     <Compile Include="FSM\IStateMachine.cs" />
     <Compile Include="FSM\ITransition.cs" />
@@ -79,6 +82,10 @@
     <Compile Include="Model\Session.cs" />
     <Compile Include="Model\Setting.cs" />
     <Compile Include="Model\Type.cs" />
+    <Page Include="ControlBoard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -319,7 +326,13 @@
     <Content Include="Config\keymap.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Img\opencard.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="opencard.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Sounds\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.2.3.0\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.2.3.0\build\portable-net+sl+win+wpa+wp\Fody.targets')" />

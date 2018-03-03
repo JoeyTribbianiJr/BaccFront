@@ -65,7 +65,12 @@ namespace Bacc_front
 				Values = new string[2] { "通知服务器:3", "通知服务器:5" }
 			});
 		}
-		private void InitGameSetting()
+
+        internal void InitSetting()
+        {
+        }
+
+        private void InitGameSetting()
 		{
 			game_setting.Add("printer", new SettingItem()
 			{
@@ -141,9 +146,14 @@ namespace Bacc_front
 				Type = SettingItemType.strings,
 				Values = new string[] { "3秒功能开", "3秒功能关" }
 			});
-			//game_str_setting.Add("print_waybill", new SettingStrItem() { desc = "打印露单", value = "打印露单", values = new string[] { "打印露单" } });
-			//game_str_setting.Add("single_double", new SettingStrItem() { desc = "单张牌", value = "单张牌", values = new string[] { "单张牌", "两张牌" } });
-		}
+            //game_str_setting.Add("print_waybill", new SettingStrItem() { desc = "打印露单", value = "打印露单", values = new string[] { "打印露单" } });
+            game_setting.Add("single_double", new SettingItem()
+            {
+                SelectedIndex =0,
+                Type = SettingItemType.strings,
+                Values = new string[] { "单张牌", "两张牌" }
+            });
+        }
 		public int GetIntSetting(string key)
 		{
 			var item = game_setting[key];

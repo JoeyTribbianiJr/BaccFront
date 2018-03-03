@@ -21,10 +21,13 @@ namespace Bacc_front
         banker = 1,
         player = 2
     }
+    public delegate void delegateGameStart();
+    public delegate void delegateRoundOver();
+    public delegate void delegateDealCard();
     public class Game
     {
         #region 游戏参数
-        private const float _frame_rate = 0.1f;
+        private const float _frame_rate = 0.2f;
         private float _bet_rate = 0.5f;
         private bool _continuously_bet = false;
         public bool _is3SecOn = false;
@@ -36,14 +39,36 @@ namespace Bacc_front
         public int Counter { get; set; }
         public List<List<int>> keymap = new List<List<int>>();
         public NetServer scr_transfer;
+        public event delegateGameStart NoticeGameStart;
+        public event delegateRoundOver NoticeRoundOver;
+        public event delegateDealCard NoticeDealCard;
         #endregion
+        public static Game Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new Game();
+                }
+                return instance;
+            }
+        }
 
-        #region 游戏初始化
-        public Game()
+        public ObservableCollection<Session> AllSessions { get; private set; }
+        public int SessionIndex { get; private set; }
+
+        private Session _curSession;
+        #region 游戏开始
+        private Game()
+        {
+
+        }
+        public void Start()
         {
             InitFsm();
 
-            dTimer = new DispatcherTimer
+            dTimer =dTimer?? new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(_frame_rate)
             };
@@ -63,7 +88,7 @@ namespace Bacc_front
         {
             //资源初始化
             _preparingState = new WsState("preparing");
-            //_preparingState.OnUpdate += InitGame;
+            //_preparingState.OnUpdate += StartGame;
             //洗牌中
             _shufflingState = new WsState("shuffling");
             _shufflingState.OnEnter += GetShufTime;
@@ -82,7 +107,7 @@ namespace Bacc_front
             //初始化切换到洗牌
             _prepareShuffle = new WsTransition("preShuffle", _preparingState, _shufflingState);
             _prepareShuffle.OnTransition += InitGame;
-            _prepareShuffle.OnCheck += IsGameInited;
+            _prepareShuffle.OnCheck += IsGameStarted;
             _preparingState.AddTransition(_prepareShuffle);
 
             //洗牌切换到押注
@@ -108,36 +133,57 @@ namespace Bacc_front
             _dealingState.AddTransition(_dealNextBet);
             _dealingState.AddTransition(_dealShuffle);
 
-
             _fsm = new WsStateMachine("baccarat", _preparingState);
             _fsm.AddState(_preparingState);
             _fsm.AddState(_shufflingState);
             _fsm.AddState(_bettingState);
             //_fsm.AddState(_accountingState);
         }
+
+        private void StartGame(IState state)
+        {
+            _isGameStart = true;
+        }
         bool InitGame()
         {
+            Desk.Instance.InitDeskForGame();
+            NoticeGameStart();
+
+            AllSessions = new ObservableCollection<Session>();
             _betKeyDownList = new List<KeyDownModel>();
-            //每场几局
-            _roundNumPerSession = Setting.Instance.GetIntSetting("round_num_per_session");
-            Desk.Instance. Waybill = new ObservableCollection<WhoWin>();
-            for (int i = 0; i < _roundNumPerSession; i++)
-            {
-                Desk.Instance.Waybill.Add(new WhoWin());
-            }
 
             //押注时间有几秒
-            _betTime = Setting.Instance.GetIntSetting("bet_tm");
-            _betTime = 10;
-            _is3SecOn = Setting.Instance.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
+            _betTime = _setting.GetIntSetting("bet_tm");
+            _betTime = 3;
+            _is3SecOn = _setting.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
 
             //提前几秒通知服务器押注结束
             _send_to_svr = 5;
-
             InitKeymap();
-            _isLoaded = true;
+
+            SessionIndex = 0;
+            NewSession();
+
             return true;
         }
+        public void NewSession()
+        {
+            var id = SessionIndex;
+            Session _curSession;
+            if (!_isRoundsFromBack)
+            {
+                _curSession = new Session(id);
+                AllSessions.Add(_curSession);
+            }
+            else
+            {
+                _curSession = new Session(id);
+            }
+
+            Desk.Instance.ResetWaybill();
+            Desk.Instance.RoundIndex = 1;
+        }
+        
         /// <summary>
         /// 初始化键盘映射
         /// </summary>
@@ -177,6 +223,10 @@ namespace Bacc_front
             }
 
         }
+        private bool IsGameStarted()
+        {
+            return _isGameStart = true;
+        }
         #endregion
         #region 键盘回调
         /// <summary>
@@ -185,10 +235,10 @@ namespace Bacc_front
         /// <param name="key"></param>
         internal void HandleKeyUp(int key)
         {
-            if (_continuously_bet)
-            {
-                _betKeyDownList.RemoveAll(k => k.keycode == key);
-            }
+            //if (_continuously_bet)
+            //{
+            //    _betKeyDownList.RemoveAll(k => k.keycode == key);
+            //}
         }
         /// <summary>
         /// 按下按键回调
@@ -196,6 +246,8 @@ namespace Bacc_front
         /// <param name="key"></param>
         internal void HandleKeyDown(int key)
         {
+            //HandleBetKey(key);
+
             if (_all_userkeys_lst.Contains(key))
             {
                 if (_bet_userkeys_lst.Contains(key))
@@ -323,13 +375,9 @@ namespace Bacc_front
         }
         #endregion
 
-        private bool IsGameInited()
-        {
-            return _isLoaded = true;
-        }
         private void GetShufTime(IState state)
         {
-            _shufTime = 5;
+            _shufTime = 4;
         }
         /// <summary>
         /// 洗牌中
@@ -338,7 +386,7 @@ namespace Bacc_front
         private void Shuffle(float f)
         {
             var timer = _shufflingState.Timer;
-            if (timer > _shufTime)
+            if (timer > _shufTime + 1)
             {
                 _isShuffled = true;
                 return;
@@ -368,7 +416,6 @@ namespace Bacc_front
         /// <param name="state"></param>
         private void Start1Round(IState state)
         {
-            Desk.Instance.RoundIndex++;
             _isBetting = true;
         }
         /// <summary>
@@ -379,12 +426,11 @@ namespace Bacc_front
         {
             HandleBetKeyList();
             _betTimer = _bettingState.Timer;
-            SetCountDownWithFloat(_betTimer, _betTime);
+            SetCountDownWithFloat(_betTimer, _betTime + 1);
             SetStateText("押注中");
-
             SendToServer(_bettingState, Desk.Instance.CountDown);
 
-            if (_betTimer > _betTime)
+            if (_betTimer > _betTime + 1)
             {
                 _betFinished = true;
                 return;
@@ -397,6 +443,7 @@ namespace Bacc_front
                     return;
                 }
             }
+           
         }
         /// <summary>
         /// 向服务器发送同步时间消息
@@ -453,7 +500,8 @@ namespace Bacc_front
             //var winner = Desk.Instance.GetWinner(_curHandCards);
             Desk.Instance.CalcAllPlayersEarning();
             Desk.Instance.ClearDeskAmount();
-            if (Desk.Instance.RoundIndex >= _roundNumPerSession)
+            var num = AllSessions[SessionIndex].AllRounds.Count;
+            if (Desk.Instance.RoundIndex >= num)
             {
                 _sessionOver = true;
             }
@@ -485,12 +533,14 @@ namespace Bacc_front
         /// <param name="state"></param>
         private void RoundOrSessionOver(IState state)
         {
+            NoticeRoundOver();
             if (_sessionOver)
             {
                 Desk.Instance.RoundIndex = 1;
                 _sessionOver = false;
             }
             _betRoundOver = false;
+            Desk.Instance.RoundIndex++;
         }
         /// <summary>
         /// 切换状态到检查路单，此时趁机保存数据等耗时操作
@@ -499,8 +549,8 @@ namespace Bacc_front
         private bool ExamineWaybill()
         {
             SetStateText("检查路单中");
-            //SetClockText("检查路单中");
-            //new WaitForSeconds(3);
+            SessionIndex++;
+            NewSession();
             return true;
         }
         #region 输入输出操作
@@ -552,26 +602,21 @@ namespace Bacc_front
         #region 开牌动画
         private void DealCard()
         {
-            SetClockText("00000000000");
-
+            SetClockText("0");
             SetStateText("开牌动画中");
-            //var singleDouble = Setting.Instance.GetStrSetting("single_double");
-            //Test
-            var singleDouble = "两张牌";
 
-            if (singleDouble == "单张牌")
-            {
-               Desk.Instance. _curHandCards = Desk.Instance.DealSingleCard();
-                OpenSingle();
-            }
-            if (singleDouble == "两张牌")
-            {
-                Desk.Instance. _curHandCards = Desk.Instance.DealTwoCard();
-                OpenTwo();
-            }
+            var r_idx = Desk.Instance.RoundIndex - 1;
+            var cur_round = AllSessions[SessionIndex].AllRounds[r_idx];
+            Desk.Instance._curHandCards = cur_round.hand_card;
 
-            
+            NoticeDealCard();
         }
+
+        private void OpenCard()
+        {
+        }
+
+        
         private void OpenSingle()
         {
             //var playerCard = _curHandCards[1][0];
@@ -648,8 +693,8 @@ namespace Bacc_front
         }
         void SetCountDownWithFloat(float cur_timer, int seconds)
         {
-            var count_down = seconds - (int)cur_timer;
-            //count_down = count_down < 0 ? 0 : count_down;
+            var count_down = seconds - Math.Floor(cur_timer);
+            count_down = count_down < 0 ? 0 : count_down;
             SetClockText(count_down.ToString());
         }
         void SetStateText(string state)
@@ -677,28 +722,31 @@ namespace Bacc_front
         private WsTransition _dealBet;   //开牌后直接开下一局
         private WsTransition _dealShuffle;   //开牌后重新洗牌,洗牌前先对单
 
-        private bool _isLoaded = false;
-        private int _shufTime;
+        private bool _isGameStart = false;
         private bool _isShuffled = false;
-        private int _betTime;
-        private int _send_to_svr;
-        private bool _betFinished;
+        private bool _betFinished = false;
         private bool _enableBet = false;
         private bool _isAccounted = false;
-        private float _betTimer;
         private bool _betRoundOver = false;
-        //private int _curRoundIndex = 1;
         private bool _sessionOver = false;
-        private int _roundNumPerSession;
-        private bool _isLoading;
         private bool _animating = false;
-        private bool _animationDone;
+        private bool _animationDone = false;
+
+        private int _shufTime;
+        private int _betTime;
+        private int _send_to_svr;
+        private float _betTimer;
+        private int _roundNumPerSession;
+
         private List<int> _all_userkeys_lst;    //所有要监听的按键,查询用
         private List<int> _bet_userkeys_lst;     //用于押注的按键，查询用
         private List<List<int>> _bet_userkeys_map;
         private List<KeyDownModel> _betKeyDownList; //按下且尚未抬起的押注按键，每一帧轮询
         private List<List<int>> _opt_userkeys_map;  //用于暗注、修改额度或者取消押注的按键
         private Thread thread;
+        private static Game instance;
+        private Setting _setting = Setting.Instance;
+        private bool _isRoundsFromBack = false;
         #endregion
     }
     public enum KeyFunc

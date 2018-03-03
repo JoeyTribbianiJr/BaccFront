@@ -20,6 +20,13 @@ namespace Bacc_front
 			this.weight = weight;
 			this.color = color;
 		}
+        public int GetPngName
+        {
+            get
+            {
+                return (int)color * 13 + (int)weight;
+            }
+        }
 
 		/// <summary>
 		/// 返回牌名
@@ -28,7 +35,6 @@ namespace Bacc_front
 		{
 			get { return cardName; }
 		}
-
 		/// <summary>
 		/// 返回权值
 		/// </summary>
@@ -47,16 +53,6 @@ namespace Bacc_front
 		{
 			get { return color; }
 		}
-
-		/// <summary>
-		/// 是否精灵化
-		/// </summary>
-		public bool isSprite
-		{
-			set { makedSprite = value; }
-			get { return makedSprite; }
-		}
-
 
 	}
 }

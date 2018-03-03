@@ -25,7 +25,6 @@ namespace Bacc_front
 		Diamond,
 		Heart,
 		Spade,
-		Back
 	}
 
 	/// <summary>

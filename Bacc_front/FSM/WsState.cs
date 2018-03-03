@@ -101,11 +101,11 @@ namespace WsFSM
 
 		public virtual void UpdateCallback(float deltaTime)
 		{
-			_timer += deltaTime;
 			if (OnUpdate != null)
 			{
 				OnUpdate(deltaTime);
 			}
+			_timer += deltaTime;
 		}
 
 		private string _name;

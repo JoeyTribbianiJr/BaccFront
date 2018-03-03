@@ -138,36 +138,34 @@ namespace Bacc_front
             }
         }
 
-            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-
-        public class WayBillVisibleConverter : IValueConverter
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-
-            public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                //var side = ((WhoWin)value).Winner;
-                var side = System.Convert.ToInt32(value);
-                switch (side)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                        return Visibility.Visible;
-                    case -1:
-                        return Visibility.Visible;
-                    default:
-                    return Visibility.Hidden;
-                }
-            }
-
-            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
         }
     }
+
+
+    public class WayBillVisibleConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var side = System.Convert.ToInt32(value);
+            switch (side)
+            {
+                case 0:
+                case 1:
+                case 2:
+                    return Visibility.Visible;
+                case -1:
+                    return Visibility.Hidden;
+                default:
+                    return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

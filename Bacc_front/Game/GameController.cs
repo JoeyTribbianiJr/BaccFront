@@ -30,7 +30,6 @@ namespace Bacc_front
 		}
 		public void ResetGame()
 		{
-
 			all_rounds_num = Setting.Instance.GetIntSetting("all_rounds_num");
 			all_rounds = CreateRounds(all_rounds_num);
 
