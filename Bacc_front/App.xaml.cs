@@ -35,7 +35,7 @@ namespace Bacc_front
 
             //w1.Show();
             w2.Show();
-            w2.WindowState = WindowState.Maximized;
+            //w2.WindowState = WindowState.Maximized;
 
             //w2.Owner = w1;
 

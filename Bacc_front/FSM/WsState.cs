@@ -60,6 +60,11 @@ namespace WsFSM
 			_name = name;
 			_transitions = new List<ITransition>();
 		}
+        public float ResetTimer(float t)
+        {
+            _timer = t;
+            return _timer;
+        }
 		public void AddTransition(ITransition t)
 		{
 			if (t != null && !_transitions.Contains(t))

@@ -4,6 +4,7 @@
 
     <!--按钮资源样式-->
     <Style x:Key="GreenButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Azure"></Setter>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">

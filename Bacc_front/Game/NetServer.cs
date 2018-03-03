@@ -134,7 +134,6 @@ namespace Bacc_front
 
         }
 
-
         private void SetImage(BitmapImage bitmapImage)
         {
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -7,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -29,27 +31,55 @@ namespace Bacc_front
             Game.Instance.NoticeGameStart += BindWaybills;
             Game.Instance.NoticeRoundOver += ResetSmWaybill;
             Game.Instance.NoticeDealCard += StartAnimation;
+            //WindowState = WindowState.Maximized;
         }
 
         public BitmapImage BeautyBmp { get; set; }
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (Game.Instance._isBetting)
+            var keymodel = Game.Instance.KeyMap[(int)e.Key];
+            if (keymodel.IsKey)
             {
-                var code = (int)e.Key;
-                Game.Instance.HandleKeyDown(code);
+                if (Game.Instance._isBetting)
+                {
+                    keymodel.Pressed = true;
+                    if (e.IsRepeat)
+                    {
+                        if (keymodel.Timer >= Game._bet_rate)
+                        {
+                            keymodel.Handler();
+                            keymodel.Timer = 0;
+                        }
+                    }
+                    else
+                    {
+                        keymodel.Handler();
+                    }
+                }
             }
+            //if (e.IsRepeat) { return; }
+            //else if (Game.Instance._isBetting)
+            //{
+            //    var key = (int)e.Key;
+            //    Game.Instance.KeyMap[key].Pressed = true;
+            //}
+            //Game.Instance.HandleKeyDown(code);
         }
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            Game.Instance.HandleKeyUp((int)e.Key);
+            //if (Game.Instance._isBetting)
+            //{
+            var key = (int)e.Key;
+            Game.Instance.KeyMap[key].Pressed = false;
+            //}
+            //Game.Instance.HandleKeyUp((int)e.Key);
         }
         private void BindWaybills()
         {
             var round_num = Setting.Instance.GetIntSetting("round_num_per_session");
             var grid = this.grdBigWaybill;
-            grid.DataContext = Desk.Instance.Waybill;
-
+            //grid.DataContext = Desk.Instance.Waybill;
+            sm_waybill_btns = new List<Button>();
             for (int i = 0; i < round_num; i++)
             {
                 //小路单按钮绑定
@@ -94,6 +124,9 @@ namespace Bacc_front
         void StartAnimation()
         {
             int b = 0;
+            moveLst = new List<Storyboard>();
+            reversalLst = new List<Storyboard>();
+            btnLst = new List<Button>();
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 2; j++)
@@ -105,12 +138,27 @@ namespace Bacc_front
                     }
                     catch (ArgumentOutOfRangeException e)
                     {
-
+                        _hasCard5 = false;
                     }
                     b++;
                 }
             }
+            var lastReversal = reversalLst[reversalLst.Count - 1];
+            lastReversal.Completed += lastReversal_Completed;
+            //lastReversal.Duration = TimeSpan.FromSeconds(5);
+            for (int i = 0; i < moveLst.Count; i++)
+            {
+                moveLst[i].Begin(btnLst[i]);
+                reversalLst[i].Begin(btnLst[i]);
+            }
         }
+
+        private void lastReversal_Completed(object sender, EventArgs e)
+        {
+            Game.Instance._animating = false;
+            Game.Instance._aniTimer = 0;
+        }
+
         void CreateAnimation(int idx, Card card)
         {
             var name = "deal" + (idx + 1);
@@ -129,28 +177,111 @@ namespace Bacc_front
             }
             btn.Style = (Style)Resources["CardButton1"];
             var bmpIdx = card.GetPngName;
-            var cardBmp = new BitmapImage(new Uri("Img/card/"+bmpIdx+".png", UriKind.Relative));
+            var cardBmp = new BitmapImage(new Uri("Img/card/" + bmpIdx + ".png", UriKind.Relative));
+            double startTime = start_time[idx];
 
-            double startTime;
-            if (idx == 0)
+            if (!_hasCard5 && idx == 5)
             {
-                startTime = 0.5 + 5.5;
-            }
-            if (idx == 1)
-            {
-                startTime = 1.5 + 5.5;
-            }
-            else
-            {
-                startTime = 5.5 + 1.5 * idx;
+                startTime -= 3;
             }
 
+            var move = CreateMove(startTime, btn, xy[idx]);
+            moveLst.Add(move);
+            var reversal = CreateReversal(startTime + 1, btn, cardBmp);
+            reversalLst.Add(reversal);
+            btnLst.Add(btn);
+
+        }
+        Storyboard CreateMove(double startTime, Button btn, double[] xy)
+        {
+            var image = new ImageBrush();
+            image.ImageSource = new BitmapImage(new Uri("Img/card/back.bmp", UriKind.Relative));
+            btn.Background = image;
+
+            var chgVisible = new ObjectAnimationUsingKeyFrames();
+            //chgVisible.Duration = new Duration(TimeSpan.FromSeconds(visibleDuration));
+            DiscreteObjectKeyFrame dk1 = new DiscreteObjectKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)),
+                Value = Visibility.Hidden
+            };
+            DiscreteObjectKeyFrame dk2 = new DiscreteObjectKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime)),
+                Value = Visibility.Visible
+            };
+            DiscreteObjectKeyFrame dk3 = new DiscreteObjectKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(visibleDuration)),
+                Value = Visibility.Hidden
+            };
+            chgVisible.KeyFrames.Add(dk1);
+            chgVisible.KeyFrames.Add(dk2);
+            chgVisible.KeyFrames.Add(dk3);
+            Storyboard.SetTargetName(chgVisible, btn.Name);
+            Storyboard.SetTargetProperty(chgVisible, new PropertyPath(VisibilityProperty));
+
+            var chgY = new DoubleAnimationUsingKeyFrames();
+            var y0 = new EasingDoubleKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)),
+                Value = xy[0]
+            };
+            var yStart = new EasingDoubleKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime)),
+                Value = xy[0]
+            };
+            var yEnd = new EasingDoubleKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.5)),
+                Value = xy[1]
+            };
+            chgY.KeyFrames.Add(y0);
+            chgY.KeyFrames.Add(yStart);
+            chgY.KeyFrames.Add(yEnd);
+            Storyboard.SetTargetName(chgY, btn.Name);
+            Storyboard.SetTargetProperty(chgY, new PropertyPath(Canvas.TopProperty));
+
+            var chgX = new DoubleAnimationUsingKeyFrames();
+            var x0 = new EasingDoubleKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)),
+                Value = xy[2]
+            };
+            var xStart = new EasingDoubleKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime)),
+                Value = xy[2]
+            };
+            var xEnd = new EasingDoubleKeyFrame()
+            {
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.5)),
+                Value = xy[3]
+            };
+            chgX.KeyFrames.Add(x0);
+            chgX.KeyFrames.Add(xStart);
+            chgX.KeyFrames.Add(xEnd);
+            Storyboard.SetTargetName(chgX, btn.Name);
+            Storyboard.SetTargetProperty(chgX, new PropertyPath(Canvas.LeftProperty));
+
+            var move = new Storyboard();
+            move.Children.Add(chgVisible);
+            move.Children.Add(chgY);
+            move.Children.Add(chgX);
+
+            return move;
+        }
+        Storyboard CreateReversal(double startTime, Button btn, BitmapImage background)
+        {
+            //CardBmp = new BitmapImage(new Uri("Img/card/22.png", UriKind.Relative));
             var chgBg = new ObjectAnimationUsingKeyFrames();
-            DiscreteObjectKeyFrame dk = new DiscreteObjectKeyFrame(cardBmp);
+            DiscreteObjectKeyFrame dk = new DiscreteObjectKeyFrame(background);
             dk.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.5));
             //var bmp = (Bitmap)Properties.Resources.ResourceManager.GetObject("_" + 11);
             //BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             //dk.Value = bitmapSource;
+            dk.Value = background;
             chgBg.KeyFrames.Add(dk);
             Storyboard.SetTargetName(chgBg, btn.Name);
             DependencyProperty[] propertyChain2 = new DependencyProperty[]
@@ -191,16 +322,12 @@ namespace Bacc_front
             };
             Storyboard.SetTargetProperty(d_transform, new PropertyPath("(0).(1)[0].(2)", propertyChain3));
 
-            var deal = (Storyboard)Resources[btn.Name];
-            //deal.Completed += Deal_Completed;
-
             var reversal = new Storyboard();
             reversal.Children.Add(transformOrigin);
             reversal.Children.Add(d_transform);
             reversal.Children.Add(chgBg);
 
-            deal.Begin(btn);
-            reversal.Begin(btn);
+            return reversal;
         }
         private void ResetSmWaybill()
         {
@@ -270,8 +397,23 @@ namespace Bacc_front
                 pre++;
             }
         }
+        private List<double[]> xy = new List<double[]>() {
+            new double[4]{316,640,436,54},
+            new double[4]{330,640,500,888},
+            new double[4]{316,640,436,78},
+            new double[4]{330,640,500,864},
+            new double[4]{316,640,436,102},
+            new double[4]{330,640,500,840}
+        };
+        private double[] start_time = new double[6] { 0, 2.5, 5, 7.5, 11, 14 };
+        private double visibleDuration = 15;
+        private List<Storyboard> moveLst;
+        private List<Storyboard> reversalLst;
+        private List<Button> btnLst;
+        private double onceAnimation = 0;
+        private List<Button> sm_waybill_btns;
+        private bool _hasCard5;
 
-        private List<Button> sm_waybill_btns = new List<Button>();
     }
 
 }

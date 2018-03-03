@@ -18,51 +18,18 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Style.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Storyboard x:Key="MovePlayer1Storyboard">
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="button">
-                    <EasingDoubleKeyFrame KeyTime="0" Value="8"/>
-                    <EasingDoubleKeyFrame KeyTime="0:0:1" Value="499.5"/>
-                </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="button">
-                    <EasingDoubleKeyFrame KeyTime="0" Value="39"/>
-                    <EasingDoubleKeyFrame KeyTime="0:0:1" Value="379.5"/>
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-            <Storyboard x:Key="MovePlayer2Storyboard">
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" Storyboard.TargetName="button">
-                    <EasingDoubleKeyFrame KeyTime="0" Value="16.5"/>
-                    <EasingDoubleKeyFrame KeyTime="0:0:1" Value="380"/>
-                </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)" Storyboard.TargetName="button">
-                    <EasingDoubleKeyFrame KeyTime="0" Value="7.5"/>
-                    <EasingDoubleKeyFrame KeyTime="0:0:1" Value="482.5"/>
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
+            
         </ResourceDictionary>
     </Window.Resources>
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="UIElement.MouseEnter" SourceName="button">
-            <BeginStoryboard Storyboard="{StaticResource MovePlayer1Storyboard}"/>
-        </EventTrigger>
-    </Window.Triggers>
+   
     <Grid>
         <!--<Button Visibility="Collapsed" Name="btnBindWaybill" Click="Button_Click"></Button>-->
         <Viewbox Stretch="fill">
             <Canvas x:Name="Casino" Width="1024" Height="768">
                 <Canvas.Background>
-                    <ImageBrush ImageSource="Img/desk.bmp" />
+                    <ImageBrush ImageSource="img/desk.bmp" />
                 </Canvas.Background>
                 <Image Name="beautyBmp"  Canvas.Left="41" Canvas.Top="10" />
-                <Button x:Name="button" Style="{StaticResource CardButton}" Canvas.Left="472" Canvas.Top="310"  >
-                    <Button.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </Button.RenderTransform>
-                </Button>
                 <!--<Button  Canvas.Left="193" Canvas.Top="69">测试按钮</Button>-->
                 <!--<Button Click="Button_Click">修改值</Button>-->
                 <!--<TextBlock Name="txthehe"  FontSize="20" FontWeight="UltraBold" Foreground="Red" Text="{Binding hehe}" Canvas.Left="227" Canvas.Top="51"  >432</TextBlock>-->

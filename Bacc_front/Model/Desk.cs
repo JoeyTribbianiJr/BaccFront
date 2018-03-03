@@ -35,6 +35,8 @@ namespace Bacc_front
             }
         }
 
+        public Tuple<BetSide, int> CurRoundWinner { get; private set; }
+
         /// <summary>
         /// 初始化，生成玩家列表
         /// </summary>
@@ -42,6 +44,11 @@ namespace Bacc_front
         {
             players = new ObservableCollection<Player>();
             Waybill = new ObservableCollection<WhoWin>();
+            _roundNumPerSession = _setting.GetIntSetting("round_num_per_session");
+            for (int i = 0; i < _roundNumPerSession; i++)
+            {
+                Waybill.Add(new WhoWin());
+            }
             desk_amount = new Dictionary<BetSide, int>()
             {
                 {BetSide.banker,0 },
@@ -55,12 +62,7 @@ namespace Bacc_front
             RoundIndex = 1;
             CountDown = 0;
 
-            Waybill = new ObservableCollection<WhoWin>();
-            _roundNumPerSession = _setting.GetIntSetting("round_num_per_session");
-            for (int i = 0; i < _roundNumPerSession; i++)
-            {
-                Waybill.Add(new WhoWin());
-            }
+            
         }
         public void ResetWaybill()
         {
@@ -144,7 +146,7 @@ namespace Bacc_front
                 var weight = GetWeightValue(card);
                 sum += weight;
             }
-            return sum;
+            return sum % 10;
         }
         private int GetWeightValue(Card card)
         {
@@ -180,16 +182,17 @@ namespace Bacc_front
         }
         public void CalcAllPlayersEarning()
         {
-            var winner = GetWinner(_curHandCards);
+            //var winner = GetWinner(_curHandCards);
+            var winner = CurRoundWinner;
 
             var r_idx = RoundIndex - 1;
-            Waybill[r_idx].Winner = (int)winner;
+            Waybill[r_idx].Winner = (int)(winner.Item1);
 
             foreach (var player in players)
             {
                 //lock (objlock)
                 //{
-                    player.Balance += CalcPlayerEarning(winner, player.BetScore);
+                    player.Balance += CalcPlayerEarning(winner.Item1, player.BetScore);
                     player.ClearBet();
                 //}
             }
@@ -258,7 +261,7 @@ namespace Bacc_front
                 {
                     var d_card = Deck.Instance.Deal();
                     hand_cards[1].Add(d_card);
-                    playerThirdCard = (int)d_card.GetCardWeight;
+                    playerThirdCard = GetWeightValue(d_card);
                     playerDrawStatus = true;
                 }
                 else
@@ -307,18 +310,24 @@ namespace Bacc_front
                 hand_cards[0].Add(Deck.Instance.Deal());
             }
         }
-        public BetSide GetWinner(List<Card>[] hand_cards)
+        public Tuple<BetSide,int> GetWinner(List<Card>[] hand_cards)
         {
             var b_amount = CalcHandValue(hand_cards[0]);
             var p_amount = CalcHandValue(hand_cards[1]);
+            var value = Math.Abs(b_amount - p_amount);
 
+            Tuple<BetSide, int> winner;
             if (b_amount == p_amount)
             {
-                return BetSide.tie;
+                 winner = new Tuple<BetSide,int>(BetSide.tie,value);
+                CurRoundWinner = winner;
+                return winner;
             }
             else
             {
-                return b_amount > p_amount ? BetSide.banker : BetSide.player;
+                winner = b_amount > p_amount ? new Tuple<BetSide,int> (BetSide.banker ,value):new Tuple<BetSide, int>( BetSide.player,value);
+                CurRoundWinner = winner;
+                return winner;
             }
         }
         #endregion
