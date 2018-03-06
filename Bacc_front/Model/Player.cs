@@ -7,27 +7,12 @@ using WsUtils;
 
 namespace Bacc_front
 {
-    public enum BetSide
-    {
-        banker = 0,
-        tie,
-        player
-    }
-
-    /// <summary>
-    /// 每次押注面额
-    /// </summary>
-    public enum BetDenomination
-    {
-        big = 100,
-        small = 10
-    }
+    
     public delegate int NativeCountRule(BetSide winner, ObservableDictionary<BetSide, int> bet);
 
     [ImplementPropertyChanged]
     public class Player
     {
-
         private int id;
         private int balance;
         private int last_add;
@@ -53,23 +38,13 @@ namespace Bacc_front
         public int Sub_score { get => sub_score; set => sub_score = value; }
         public bool Bet_hide { get => bet_hide; set => bet_hide = value; }
 
-        public BetDenomination denomination;
-
+        public int denomination;
+        public BetDenomination choose_denomination;
+        public int[] Denominations { get; set; }
         public event NativeCountRule count_rule;
 
-        public void ClearBet()
-        {
-            BetScoreOnBank = 0;
-            BetScoreOnPlayer = 0;
-            BetScoreOnTie = 0;
 
-            bet_score = new ObservableDictionary<BetSide, int>()
-            {
-                {BetSide.banker,0 },
-                {BetSide.player,0 },
-                {BetSide.tie,0 },
-            };
-        }
+        public Player() { }
         public Player(int id, NativeCountRule count_rule)
         {
             this.Id = id;
@@ -87,7 +62,12 @@ namespace Bacc_front
             {BetSide.player,0 },
             {BetSide.tie,0 },
         };
-            denomination = BetDenomination.small;  //押注筹码大小
+            Denominations = new int[2];
+            Denominations[0] = Setting.Instance.GetIntSetting("big_chip_facevalue");
+            Denominations[1] = Setting.Instance.GetIntSetting("mini_chip_facevalue");
+            choose_denomination = BetDenomination.big;  //押注筹码大小
+            SetDenomination();
+
             Bet_hide = false;       //是否隐藏压哪边
 
             this.count_rule = count_rule;
@@ -96,9 +76,21 @@ namespace Bacc_front
         #region 玩家押注的函数
         public void Bet(BetSide side)
         {
-            if (Desk.Instance.CanHeBet(this, side))
+            if (Game.Instance._isIn3)
             {
-                var add_score = Balance >= (int)denomination ? (int)denomination : Balance;
+                var winner = Game.Instance.CurrentRound.Winner.Item1;
+                if(side == winner)
+                {
+                    var add_score = 1;
+                    Balance -= add_score;
+                    bet_score[side] += add_score;
+
+                    Desk.Instance.UpdateDeskAmount(side, add_score);
+                }
+            }
+            else if (Desk.Instance.CanHeBet(this, side))
+            {
+                var add_score = Balance >= denomination ? denomination : Balance;
 
                 Balance -= add_score;
                 bet_score[side] += add_score;
@@ -127,17 +119,35 @@ namespace Bacc_front
                 var cancle_score = bet_score.Values.Sum();
                 Balance += cancle_score;
 
-                ClearBet();
                 foreach (var bet in bet_score)
                 {
                     Desk.Instance.UpdateDeskAmount(bet.Key, -bet.Value);
                 }
+                ClearBet();
             }
         }
+        public void ClearBet()
+        {
+            BetScoreOnBank = 0;
+            BetScoreOnPlayer = 0;
+            BetScoreOnTie = 0;
 
+            bet_score = new ObservableDictionary<BetSide, int>()
+            {
+                {BetSide.banker,0 },
+                {BetSide.player,0 },
+                {BetSide.tie,0 },
+            };
+        }
+        public void Set3SecDenomination()
+        {
+            denomination = 1;
+        }
         public void SetDenomination()
         {
-            denomination = denomination == BetDenomination.big ? BetDenomination.small : BetDenomination.big;
+            denomination = choose_denomination == BetDenomination.big
+                ? Denominations[(int)BetDenomination.mini]
+                : Denominations[(int)BetDenomination.big];
         }
         public void SetHide()
         {
@@ -158,7 +168,7 @@ namespace Bacc_front
         public void SubScore(int sub_score)
         {
             var ss = this.Sub_score + sub_score;
-            if (ss > Balance)
+            if (ss >= Balance)
             {
                 this.Sub_score = Balance;
             }
@@ -176,13 +186,20 @@ namespace Bacc_front
         }
         public void SubAllScore()
         {
-            SubScore(balance);
+            if (Sub_score == 0)
+            {
+                SubScore(Balance);
+            }
+            else
+            {
+                Sub_score = 0;
+            }
         }
         public void ConfirmSub()
         {
             Balance -= Sub_score;
-            Sub_score = 0;
             Last_sub = Sub_score;
+            Sub_score = 0;
         }
         #endregion
     }

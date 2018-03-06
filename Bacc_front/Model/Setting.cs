@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -53,22 +54,27 @@ namespace Bacc_front
 
 		private Setting()
 		{
-			InitGameSetting();
+            var util = new WsUtils.FileUtils();
+            var config = util.ReadFile("Config/Config.json");
+            if(config == null)
+            {
+                InitGameSetting();
+            }
+            else
+            {
+                game_setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(config);
+            }
 		}
 
 		private void InitAppSetting()
 		{
-			game_setting.Add("send_to_svr_second", new SettingItem()
+			app_setting.Add("send_to_svr_second", new SettingItem()
 			{
 				SelectedIndex = 1,
 				Type = SettingItemType.intager,
 				Values = new string[2] { "通知服务器:3", "通知服务器:5" }
 			});
 		}
-
-        internal void InitSetting()
-        {
-        }
 
         private void InitGameSetting()
 		{

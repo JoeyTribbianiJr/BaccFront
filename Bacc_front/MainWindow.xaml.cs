@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using PropertyChanged;
 
 namespace Bacc_front
 {
@@ -24,23 +15,61 @@ namespace Bacc_front
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        /// <summary>
+        /// 状态栏文字
+        /// </summary>
+        public string StateText { get; set; }
+        public BitmapImage BeautyBmp { get; set; }
+        public static MainWindow Instance { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
-            Casino.DataContext = Desk.Instance;
-            Game.Instance.NoticeGameStart += BindWaybills;
-            Game.Instance.NoticeRoundOver += ResetSmWaybill;
+            Instance = this;
+            spPlayers.DataContext = Desk.Instance;
+            cvsHidebar.DataContext = Desk.Instance;
+            bdSign.DataContext = Desk.Instance;
+
+            txtCountDown.DataContext = Game.Instance;
+            txtState.DataContext = Game.Instance;
+            txtRoundIndex.DataContext = Game.Instance;
+            txtSessionIndex.DataContext = Game.Instance;
+            txtBanker.DataContext = Game.Instance;
+            txtPlayer.DataContext = Game.Instance;
+            bdBankerState.DataContext = Game.Instance;
+            bdPlayerState.DataContext = Game.Instance;
+
+            Game.Instance.NoticeWindowBind += BindWaybills;
             Game.Instance.NoticeDealCard += StartAnimation;
-            //WindowState = WindowState.Maximized;
+            Game.Instance.NoticeRoundOver += ResetSmWaybill;
+            WindowState = WindowState.Maximized;
+            Activated += MainWindow_Activated;
+            WindowStyle = WindowStyle.None;
+
         }
 
-        public BitmapImage BeautyBmp { get; set; }
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            Focus();
+            Mouse.Click(MouseButton.Left);
+        }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            var keymodel = Game.Instance.KeyMap[(int)e.Key];
-            if (keymodel.IsKey)
+            if(e.Key == Key.Tab)
             {
-                if (Game.Instance._isBetting)
+                if(System.Windows.Forms.Screen.AllScreens.Length == 1)
+                {
+                    ControlBoard.Instance.Topmost = true;
+                    Instance.Topmost = false;
+                    ControlBoard.Instance.Activate();
+                }
+            }
+            else if (Game.Instance._isBetting)
+            {
+                var keymodel = Game.Instance.KeyMap[(int)e.Key];
+                if (keymodel.IsKey)
                 {
                     keymodel.Pressed = true;
                     if (e.IsRepeat)
@@ -55,101 +84,139 @@ namespace Bacc_front
                     {
                         keymodel.Handler();
                     }
+
+                    var space = Desk.Instance.CancleSpace();
+                    Game.Instance.BankerStateText = "庄押" + space[0] + "分可撤注";
+                    Game.Instance.PlayerStateText= "闲押" + space[1] + "分可撤注";
                 }
+
             }
-            //if (e.IsRepeat) { return; }
-            //else if (Game.Instance._isBetting)
-            //{
-            //    var key = (int)e.Key;
-            //    Game.Instance.KeyMap[key].Pressed = true;
-            //}
-            //Game.Instance.HandleKeyDown(code);
         }
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            //if (Game.Instance._isBetting)
-            //{
-            var key = (int)e.Key;
-            Game.Instance.KeyMap[key].Pressed = false;
-            //}
-            //Game.Instance.HandleKeyUp((int)e.Key);
+           
+            if (Game.Instance._isBetting)
+            {
+                var key = (int)e.Key;
+                Game.Instance.KeyMap[key].Pressed = false;
+                Game.Instance.KeyMap[key].Timer = 0;
+            }
         }
         private void BindWaybills()
         {
-            var round_num = Setting.Instance.GetIntSetting("round_num_per_session");
-            var grid = this.grdBigWaybill;
-            //grid.DataContext = Desk.Instance.Waybill;
+            var round_num = Game.Instance.Waybill.Count;
             sm_waybill_btns = new List<Button>();
-            for (int i = 0; i < round_num; i++)
+            try
             {
-                //小路单按钮绑定
-                var block = new Button();
-                block.Style = (Style)Resources["SmallWaybillButton"];
-                block.Tag = i;
-                grdSmallWaybill.Children.Add(block);
-                sm_waybill_btns.Add(block);
-
-                Binding myBinding = new Binding
+                for (int i = 0; i < round_num; i++)
                 {
-                    Source = this,
-                    Path = new PropertyPath("Waybill[" + i + "].Winner"),
-                    Mode = BindingMode.OneWay,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-                };
-                BindingOperations.SetBinding(block, DataContextProperty, myBinding);
+                    //小路单按钮绑定
+                    var block = new Button();
+                    block.Style = (Style)Resources["SmallWaybillButton"];
+                    block.Tag = i;
+                    grdSmallWaybill.Children.Add(block);
+                    sm_waybill_btns.Add(block);
 
-                //大路单按钮绑定
-                var blockBig = new Button();
-                blockBig.Style = (Style)Resources["WaybillBlock"];
-                blockBig.Tag = i;
-                grid.Children.Add(blockBig);
+                    Binding myBinding = new Binding
+                    {
+                        Source = Game.Instance,
+                        Path = new PropertyPath("Waybill[" + i + "].Winner"),
+                        Mode = BindingMode.OneWay,
+                        UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                    };
+                    BindingOperations.SetBinding(block, DataContextProperty, myBinding);
 
-                var myBindingBig = new Binding
-                {
-                    Source = Desk.Instance,
-                    Path = new PropertyPath("Waybill[" + i + "].Winner"),
-                    Mode = BindingMode.TwoWay,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-                };
-                BindingOperations.SetBinding(blockBig, DataContextProperty, myBindingBig);
+                    //大路单按钮绑定
+                    var blockBig = new Button();
+                    blockBig.Style = (Style)Resources["WaybillBlock"];
+                    blockBig.Tag = i;
+                    grdBigWaybill.Children.Add(blockBig);
 
-                var col = i / 6;
-                var row = i % 6;
-                Grid.SetRow(blockBig, row);
-                Grid.SetColumn(blockBig, col);
+                    var myBindingBig = new Binding
+                    {
+                        Source = Game.Instance,
+                        Path = new PropertyPath("Waybill[" + i + "].Winner"),
+                        Mode = BindingMode.OneWay,
+                        UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                    };
+                    BindingOperations.SetBinding(blockBig, DataContextProperty, myBindingBig);
+
+                    var col = i / 6;
+                    var row = i % 6;
+                    Grid.SetRow(blockBig, row);
+                    Grid.SetColumn(blockBig, col);
+                }
+
+                grdBigWaybill.DataContext = Game.Instance;
+                grdSmallWaybill.DataContext = Game.Instance;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
 
-            ResetSmWaybill();
+            //ResetSmWaybill();
         }
+
         void StartAnimation()
         {
             int b = 0;
+            _hasCard5 = true;
             moveLst = new List<Storyboard>();
             reversalLst = new List<Storyboard>();
             btnLst = new List<Button>();
-            for (int i = 0; i < 3; i++)
+            if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
             {
-                for (int j = 0; j < 2; j++)
+                for (int i = 0; i < 1; i++)
                 {
-                    try
+                    for (int j = 0; j < 2; j++)
                     {
-                        var card = Desk.Instance._curHandCards[j][i];
-                        CreateAnimation(b, card);
+                        try
+                        {
+                            var card = Game.Instance.CurrentRound.HandCard[j][i];
+                            CreateAnimation(b, card);
+                        }
+                        catch (ArgumentOutOfRangeException e)
+                        {
+                            _hasCard5 = false;
+                        }
+                        b++;
                     }
-                    catch (ArgumentOutOfRangeException e)
-                    {
-                        _hasCard5 = false;
-                    }
-                    b++;
+                }
+                var lastReversal = reversalLst[reversalLst.Count - 1];
+                lastReversal.Completed += lastReversal_Completed;
+                for (int i = 0; i < moveLst.Count; i++)
+                {
+                    moveLst[i].Begin(btnLst[i]);
+                    reversalLst[i].Begin(btnLst[i]);
                 }
             }
-            var lastReversal = reversalLst[reversalLst.Count - 1];
-            lastReversal.Completed += lastReversal_Completed;
-            //lastReversal.Duration = TimeSpan.FromSeconds(5);
-            for (int i = 0; i < moveLst.Count; i++)
+            else
             {
-                moveLst[i].Begin(btnLst[i]);
-                reversalLst[i].Begin(btnLst[i]);
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 2; j++)
+                    {
+                        try
+                        {
+                            var card = Game.Instance.CurrentRound.HandCard[j][i];
+                            CreateAnimation(b, card);
+                        }
+                        catch (ArgumentOutOfRangeException e)
+                        {
+                            _hasCard5 = false;
+                        }
+                        b++;
+                    }
+                }
+                var lastReversal = reversalLst[reversalLst.Count - 1];
+                lastReversal.Completed += lastReversal_Completed;
+                for (int i = 0; i < moveLst.Count; i++)
+                {
+                    moveLst[i].Begin(btnLst[i]);
+                    reversalLst[i].Begin(btnLst[i]);
+                }
             }
         }
 
@@ -158,7 +225,6 @@ namespace Bacc_front
             Game.Instance._animating = false;
             Game.Instance._aniTimer = 0;
         }
-
         void CreateAnimation(int idx, Card card)
         {
             var name = "deal" + (idx + 1);
@@ -199,7 +265,6 @@ namespace Bacc_front
             btn.Background = image;
 
             var chgVisible = new ObjectAnimationUsingKeyFrames();
-            //chgVisible.Duration = new Duration(TimeSpan.FromSeconds(visibleDuration));
             DiscreteObjectKeyFrame dk1 = new DiscreteObjectKeyFrame()
             {
                 KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)),
@@ -274,13 +339,9 @@ namespace Bacc_front
         }
         Storyboard CreateReversal(double startTime, Button btn, BitmapImage background)
         {
-            //CardBmp = new BitmapImage(new Uri("Img/card/22.png", UriKind.Relative));
             var chgBg = new ObjectAnimationUsingKeyFrames();
             DiscreteObjectKeyFrame dk = new DiscreteObjectKeyFrame(background);
             dk.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.5));
-            //var bmp = (Bitmap)Properties.Resources.ResourceManager.GetObject("_" + 11);
-            //BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            //dk.Value = bitmapSource;
             dk.Value = background;
             chgBg.KeyFrames.Add(dk);
             Storyboard.SetTargetName(chgBg, btn.Name);
@@ -331,7 +392,7 @@ namespace Bacc_front
         }
         private void ResetSmWaybill()
         {
-            var Waybill = Desk.Instance.Waybill;
+            var Waybill = Game.Instance.Waybill;
             int pre_row = 0, pre_col = 0, pre = 0;
             int cur_side = Waybill[0].Winner;
 
@@ -344,9 +405,9 @@ namespace Bacc_front
                 var w_pre = Waybill[pre].Winner;
 
 
-                if (w_pre == (int)Winner.tie)
+                if (w_pre == (int)WinnerEnum.tie)
                 {
-                    if (cur_side == (int)Winner.tie)
+                    if (cur_side == (int)WinnerEnum.tie)
                     {
                         if (++pre_row > 10)
                         {
@@ -375,7 +436,7 @@ namespace Bacc_front
                 }
                 else
                 {
-                    if (w_i == (int)Winner.tie || w_i == w_pre)
+                    if (w_i == (int)WinnerEnum.tie || w_i == w_pre)
                     {
                         if (++pre_row > 10)
                         {
@@ -406,13 +467,12 @@ namespace Bacc_front
             new double[4]{330,640,500,840}
         };
         private double[] start_time = new double[6] { 0, 2.5, 5, 7.5, 11, 14 };
-        private double visibleDuration = 15;
+        private double visibleDuration = 23;
         private List<Storyboard> moveLst;
         private List<Storyboard> reversalLst;
         private List<Button> btnLst;
-        private double onceAnimation = 0;
         private List<Button> sm_waybill_btns;
-        private bool _hasCard5;
+        private bool _hasCard5 = true;
 
     }
 

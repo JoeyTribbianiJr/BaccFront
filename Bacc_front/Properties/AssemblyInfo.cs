@@ -53,3 +53,6 @@ using System.Windows;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+//配置Log4Net监听默认配置文件App.config
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]

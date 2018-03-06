@@ -3,33 +3,44 @@ using System.Collections;
 
 namespace Bacc_front
 {
-	/// <summary>
-	/// 角色类型
-	/// </summary>
-	public enum CharacterType
-	{
-		Library = 0,
-		Player,
-		ComputerOne,
-		ComputerTwo,
-		Desk
-	}
+    public enum BetSide
+    {
+        banker = 0,
+        tie = 1,
+        player =2
+    }
 
-
-	/// <summary>
-	/// 花色
-	/// </summary>
-	public enum Suits
+    /// <summary>
+    /// 每次押注面额
+    /// </summary>
+    public enum BetDenomination
+    {
+        big = 0,
+        mini = 1
+    }
+    [PropertyChanged.ImplementPropertyChanged]
+    public class WhoWin
+    {
+        public int Winner { get; set; }
+        public WhoWin()
+        {
+            Winner = -1;
+        }
+    }
+    public enum WinnerEnum
+    {
+        none = -1,
+        banker = 0,
+        tie = 1,
+        player =2
+    }
+    public enum Suits
 	{
 		Club,
 		Diamond,
 		Heart,
 		Spade,
 	}
-
-	/// <summary>
-	/// 卡牌权值
-	/// </summary>
 	public enum Weight
 	{
 		One = 1,
@@ -45,17 +56,9 @@ namespace Bacc_front
 		Jack ,
 		Queen,
 		King ,
-
 	}
-
-	/// <summary>
-	/// 存储数据类型
-	/// </summary>
-	[System.Serializable]
-	public class GameData
-	{
-		public int playerIntegration;
-		public int computerOneIntegration;
-		public int computerTwoIntegration;
-	}
+    public enum RemoteCommand
+    {
+        ImportFront = 2
+    }
 }

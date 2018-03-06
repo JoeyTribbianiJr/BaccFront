@@ -9,20 +9,14 @@ using WsUtils;
 
 namespace Bacc_front
 {
+    
     [PropertyChanged.ImplementPropertyChanged]
     public class Desk
     {
-        public int RoundIndex { get; set; }
-        public int CountDown { get; set; }
-        public string StateText { get; set; }
-
-        public ObservableCollection<WhoWin> Waybill { get => waybill; set => waybill = value; }
-
-        public int _roundNumPerSession;
-
-        public List<Card>[] _curHandCards { get; set; }
-        public List<Card> cardList;
         public ObservableCollection<Player> Players { get => players; set => players = value; }
+        public int AllMostLimit { get; set; }
+        public int LeastBet { get; set; }
+        public int TieMostBet { get; set; }
         public static Desk Instance
         {
             get
@@ -35,43 +29,19 @@ namespace Bacc_front
             }
         }
 
-        public Tuple<BetSide, int> CurRoundWinner { get; private set; }
-
-        /// <summary>
-        /// 初始化，生成玩家列表
-        /// </summary>
         private Desk()
         {
             players = new ObservableCollection<Player>();
-            Waybill = new ObservableCollection<WhoWin>();
-            _roundNumPerSession = _setting.GetIntSetting("round_num_per_session");
-            for (int i = 0; i < _roundNumPerSession; i++)
-            {
-                Waybill.Add(new WhoWin());
-            }
+            AllMostLimit = Setting.Instance.GetIntSetting("total_limit_red");
+            LeastBet = Setting.Instance.GetIntSetting("mini_chip_facevalue");
+            TieMostBet = Setting.Instance.GetIntSetting("tie_limit_red");
+
             desk_amount = new Dictionary<BetSide, int>()
             {
                 {BetSide.banker,0 },
                 {BetSide.player,0 },
                 {BetSide.tie,0 },
             };
-        }
-
-        public void InitDeskForGame()
-        {
-            RoundIndex = 1;
-            CountDown = 0;
-
-            
-        }
-        public void ResetWaybill()
-        {
-            Waybill = new ObservableCollection<WhoWin>();
-            _roundNumPerSession = _setting.GetIntSetting("round_num_per_session");
-            for (int i = 0; i < _roundNumPerSession; i++)
-            {
-                Waybill.Add(new WhoWin());
-            }
         }
 
         #region 赌桌规则
@@ -87,19 +57,13 @@ namespace Bacc_front
         }
         public bool CanHeBet(Player p, BetSide side)
         {
-            var bet_amount = p.Balance >= (int)p.denomination ? (int)p.denomination : p.Balance;
+            var bet_amount = p.Balance >= p.denomination ? p.denomination : p.Balance;
 
             //待加入其他限制规则
             var can_he = LimitRed(bet_amount, side) && true;
 
             return can_he;
         }
-        /// <summary>
-        /// 检测限红
-        /// </summary>
-        /// <param name="bet_amount">押注大小</param>
-        /// <param name="side">押注哪边</param>
-        /// <returns></returns>
         private bool LimitRed(int bet_amount, BetSide side)
         {
             var b_amount = desk_amount[BetSide.banker];
@@ -116,7 +80,6 @@ namespace Bacc_front
                     return false;
                 }
             }
-
             if (side == BetSide.player)
             {
                 var desk_red = Math.Abs(bet_amount + p_amount - b_amount);
@@ -125,7 +88,6 @@ namespace Bacc_front
                     return false;
                 }
             }
-
             if (side == BetSide.tie)
             {
                 var tie_limit = _setting.GetIntSetting("tie_limit_red");
@@ -138,17 +100,7 @@ namespace Bacc_front
 
             return true;
         }
-        private int CalcHandValue(List<Card> hand_cards)
-        {
-            var sum = 0;
-            foreach (var card in hand_cards)
-            {
-                var weight = GetWeightValue(card);
-                sum += weight;
-            }
-            return sum % 10;
-        }
-        private int GetWeightValue(Card card)
+        private int GetCardValue(Card card)
         {
             var weight = (int)card.GetCardWeight;
             if (weight > 9)
@@ -157,9 +109,20 @@ namespace Bacc_front
             }
             return weight;
         }
+        public int[] CancleSpace()
+        {
+            var res = new int[2];
+            var banker = desk_amount[BetSide.banker];
+            var player =  desk_amount[BetSide.player];
+            var sub = banker - player;
+            var desk_limit = _setting.GetIntSetting("desk_limit_red");
+            res[0] = desk_limit - sub;
+            res[1] = desk_limit + sub;
+            return res;
+        }
         #endregion
-        #region 赌桌及玩家分数操作
-        public void UpdateDeskAmount(BetSide side,int score)
+        #region 赌桌及玩家收益操作
+        public void UpdateDeskAmount(BetSide side, int score)
         {
             desk_amount[side] += score;
         }
@@ -172,29 +135,14 @@ namespace Bacc_front
                 {BetSide.tie,0 },
             };
         }
-        public void AddScore(int p_index, int score)
+        public void CalcAllPlayersEarning(Round cur_round)
         {
-            players[p_index].AddScore(score);
-        }
-        public void SubScore(int p_idx, int score)
-        {
-            players[p_idx].SubScore(score);
-        }
-        public void CalcAllPlayersEarning()
-        {
-            //var winner = GetWinner(_curHandCards);
-            var winner = CurRoundWinner;
-
-            var r_idx = RoundIndex - 1;
-            Waybill[r_idx].Winner = (int)(winner.Item1);
+            var winner = cur_round.Winner;
 
             foreach (var player in players)
             {
-                //lock (objlock)
-                //{
-                    player.Balance += CalcPlayerEarning(winner.Item1, player.BetScore);
-                    player.ClearBet();
-                //}
+                player.Balance += CalcPlayerEarning(winner.Item1, player.BetScore);
+                player.ClearBet();
             }
         }
         public int CalcPlayerEarning(BetSide winner, ObservableDictionary<BetSide, int> p_bets)
@@ -218,9 +166,9 @@ namespace Bacc_front
         #endregion
 
         #region 发牌及结算操作
-        public void DealSingleCard()
+        public List<Card>[] DealSingleCard()
         {
-            _curHandCards = new List<Card>[2];
+            var _curHandCards = new List<Card>[2];
 
             var banker_card = new List<Card>();
             banker_card.Add(Deck.Instance.Deal());
@@ -229,10 +177,11 @@ namespace Bacc_front
 
             _curHandCards[0] = banker_card;
             _curHandCards[1] = player_card;
+            return _curHandCards;
         }
-        public void DealTwoCard()
+        public List<Card>[] DealTwoCard()
         {
-            _curHandCards = new List<Card>[2];
+            var _curHandCards = new List<Card>[2];
 
             var player_card = new List<Card>();
             player_card.Add(Deck.Instance.Deal());
@@ -246,6 +195,7 @@ namespace Bacc_front
             _curHandCards[1] = player_card;
 
             CheckThirdCard(_curHandCards);
+            return _curHandCards;
         }
         public void CheckThirdCard(List<Card>[] hand_cards)
         {
@@ -261,7 +211,7 @@ namespace Bacc_front
                 {
                     var d_card = Deck.Instance.Deal();
                     hand_cards[1].Add(d_card);
-                    playerThirdCard = GetWeightValue(d_card);
+                    playerThirdCard = GetCardValue(d_card);
                     playerDrawStatus = true;
                 }
                 else
@@ -310,63 +260,50 @@ namespace Bacc_front
                 hand_cards[0].Add(Deck.Instance.Deal());
             }
         }
-        public Tuple<BetSide,int> GetWinner(List<Card>[] hand_cards)
+        private int CalcHandValue(List<Card> hand_cards)
+        {
+            var sum = 0;
+            foreach (var card in hand_cards)
+            {
+                var weight = GetCardValue(card);
+                sum += weight;
+            }
+            return sum % 10;
+        }
+        public Tuple<BetSide, int,int> GetWinner(List<Card>[] hand_cards)   //<赢家,庄点数,闲点数>
         {
             var b_amount = CalcHandValue(hand_cards[0]);
             var p_amount = CalcHandValue(hand_cards[1]);
             var value = Math.Abs(b_amount - p_amount);
 
-            Tuple<BetSide, int> winner;
+            Tuple<BetSide, int, int> winner;
             if (b_amount == p_amount)
             {
-                 winner = new Tuple<BetSide,int>(BetSide.tie,value);
-                CurRoundWinner = winner;
+                winner= new Tuple<BetSide, int,int>(BetSide.tie, b_amount, p_amount);
                 return winner;
             }
             else
             {
-                winner = b_amount > p_amount ? new Tuple<BetSide,int> (BetSide.banker ,value):new Tuple<BetSide, int>( BetSide.player,value);
-                CurRoundWinner = winner;
+                winner = b_amount > p_amount 
+                    ? new Tuple<BetSide, int,int>(BetSide.banker, b_amount,p_amount) 
+                    : new Tuple<BetSide, int,int>(BetSide.player, b_amount,p_amount);
                 return winner;
             }
         }
         #endregion
 
         #region 私有变量
-        private const float BANKER_ODDS = 0.95f;
-        private const float PLAYER_ODDS = 1;
+        private const float BANKER_ODDS = 0.95f;    
+        private const float PLAYER_ODDS = 1;       
         private const float TIE_ODDS = 8;
         private float[] odds_map = new float[3] { BANKER_ODDS, TIE_ODDS, PLAYER_ODDS };
 
         private ObservableCollection<Player> players;
         private Dictionary<BetSide, int> desk_amount;
-        private ObservableCollection<WhoWin> waybill;
 
-        private static object objlock = new object();
         private Setting _setting = Setting.Instance;
         private static Desk instance;
         #endregion
     }
-
-
-
-    /// <summary>
-    /// 谁赢了,路单用
-    /// </summary>
-    [PropertyChanged.ImplementPropertyChanged]
-    public class WhoWin
-    {
-        public int Winner { get; set; }
-        public WhoWin()
-        {
-            Winner = -1;
-        }
-    }
-    public enum Winner
-    {
-        none=-1,
-        banker,
-        player,
-        tie
-    }
+    
 }

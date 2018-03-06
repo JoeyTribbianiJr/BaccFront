@@ -4,7 +4,9 @@
 
     <!--按钮资源样式-->
     <Style x:Key="GreenButton" TargetType="{x:Type Button}">
-        <Setter Property="Background" Value="Azure"></Setter>
+        <Setter Property="Background" Value="lightblue"></Setter>
+        <Setter Property="FontSize" Value="22"></Setter>
+        <Setter Property="FontWeight" Value="Heavy"></Setter>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -431,6 +433,15 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <DataTemplate x:Key="listBoxTemplateInt">
+        <StackPanel Margin="4">
+            <DockPanel>
+                <ComboBox ItemsSource="{Binding Value.Values}" Width="180"
+							  SelectedIndex="{Binding Value.SelectedIndex,Mode=TwoWay}" 
+							  ></ComboBox>
+            </DockPanel>
+        </StackPanel>
+    </DataTemplate>
     <Storyboard x:Key="move" >
         <PointAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)" >
             <!--Storyboard.TargetName="card"-->

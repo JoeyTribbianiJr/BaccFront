@@ -94,17 +94,16 @@ namespace Bacc_front
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            //var side = ((WhoWin)value).Winner;
-            var side = System.Convert.ToInt32(value);
-            if (side == 0)
+            var side = (WinnerEnum)value;
+            if (side ==  WinnerEnum.banker)
             {
                 return new SolidColorBrush(Colors.Red);
             }
-            if (side == 1)
+            if (side ==  WinnerEnum.player)
             {
                 return new SolidColorBrush(Colors.Blue);
             }
-            if (side == 2)
+            if (side ==  WinnerEnum.tie)
             {
                 return new SolidColorBrush(Colors.Green);
             }
@@ -123,15 +122,14 @@ namespace Bacc_front
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            //var side = ((WhoWin)value).Winner;
-            var side = System.Convert.ToInt32(value);
+            var side = (WinnerEnum)value;
             switch (side)
             {
-                case 0:
+                case WinnerEnum.banker:
                     return "庄";
-                case 1:
+                case WinnerEnum.player:
                     return "闲";
-                case 2:
+                case WinnerEnum.tie:
                     return "和";
                 default:
                     return "";
@@ -149,14 +147,14 @@ namespace Bacc_front
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var side = System.Convert.ToInt32(value);
+            var side = (WinnerEnum)value;
             switch (side)
             {
-                case 0:
-                case 1:
-                case 2:
+                case WinnerEnum.tie:
+                case WinnerEnum.player:
+                case WinnerEnum.banker:
                     return Visibility.Visible;
-                case -1:
+                case WinnerEnum.none:
                     return Visibility.Hidden;
                 default:
                     return Visibility.Collapsed;

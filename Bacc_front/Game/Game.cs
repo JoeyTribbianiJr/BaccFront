@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using WsUtils;
 using WsFSM;
-using System.Timers;
 using System.Collections.ObjectModel;
 using System.Threading;
-using System.Windows;
-using System.IO;
-using System.Drawing;
-using System.Net;
-using System.Net.Sockets;
-using System.Windows.Forms;
 using System.Windows.Threading;
+using System.Windows.Media;
 
 namespace Bacc_front
 {
@@ -24,26 +18,72 @@ namespace Bacc_front
     public delegate void delegateGameStart();
     public delegate void delegateRoundOver();
     public delegate void delegateDealCard();
+    [PropertyChanged.ImplementPropertyChanged]
     public class Game
     {
         #region 游戏参数
-        public const float _frame_rate = 0.2f;
-        public const float _bet_rate = 0.4f;
+        public const float _frame_rate = 0.1f;
+        public const float _bet_rate = 0.1f;
         public bool _is3SecOn = false;
         public bool _isBetting = false;
         public bool _isIn3 = false;
         public double animationTime = 3;
         #endregion
         #region 游戏对象
+        public MediaPlayer WavPlayer { get; set; }
+        /// <summary>
+        /// 定时器
+        /// </summary>
         public DispatcherTimer dTimer;
-        public int Counter { get; set; }
-        public List<List<int>> keymap = new List<List<int>>();
+        /// <summary>
+        /// 倒计时器
+        /// </summary>
+        public int CountDown { get; set; }
+        /// <summary>
+        /// 状态显示器
+        /// </summary>
+        public string StateText { get; set; }
+        public string BankerStateText { get; set; }
+        public string PlayerStateText { get; set; }
+        /// <summary>
+        /// 受控指示器
+        /// </summary>
+        private bool IsUnderControl { get; set; }
+        /// <summary>
+        /// 轮次计数器
+        /// </summary>
+        public int RoundIndex { get; set; }
+        public string _roundStrIndex { get { return (RoundIndex + 1).ToString(); } }
+        public Round CurrentRound { get { return LocalSessions[SessionIndex].RoundsOfSession[RoundIndex]; } }
+        /// <summary>
+        /// 局数计数器
+        /// </summary>
+        public int SessionIndex { get; set; }
+        public string _sessionStrIndex { get { return (SessionIndex + 1).ToString(); } }
+        /// <summary>
+        /// 本地局集合
+        /// </summary>
+        public ObservableCollection<Session> LocalSessions { get; private set; }
+        /// <summary>
+        /// 当前局路单
+        /// </summary>
+        public ObservableCollection<WhoWin> Waybill { get; set; }
+        /// <summary>
+        /// 键盘映射表
+        /// </summary>
         public KeyDownModel[] KeyMap = new KeyDownModel[300];
-        public NetServer scr_transfer;
-        public event delegateGameStart NoticeGameStart;
+        /// <summary>
+        /// 通知窗口游戏开始事件，进行路单绑定
+        /// </summary>
+        public event delegateGameStart NoticeWindowBind;
+        /// <summary>
+        /// 通知窗口本局结束事件，重置路单
+        /// </summary>
         public event delegateRoundOver NoticeRoundOver;
+        /// <summary>
+        /// 通知窗口开始发牌动画事件
+        /// </summary>
         public event delegateDealCard NoticeDealCard;
-        #endregion
         public static Game Instance
         {
             get
@@ -56,20 +96,17 @@ namespace Bacc_front
             }
         }
 
-        public ObservableCollection<Session> AllSessions { get; private set; }
-        public int SessionIndex { get; private set; }
-
-        private Session _curSession;
-        #region 游戏开始
-        private Game()
+        #endregion
+        public Game()
         {
-
+            LocalSessions = new ObservableCollection<Session>();
         }
+
+        #region 游戏开始
         public void Start()
         {
-            InitFsm();
-
-            dTimer =dTimer?? new DispatcherTimer
+            InitGame();
+            dTimer = dTimer ?? new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(_frame_rate)
             };
@@ -77,210 +114,29 @@ namespace Bacc_front
 
             dTimer.Start();
 
-            //thread = new Thread(ScanAndHandleKeyMap);
-            //thread.IsBackground = true;
-            //thread.Start();
-
-            scr_transfer = new NetServer();
-            scr_transfer.StartServer();
+            InitFsm();
         }
-
-        private void ScanAndHandleKeyMap()
+        void InitGame()
         {
-            while (true)
-            {
-                if (_isBetting)
-                {
-                    foreach (var key in _all_userkeys_lst)
-                    {
-                        var keymodel = KeyMap[key];
-                        if (keymodel.Pressed)
-                        {
-                            if (keymodel.Timer < _bet_rate)
-                            {
-                                keymodel.Timer += _frame_rate;
-                            }
-                            else
-                            {
-                                keymodel.Handler();
-                                keymodel.Timer = 0;
-                            }
-                        }
-                    }
-                }
-                Thread.Sleep(TimeSpan.FromMilliseconds(_frame_rate));
-            }
-        }
-        public void HandleKeyMap()
-        {
-            while (true)
-            {
-                if (_isBetting)
-                {
-                    foreach (var key in _all_userkeys_lst)
-                    {
-                        var keymodel = KeyMap[key];
-                        if (keymodel.Pressed)
-                        {
-                            if (keymodel.Timer < _bet_rate)
-                            {
-                                keymodel.Timer += _frame_rate;
-                            }
-                            else
-                            {
-                                keymodel.Handler();
-                                keymodel.Timer = 0;
-                            }
-                        }
-                    }
-                }
-                Thread.Sleep(TimeSpan.FromMilliseconds(_frame_rate));
-            }
-        }
-        private void AddKeyTimer()
-        {
-            foreach (var key in _all_userkeys_lst)
-            {
-                var keymodel = KeyMap[key];
-                if (keymodel.Pressed)
-                {
-                    keymodel.Timer += _frame_rate;
-                }
-                else
-                {
-                    keymodel.Timer = 0;
-                }
-            }
-        }
-        private void Update(object sender, EventArgs e)
-        {
-            if (_isGameInited)
-            {
-                AddKeyTimer();
-            }
-            _fsm.UpdateCallback(_frame_rate);
-        }
-        private void InitFsm()
-        {
-            //资源初始化
-            _preparingState = new WsState("preparing");
-            //_preparingState.OnUpdate += StartGame;
-            //洗牌中
-            _shufflingState = new WsState("shuffling");
-            _shufflingState.OnEnter += GetShufTime;
-            _shufflingState.OnUpdate += Shuffle;
-            _shufflingState.OnExit += ShuffleOver;
-            //押注中
-            _bettingState = new WsState("betting");
-            _bettingState.OnEnter += Start1Round;
-            _bettingState.OnUpdate += Bet;
-            _bettingState.OnExit += BetOver;
-            //开牌中
-            _dealingState = new WsState("dealing");
-            _dealingState.OnEnter += GetWinner;
-            _dealingState.OnUpdate += StartDealing;
-            _dealingState.OnExit += RoundOrSessionOver;
+            BankerStateText = "庄";
+            PlayerStateText = "闲";
+            _betTime = _setting.GetIntSetting("bet_tm");    //押注时间有几秒
+            _betTime = 1;
+            _shufTime = 10;
+            _is3SecOn = _setting.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
+            _roundNumPerSession = _setting.GetIntSetting("round_num_per_session");
+            _send_to_svr = 5;   //提前几秒通知服务器押注结束
+            InitKeymap();
 
-            //初始化切换到洗牌
-            _prepareShuffle = new WsTransition("preShuffle", _preparingState, _shufflingState);
-            _prepareShuffle.OnTransition += InitGame;
-            _prepareShuffle.OnCheck += IsGameStarted;
-            _preparingState.AddTransition(_prepareShuffle);
+            WavPlayer = new MediaPlayer();
 
-            //洗牌切换到押注
-            _shuffleBet = new WsTransition("shuffleBet", _shufflingState, _bettingState);
-            _shuffleBet.OnCheck += IsShuffled;
-            _shufflingState.AddTransition(_shuffleBet);
+            SessionIndex = -1;
 
-            //押注切换到开牌
-            _betDeal = new WsTransition("betDeal", _bettingState, _dealingState);
-            _betDeal.OnCheck += IsBetted;
-            _bettingState.AddTransition(_betDeal);
-
-            //开牌后切换到下一局
-            _dealNextBet = new WsTransition("dealNextBet", _dealingState, _bettingState);
-            _dealNextBet.OnCheck += CanGoNextBet;
-
-            //开牌后本场结束，验单，重新洗牌,切换到下一场
-            _dealShuffle = new WsTransition("dealShuffle", _dealingState, _shufflingState);
-            _dealShuffle.OnCheck += IsSessionOver;
-            _dealShuffle.OnTransition += ExamineWaybill;
-
-            _dealingState.AddTransition(_dealNextBet);
-            _dealingState.AddTransition(_dealShuffle);
-
-            _fsm = new WsStateMachine("baccarat", _preparingState);
-            _fsm.AddState(_preparingState);
-            _fsm.AddState(_shufflingState);
-            _fsm.AddState(_bettingState);
-            _fsm.AddState(_dealingState);
-            //_fsm.AddState(_accountingState);
+            NewSession();
+            NoticeWindowBind();
+            _isGameInited = true;
         }
 
-        
-        private void StartGame(IState state)
-        {
-            _isGameStart = true;
-        }
-        bool InitGame()
-        {
-            if (_isGameInited)
-            {
-                return true;
-            }
-            else
-            {
-                if (_isGameIniting)
-                {
-                    return false;
-                }
-                else
-                {
-                    _isGameIniting = true;
-                    Desk.Instance.InitDeskForGame();
-                    NoticeGameStart();
-
-                    AllSessions = new ObservableCollection<Session>();
-                    _betKeyDownList = new List<KeyDownModel>();
-
-                    //押注时间有几秒
-                    _betTime = _setting.GetIntSetting("bet_tm");
-                    _betTime = 3;
-                    _is3SecOn = _setting.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
-
-                    //提前几秒通知服务器押注结束
-                    _send_to_svr = 5;
-                    InitKeymap();
-
-                    SessionIndex = 0;
-                    NewSession();
-                    _isGameInited = true;
-                    _isGameIniting = false;
-                    return true;
-                }
-            }
-        }
-        public void NewSession()
-        {
-            var id = SessionIndex;
-            Session _curSession;
-            if (!_isRoundsFromBack)
-            {
-                _curSession = new Session(id);
-                AllSessions.Add(_curSession);
-            }
-            else
-            {
-                _curSession = new Session(id);
-            }
-
-            Desk.Instance.ResetWaybill();
-            Desk.Instance.RoundIndex = 1;
-        }
-        
-        /// <summary>
-        /// 初始化键盘映射
-        /// </summary>
         void InitKeymap()
         {
             var content = FileUtils.getInstance().readStreamingFile("keymap.txt");
@@ -296,44 +152,31 @@ namespace Bacc_front
             for (int i = 0; i < lines.Length - 1; i += 8)
             {
                 List<int> keys = new List<int>();
-                    int func = 0;
+                int func = 0;
                 for (int j = 0; j < 8; j++)
                 {
                     var arr = lines[i + j].Split('=');
                     if (0 < j && j < 7 && arr.Length == 2)
                     {
-                        //var x = Convert.ToInt32(arr[0].Substring(arr[0].Length - 1, 1));
-
                         var keycode = Convert.ToInt32(arr[1]);
+
                         var na = new KeyDownModel(keycode)
                         {
                             IsKey = true,
                             Pressed = false,
-                            Handler = SetKeyAction(func,p)
+                            Handler = SetKeyAction(func, p)
                         };
                         KeyMap[keycode] = na;
-                        func++;
+
                         _all_userkeys_lst.Add(keycode);
-                        //keys.Add(keycode);
+
+                        func++;
                     }
                 }
                 p++;
-                //keymap.Add(keys);
             }
-
-            //_bet_userkeys_lst = new List<int>();
-            //_bet_userkeys_map = new List<List<int>>();
-            //_opt_userkeys_map = new List<List<int>>();
-            //foreach (var map in keymap)
-            //{
-            //    _bet_userkeys_lst.AddRange(map.GetRange(0, 3));
-
-            //    _bet_userkeys_map.Add(map.GetRange(0, 3));
-            //    _opt_userkeys_map.Add(map.GetRange(3, 3));
-            //}
-
         }
-        Action SetKeyAction(int func_id,int p_id)
+        Action SetKeyAction(int func_id, int p_id)
         {
             Action action;
             switch (func_id)
@@ -362,206 +205,169 @@ namespace Bacc_front
             }
             return action;
         }
-        private bool IsGameStarted()
-        {
-            return _isGameStart = true;
-        }
-        #endregion
-        #region 键盘回调
-        /// <summary>
-        /// 松开按键回调
-        /// </summary>
-        /// <param name="key"></param>
-        internal void HandleKeyUp(int key)
-        {
-            //if (_continuously_bet)
-            //{
-            //    _betKeyDownList.RemoveAll(k => k.keycode == key);
-            //}
-        }
-        /// <summary>
-        /// 按下按键回调
-        /// </summary>
-        /// <param name="key"></param>
-        internal void HandleKeyDown(int key)
-        {
-            //HandleBetKey(key);
 
-            //if (_all_userkeys_lst.Contains(key))
-            //{
-            //    if (_bet_userkeys_lst.Contains(key))
-            //    {
-            //        if (_continuously_bet) //如果不是连续押分，直接执行
-            //        {
-            //            _betKeyDownList.Add(new KeyDownModel(key));
-            //        }
-            //        //连续押分要缓存按键
-            //        HandleBetKey(key);
-            //    }
-            //    else
-            //    {
-            //        HandleOptionKey(key);
-            //    }
-            //}
-        }
-        /// <summary>
-        /// 连续押注按键处理，在每一帧执行
-        /// </summary>
-        private void HandleBetKeyList()
+        public void NewSession()
         {
-            foreach (var keydown in _betKeyDownList)
-            {
-                //第一次按键 或 在_bet_rate时间内未松开
-                if (keydown.Timer == 0 || keydown.Timer >= _bet_rate)
-                {
-                    HandleBetKey(keydown.keycode);
-                    keydown.Timer = 0;
-                }
-                keydown.Timer += _frame_rate;
-            }
-        }
-        /// <summary>
-        /// 玩家押注
-        /// </summary>
-        /// <param name="key"></param>
-        private void HandleBetKey(int key)
-        {
-            var p_idx = GetBetUser(key, out KeyFunc func);
-            var player = Desk.Instance.Players[p_idx];
+            SessionIndex++;
+            RoundIndex = -1;
 
-                player.Bet((BetSide)func);
-        }
-        /// <summary>
-        /// 玩家配置
-        /// </summary>
-        /// <param name="key"></param>
-        private void HandleOptionKey(int key)
-        {
-            var p_idx = GetOptUser(key, out KeyFunc func);
-            var player = Desk.Instance.Players[p_idx];
-            switch (func)
+            Session newSession;
+            try
             {
-                //设置押注面额
-                case KeyFunc.toggle_denomination:
-                    {
-                        player.SetDenomination();
-                        break;
-                    }
-                //取消所有押注
-                case KeyFunc.cancle_bet:
-                    {
-                            player.CancleBet();
-                        break;
-                    }
-                //是否隐藏压了哪家
-                case KeyFunc.hide_bet:
-                    {
-                        player.SetHide();
-                        break;
-                    }
+                newSession = LocalSessions[SessionIndex];
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                newSession = new Session(SessionIndex);
+                LocalSessions.Add(newSession);
+            }
+            finally
+            {
+                ResetWaybill();
             }
         }
-        /// <summary>
-        /// 获取按下押注键的玩家
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns>玩家索引</returns>
-        int GetBetUser(int key, out KeyFunc func)
+        public void ResetWaybill()
         {
-            func = KeyFunc.bet_bank;
-            int p_idx = 0, f_idx = 0;
-            for (int i = 0; i < _bet_userkeys_map.Count; i++)
+            var rounds = LocalSessions[SessionIndex].RoundsOfSession;
+            if (Waybill == null)
             {
-                var map = _bet_userkeys_map[i];
-                f_idx = map.IndexOf(key);
-                if (f_idx > -1)
+                Waybill = new ObservableCollection<WhoWin>();
+                for (int i = 0; i < rounds.Count; i++)
                 {
-                    func = (KeyFunc)f_idx;
-                    return p_idx;
+                    Waybill.Add(new WhoWin()
+                    {
+                        Winner = (int)WinnerEnum.none
+                    });
                 }
-                p_idx++;
             }
-            return -1;
-        }
-        /// <summary>
-        /// 获取按下配置键的玩家索引
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        int GetOptUser(int key, out KeyFunc func)
-        {
-            func = KeyFunc.bet_bank;
-            var f_idx = 0;
-            int p_idx = 0;
-            for (int i = 0; i < _opt_userkeys_map.Count; i++)
+            else
             {
-                var map = _opt_userkeys_map[i];
-                f_idx = map.IndexOf(key);
-                if (f_idx > -1)
+                for (int i = 0; i < rounds.Count; i++)
                 {
-                    func = (KeyFunc)(f_idx + 3);
-                    return p_idx;
+                    Waybill[i] = new WhoWin()
+                    {
+                        Winner = (int)WinnerEnum.none
+                    };
                 }
-                p_idx++;
             }
-            return -1;
         }
+
+        private void Update(object sender, EventArgs e)
+        {
+            if (_isGameInited)
+            {
+                AddKeyTimer();
+            }
+            _fsm.UpdateCallback(_frame_rate);
+        }
+        private void AddKeyTimer()
+        {
+            foreach (var key in _all_userkeys_lst)
+            {
+                var keymodel = KeyMap[key];
+                if (keymodel.Pressed)
+                {
+                    keymodel.Timer += _frame_rate;
+                }
+                else
+                {
+                    keymodel.Timer = 0;
+                }
+            }
+        }
+
+        private void InitFsm()
+        {
+            //直接开始
+            _preparingState = new WsState("preparing");
+            //洗牌中
+            _shufflingState = new WsState("shuffling");
+            _shufflingState.OnEnter += StartNewSession;
+            _shufflingState.OnUpdate += Shufflling;
+            _shufflingState.OnExit += ShuffleOver;
+            //押注中
+            _bettingState = new WsState("betting");
+            _bettingState.OnEnter += Start1Round;
+            _bettingState.OnUpdate += Betting;
+            _bettingState.OnExit += BetOver;
+            //开牌中
+            _dealingState = new WsState("dealing");
+            _dealingState.OnUpdate += Dealing;
+            _dealingState.OnExit += RoundOrSessionOver;
+
+            //初始化切换到洗牌
+            _prepareShuffle = new WsTransition("preShuffle", _preparingState, _shufflingState);
+            _prepareShuffle.OnCheck += () => { return true; };
+            _preparingState.AddTransition(_prepareShuffle);
+
+            //洗牌切换到押注
+            _shuffleBet = new WsTransition("shuffleBet", _shufflingState, _bettingState);
+            _shuffleBet.OnCheck += IsShuffled;
+            _shufflingState.AddTransition(_shuffleBet);
+
+            //押注切换到开牌
+            _betDeal = new WsTransition("betDeal", _bettingState, _dealingState);
+            _betDeal.OnCheck += IsBetted;
+            _bettingState.AddTransition(_betDeal);
+
+            //开牌后切换到下一轮
+            _dealNextBet = new WsTransition("dealNextBet", _dealingState, _bettingState);
+            _dealNextBet.OnCheck += CanGoNextBet;
+
+            //开牌后本局结束，验单，重新洗牌,切换到下一局
+            _dealShuffle = new WsTransition("dealShuffle", _dealingState, _shufflingState);
+            _dealShuffle.OnCheck += IsSessionOver;
+            _dealShuffle.OnTransition += ExamineWaybill;
+
+            _dealingState.AddTransition(_dealNextBet);
+            _dealingState.AddTransition(_dealShuffle);
+
+            _fsm = new WsStateMachine("baccarat", _preparingState);
+            _fsm.AddState(_preparingState);
+            _fsm.AddState(_shufflingState);
+            _fsm.AddState(_bettingState);
+            _fsm.AddState(_dealingState);
+        }
+
         #endregion
 
-        private void GetShufTime(IState state)
+        #region 状态机运行
+        private void StartNewSession(IState state)
         {
-            _shufTime = 4;
         }
-        /// <summary>
-        /// 洗牌中
-        /// </summary>
-        /// <param name="f"></param>
-        private void Shuffle(float f)
+        private void Shufflling(float f)
         {
             var timer = _shufflingState.Timer;
+            SetCountDownWithFloat(timer, _shufTime + 1);
+            SetStateText("洗牌中");
+
             if (timer > _shufTime + 1)
             {
                 _isShuffled = true;
                 return;
             }
-            SetCountDownWithFloat(timer, _shufTime);
-            SetStateText("洗牌中");
         }
-        /// <summary>
-        /// 是否洗完牌
-        /// </summary>
-        /// <returns></returns>
         private bool IsShuffled()
         {
             return _isShuffled;
         }
-        /// <summary>
-        /// 洗牌结束重置标志
-        /// </summary>
-        /// <param name="state"></param>
         private void ShuffleOver(IState state)
         {
             _isShuffled = false;
         }
-        /// <summary>
-        /// 开始新一局
-        /// </summary>
-        /// <param name="state"></param>
+
         private void Start1Round(IState state)
         {
+            RoundIndex++;
             _isBetting = true;
         }
-        /// <summary>
-        /// 押注中
-        /// </summary>
-        /// <param name="f"></param>
-        private void Bet(float f)
+        private void Betting(float f)
         {
-            HandleBetKeyList();
             _betTimer = _bettingState.Timer;
+
             SetCountDownWithFloat(_betTimer, _betTime + 1);
             SetStateText("押注中");
-            SendToServer(_bettingState, Desk.Instance.CountDown);
+            SendToServer(_bettingState, CountDown);
 
             if (_betTimer > _betTime + 1)
             {
@@ -576,57 +382,19 @@ namespace Bacc_front
                     return;
                 }
             }
-           
         }
-        /// <summary>
-        /// 向服务器发送同步时间消息
-        /// </summary>
-        /// <param name="bettingState"></param>
-        /// <param name="countDown"></param>
-        private void SendToServer(WsState bettingState, int countDown)
-        {
-        }
-        /// <summary>
-        /// 是否押注结束
-        /// </summary>
-        /// <returns></returns>
         private bool IsBetted()
         {
             return _betFinished;
         }
-        /// <summary>
-        /// 押注结束重置标志
-        /// </summary>
-        /// <param name="state"></param>
         private void BetOver(IState state)
         {
-           
             _isBetting = false;
             _betFinished = false;
             _isIn3 = false;
         }
-        /// <summary>
-        /// 开牌前获得赢家
-        /// </summary>
-        /// <param name="state"></param>
-        private void GetWinner(IState state)
-        {
-            //var winner = Desk.Instance.GetWinner(_curHandCards);
-            var r_idx = Desk.Instance.RoundIndex - 1;
-            var cur_round = AllSessions[SessionIndex].AllRounds[r_idx];
 
-            Desk.Instance._curHandCards = cur_round.hand_card;
-            Desk.Instance.GetWinner(Desk.Instance._curHandCards);
-
-            
-        }
-        /// <summary>
-        /// 切换到开牌时播放开牌动画，不依赖计时器
-        /// 动画结束后直接结算
-        /// 然后判断牌局状态
-        /// </summary>
-        /// <param name="state"></param>
-        private void StartDealing(float f)
+        private void Dealing(float f)
         {
             if (_firstAnimation)
             {
@@ -641,14 +409,14 @@ namespace Bacc_front
             }
             else
             {
-                if (_aniTimer < 3)
+                if (_aniTimer < 0.2)
                 {
                     SetWinStateText();
                     _aniTimer += f;
                     return;
                 }
-                var num = AllSessions[SessionIndex].AllRounds.Count;
-                if (Desk.Instance.RoundIndex >= num)
+                var round_num = LocalSessions[SessionIndex].RoundNumber;
+                if (RoundIndex + 1 >= round_num)
                 {
                     _sessionOver = true;
                 }
@@ -657,94 +425,83 @@ namespace Bacc_front
                     _sessionOver = false;
                     _betRoundOver = true;
                 }
-                return;
             }
         }
-
-        private void SetWinStateText()
-        {
-            var r_idx = Desk.Instance.RoundIndex - 1;
-            var cur_round = AllSessions[SessionIndex].AllRounds[r_idx];
-
-            var winner = Desk.Instance.CurRoundWinner;
-            var str =GetWinStr(winner);
-            SetStateText(str);
-        }
-        private string GetWinStr(Tuple<BetSide,int> winner)
-        {
-            switch (winner.Item1)
-            {
-                case BetSide.banker:
-                    return "庄赢 " + winner.Item2 + " 点";
-                case BetSide.tie:
-                    return "和";
-                case BetSide.player:
-                    return "闲赢 " + winner.Item2 + " 点";
-                default:
-                    return "";
-            }
-        }
-
-        /// <summary>
-        /// 是否直接开下一局
-        /// </summary>
-        /// <returns></returns>
         private bool CanGoNextBet()
         {
             return _betRoundOver && !_sessionOver;
         }
-        /// <summary>
-        /// 是否本场全部结束
-        /// </summary>
-        /// <returns></returns>
         private bool IsSessionOver()
         {
             return _sessionOver;
         }
-        /// <summary>
-        /// 离开状态时重置变量
-        /// </summary>
-        /// <param name="state"></param>
         private void RoundOrSessionOver(IState state)
         {
+            Waybill[RoundIndex].Winner = (int)CurrentRound.Winner.Item1;
             NoticeRoundOver();
-            Desk.Instance.CalcAllPlayersEarning();
+
+            Desk.Instance.CalcAllPlayersEarning(CurrentRound);
             Desk.Instance.ClearDeskAmount();
-            if (_sessionOver)
-            {
-                Desk.Instance.RoundIndex = 1;
-                _sessionOver = false;
-            }
-            Desk.Instance.RoundIndex++;
+
             _betRoundOver = false;
             _firstAnimation = true;
             _animating = false;
+            BankerStateText = "庄";
+            PlayerStateText = "闲";
+
+            if (_sessionOver)
+            {
+                _sessionOver = false;
+                NewSession();
+            }
+            
         }
-        /// <summary>
-        /// 切换状态到检查路单，此时趁机保存数据等耗时操作
-        /// </summary>
-        /// <returns></returns>
+
         private bool ExamineWaybill()
         {
+            //var timer = _dealingState.Timer;
             SetStateText("检查路单中");
-            SessionIndex++;
-            NewSession();
             return true;
         }
-       
+        #endregion
+
         #region 开牌动画
         private void DealCard()
         {
             SetClockText("0");
-            SetStateText("开牌动画中");
+            SetStateText("开牌中");
 
             NoticeDealCard();
+        }
+        private void SetWinStateText()
+        {
+            var winner = CurrentRound.Winner;
+            string str;
+            switch (winner.Item1)
+            {
+                case BetSide.banker:
+                    str = "庄赢 " + (winner.Item2 - winner.Item3) + " 点";
+                    BankerStateText = str;
+                    break;
+                case BetSide.tie:
+                    str = "和";
+                    BankerStateText = "和牌退注";
+                    PlayerStateText = "和牌退注";
+                    break;
+                case BetSide.player:
+                    str = "闲赢 " + (winner.Item3 - winner.Item2) + " 点";
+                    PlayerStateText = str;
+                    break;
+                default:
+                    str = "";
+                    break;
+            }
         }
         #endregion
         #region 倒计时 
         void SetClockText(string time)
         {
-            Desk.Instance.CountDown = Convert.ToInt32(time);
+            CountDown = Convert.ToInt32(time);
         }
         void SetCountDownWithFloat(float cur_timer, int seconds)
         {
@@ -754,14 +511,23 @@ namespace Bacc_front
         }
         void SetStateText(string state)
         {
-            Desk.Instance.StateText = state;
+            StateText = state;
+        }
+        #endregion
+        #region 音乐播放器
+        private void PlayWav(string name)
+        {
+            WavPlayer.Open(new Uri("Wav/" + name + ".wav", UriKind.Relative));
+            WavPlayer.Play();
         }
         #endregion
         void FullScreen()
         {
 
         }
-
+        private void SendToServer(WsState bettingState, int countDown)
+        {
+        }
         #region 状态机
         private WsStateMachine _fsm;
 
@@ -774,18 +540,13 @@ namespace Bacc_front
         private WsTransition _shuffleBet;
         private WsTransition _betDeal;
         private WsTransition _dealNextBet;
-        private WsTransition _dealBet;   //开牌后直接开下一局
         private WsTransition _dealShuffle;   //开牌后重新洗牌,洗牌前先对单
 
-        private bool _isGameStart = false;
         private bool _isShuffled = false;
         private bool _betFinished = false;
-        private bool _enableBet = false;
-        private bool _isAccounted = false;
         private bool _betRoundOver = false;
         private bool _sessionOver = false;
         public bool _animating = false;
-        private bool _animationDone = false;
 
         private int _shufTime;
         private int _betTime;
@@ -801,21 +562,11 @@ namespace Bacc_front
         private Thread thread;
         private static Game instance;
         private Setting _setting = Setting.Instance;
-        private bool _isRoundsFromBack = false;
-        private bool _firstAnimation= true;
+        private bool _firstAnimation = true;
         public float _aniTimer = 0;
         private bool _isGameInited = false;
         private bool _isGameIniting;
         #endregion
-    }
-    public enum KeyFunc
-    {
-        bet_bank = 0,
-        bet_player,
-        bet_tie,
-        toggle_denomination,
-        cancle_bet,
-        hide_bet
     }
     public class KeyDownModel
     {
@@ -823,7 +574,7 @@ namespace Bacc_front
         public float Timer { get; set; }
         public Action Handler { get; set; }
         public bool Pressed { get; internal set; }
-        public bool IsKey{ get; internal set; }
+        public bool IsKey { get; internal set; }
 
         public KeyDownModel(int key)
         {

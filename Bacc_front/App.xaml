@@ -1,8 +1,9 @@
 ﻿<Application x:Class="Bacc_front.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Bacc_front"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:Bacc_front">
+
+    <!--StartupUri="MainWindow.xaml">-->
     <Application.Resources>
 		<local:ChipVisibleConverter x:Key="ChipVisibleConverter"></local:ChipVisibleConverter>
 		<local:ChipBackgroundConverter x:Key="ChipBackgroundConverter"></local:ChipBackgroundConverter>

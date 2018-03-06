@@ -14,10 +14,10 @@ using System.Windows.Media.Imaging;
 
 namespace Bacc_front
 {
-    public class NetServer 
+    public class NetServer
     {
         private const int port = 54322;
-        private const int Time = 1000;
+        private const int ImageFrame = 40;
         private Socket serverSocket;
         private IPEndPoint serverIEP;
 
@@ -48,64 +48,43 @@ namespace Bacc_front
                 Debug.Write("start出错");
             }
         }
-        
-       private void Accept()
+
+        private void Accept()
         {
             while (true)
             {
                 Socket client = serverSocket.Accept();
-
                 Debug.Write("一名用户连接");
-
-                Thread threadSend = new Thread(new ParameterizedThreadStart(Send));
-                threadSend.IsBackground = true;
-                threadSend.Start(client);
+                Send(client);
             }
         }
 
         private void Send(Object Obj)
         {
-            try
+            while (true)
             {
-                Socket client = (Socket)Obj;
-                //Bitmap bitmap = GetBitmapFromScreen();
-                Bitmap bitmap = GetScreen();
-                Byte[] byteBuffer = new Byte[1048567];
-                byteBuffer = BitmapToByte(bitmap);
-
-                if (client.Connected)
+                try
                 {
-                    client.BeginSend(byteBuffer, 0, byteBuffer.Length, SocketFlags.None, new AsyncCallback(SendCallBack), client);
+                    Socket client = (Socket)Obj;
+                    Bitmap bitmap = GetScreen();
+                    MemoryStream ms = new MemoryStream();
+                    CompressImage(bitmap, ms);
+                    var byteBuffer = ms.ToArray();
+                    if (client.Connected)
+                    {
+                        client.Send(byteBuffer);
+                        Thread.Sleep(ImageFrame);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    Debug.Write("发送出错");
                 }
             }
-            catch
-            {
-                Debug.Write("发送出错");
-            }
-
-        }
-
-        private void SendCallBack(IAsyncResult AR)
-        {
-            try
-            {
-                Thread.Sleep(Time);
-
-                Socket client = (Socket)AR.AsyncState;
-                //Bitmap bitmap = GetBitmapFromScreen();
-                Bitmap bitmap = GetScreen();
-                Byte[] byteBuffer = new Byte[1048567];
-                byteBuffer = BitmapToByte(bitmap);
-
-                if (client.Connected)
-                {
-                    client.BeginSend(byteBuffer, 0, byteBuffer.Length, SocketFlags.None, new AsyncCallback(SendCallBack), client);
-                }
-            }
-            catch
-            {
-            }
-
         }
 
         private Bitmap GetBitmapFromScreen()
@@ -131,13 +110,6 @@ namespace Bacc_front
             stream.Seek(0, SeekOrigin.Begin);
             stream.Read(buffer, 0, Convert.ToInt32(stream.Length));
             return buffer;
-
-        }
-
-        private void SetImage(BitmapImage bitmapImage)
-        {
-
-            //imageScreen.Source = bitmapImage;
 
         }
 
@@ -171,7 +143,6 @@ namespace Bacc_front
                 eptS.Dispose();
             }
         }
-
         /// <summary>  
         /// 获取图片编码信息  
         /// </summary>  
