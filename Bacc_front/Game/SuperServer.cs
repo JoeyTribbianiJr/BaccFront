@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace Bacc_front
 {
-    public class SuperServer
+    public class SuperServer :AppServer
     {
         private AppServer appServer;
         private const int ImageFrame = 40;
@@ -65,7 +65,7 @@ namespace Bacc_front
             switch (type)
             {
                 case RemoteCommand.ImportFront:
-                    session.Send(SendData(RemoteCommand.ImportFront, Game.Instance.LocalSessions));
+                    SendData(RemoteCommand.ImportFront, Game.Instance.LocalSessions,session);
                     break;
                 case "2":
                     session.Send("You input 2");
@@ -79,16 +79,24 @@ namespace Bacc_front
         {
             session.Send("服务已关闭");
         }
-        string SendData(RemoteCommand command,object obj)
+        void SendData(RemoteCommand command,object obj, AppSession session)
         {
             var type = ((int)command).ToString().PadLeft(2,'0');
+            byte[] typeByte = Encoding.Default.GetBytes(type);
+
+            int len = 0;
+            byte[] length = BitConverter.GetBytes(len);
+
             var str = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
-            
-            if(type.Length != 2)
+            byte[] byteBuffer = Encoding.Default.GetBytes(str);
+
+            var data = typeByte.Concat(length).Concat(byteBuffer).ToArray();
+
+            if (type.Length != 2)
             {
                 throw new Exception();
             }
-            return type + str;
+            session.Send(data, 0, data.Length);
         }
         #region 发送图片
         void TransmitImage(AppSession session)
@@ -103,12 +111,15 @@ namespace Bacc_front
             {
                 try
                 {
+                    Thread.Sleep(100);
                     AppSession session = (AppSession)obj;
                     MemoryStream ms = new MemoryStream();
                     Bitmap bitmap = GetScreen();
-                    bitmap.Save(ms, ImageFormat.Bmp);
+                    //bitmap.Save(ms, ImageFormat.Bmp);
+                    CompressImage(bitmap, ms);
                     //CompressImage(bitmap, ms);
-                    var byteBuffer = Compress(ms.ToArray());
+                    //var byteBuffer = Compress(ms.ToArray());
+                    var byteBuffer = ms.ToArray();
 
                     if (session.Connected)
                     {
@@ -119,7 +130,7 @@ namespace Bacc_front
                         int legth = BitConverter.ToInt32(data, 2);
 
                         session.Send(data, 0, data.Length);
-                        Thread.Sleep(ImageFrame);
+                        //Thread.Sleep(ImageFrame);
                     }
                     else
                     {
@@ -180,7 +191,7 @@ namespace Bacc_front
                 ici = this.GetImageCoderInfo("image/jpeg");
                 ecd = System.Drawing.Imaging.Encoder.Quality;
                 eptS = new EncoderParameters(1);
-                ept = new EncoderParameter(ecd, 10L);
+                ept = new EncoderParameter(ecd, 50L);
                 eptS.Param[0] = ept;
                 bitmap.Save(ms, ici, eptS);
             }
