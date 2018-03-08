@@ -1,6 +1,9 @@
-﻿using SuperSocket.SocketBase;
+﻿using Newtonsoft.Json;
+using SuperSocket.SocketBase;
+using SuperSocket.SocketBase.Protocol;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -14,7 +17,7 @@ using System.Windows.Forms;
 
 namespace Bacc_front
 {
-    public class SuperServer :AppServer
+    public class SuperServer : AppServer
     {
         private AppServer appServer;
         private const int ImageFrame = 40;
@@ -23,6 +26,7 @@ namespace Bacc_front
             appServer = new AppServer();
         }
         private const int port = 54322;
+
 
         public void StartSever()
         {
@@ -61,33 +65,92 @@ namespace Bacc_front
 
         void appServer_NewRequestReceived(AppSession session, SuperSocket.SocketBase.Protocol.StringRequestInfo requestInfo)
         {
-            var type = Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
+            RemoteCommand type = (RemoteCommand) Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
             switch (type)
             {
                 case RemoteCommand.ImportFront:
-                    SendData(RemoteCommand.ImportFront, Game.Instance.LocalSessions,session);
+                    SendData(RemoteCommand.ImportFront, Game.Instance.LocalSessions, session);
                     break;
-                case "2":
-                    session.Send("You input 2");
+                case RemoteCommand.ReplaceWaybill:
+                    ReplaceWaybill(requestInfo,session);
+                    break;
+                case RemoteCommand.ImportBack:
+                    ImportBack(requestInfo, session);
                     break;
                 default:
                     session.Send("Unknow ");
                     break;
             }
         }
+
+        private void ImportBack(StringRequestInfo requestInfo, AppSession app_session)
+        {
+            try
+            {
+                var data = requestInfo.Parameters[0];
+                var back_sessions = JsonConvert.DeserializeObject<ObservableCollection<Session>>(data);
+
+                var local_sessions = Game.Instance.LocalSessions;
+                var cur_session = local_sessions[Game.Instance.SessionIndex];
+
+                var sess_idx = Game.Instance.SessionIndex;
+                var round_idx = Game.Instance.RoundIndex;
+
+                if (back_sessions.Count >= Game.Instance.SessionIndex + 1)
+                {
+                    for (int j = round_idx; j < cur_session.RoundNumber; j++)
+                    {
+                        cur_session.RoundsOfSession[j] = back_sessions[sess_idx].RoundsOfSession[round_idx];
+                    }
+                    for (int i = sess_idx + 1; i < local_sessions.Count(); i++)
+                    {
+                        local_sessions[i] = back_sessions[i];
+                    }
+                    for (int k = local_sessions.Count(); k < back_sessions.Count; k++)
+                    {
+                        local_sessions.Add(back_sessions[k]);
+                    }
+                    SendData(RemoteCommand.ImportBackOK, local_sessions[Game.Instance.SessionIndex], app_session);
+                }
+            }
+            catch (Exception ex)
+            {
+                    SendData(RemoteCommand.ImportBackFail, ex.Message, app_session);
+            }
+        }
+
+        private void ReplaceWaybill(StringRequestInfo requestInfo, AppSession app_session)
+        {
+            try
+            {
+                var data = requestInfo.Parameters[0];
+                var session = JsonConvert.DeserializeObject<Session>(data);
+                var local = Game.Instance.LocalSessions[Game.Instance.SessionIndex];
+                for (int i = Game.Instance.RoundIndex; i < local.RoundNumber; i++)
+                {
+                    local.RoundsOfSession[i] = session.RoundsOfSession[i];
+                }
+                SendData(RemoteCommand.ReplaceWaybillOK, local.RoundsOfSession[Game.Instance.RoundIndex], app_session);
+            }
+            catch (Exception ex)
+            {
+                SendData(RemoteCommand.ReplaceWaybillFail, ex.Message, app_session);
+            }
+        }
+
         void appServer_SessionClosed(AppSession session, SuperSocket.SocketBase.CloseReason value)
         {
             session.Send("服务已关闭");
         }
-        void SendData(RemoteCommand command,object obj, AppSession session)
+        void SendData(RemoteCommand command, object obj, AppSession session)
         {
-            var type = ((int)command).ToString().PadLeft(2,'0');
+            var type = ((int)command).ToString().PadLeft(2, '0');
             byte[] typeByte = Encoding.Default.GetBytes(type);
 
             int len = 0;
             byte[] length = BitConverter.GetBytes(len);
 
-            var str = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            var str = JsonConvert.SerializeObject(obj);
             byte[] byteBuffer = Encoding.Default.GetBytes(str);
 
             var data = typeByte.Concat(length).Concat(byteBuffer).ToArray();

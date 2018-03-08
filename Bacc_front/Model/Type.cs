@@ -59,6 +59,14 @@ namespace Bacc_front
 	}
     public enum RemoteCommand
     {
-        ImportFront = 2
+        ImportFront = 2,
+
+        ReplaceWaybill =3,
+        ReplaceWaybillOK =4,
+        ReplaceWaybillFail = 5,
+
+        ImportBack =6,
+        ImportBackOK =7,
+        ImportBackFail =8,
     }
 }

@@ -85,7 +85,13 @@ namespace Bacc_front
 				Values = new string[2] { "热敏打印机:1", "热敏打印机:2" }
 			});
 
-			game_setting.Add("round_num_per_session", new SettingItem()
+            game_setting.Add("bet_rate", new SettingItem()
+            {
+                SelectedIndex = 2,
+                Type = SettingItemType.intager,
+                Values = new string[] { "连续押分间隔:20", "连续押分间隔:40", "连续押分间隔:80" }
+            });
+            game_setting.Add("round_num_per_session", new SettingItem()
 			{
 				SelectedIndex = 2,
 				Type = SettingItemType.intager,

@@ -55,12 +55,12 @@
                 <Binding Path="." ></Binding>
             </Setter.Value>
         </Setter>
-
         <Setter Property="Visibility" >
             <Setter.Value>
                 <Binding Path="." Converter="{StaticResource ChipVisibleConverter}"></Binding>
             </Setter.Value>
         </Setter>
+        <Setter Property="Foreground" Value="Red"></Setter>
         <Setter Property="Background" >
             <Setter.Value>
                 <ImageBrush >

@@ -146,7 +146,7 @@ namespace Bacc_front
                 }
 
             }
-            else if (Game.Instance._isBetting)
+            else if (Game.Instance._isInBetting)
             {
                 var keymodel = Game.Instance.KeyMap[(int)e.Key];
                 if (keymodel.IsKey)
@@ -170,7 +170,7 @@ namespace Bacc_front
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            if (Game.Instance._isBetting)
+            if (Game.Instance._isInBetting)
             {
                 var key = (int)e.Key;
                 Game.Instance.KeyMap[key].Pressed = false;
