@@ -25,12 +25,14 @@ namespace Bacc_front
 		strings
 	}
 
+    [PropertyChanged.ImplementPropertyChanged]
 	public class Setting
 	{
 		/// <summary>
 		/// 游戏参数
 		/// </summary>
 		public Dictionary<string, SettingItem> app_setting = new Dictionary<string, SettingItem>();
+        public string ServerIP { get; set; }
 		/// <summary>
 		/// 牌局设置
 		/// </summary>
@@ -56,13 +58,15 @@ namespace Bacc_front
 		{
             var util = new WsUtils.FileUtils();
             var config = util.ReadFile("Config/Config.json");
-            if(config == null)
+            var serverip = util.ReadFile("Config/ServerIP.json");
+            if(string.IsNullOrEmpty( config ))
             {
                 InitGameSetting();
             }
             else
             {
                 game_setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(config);
+                ServerIP = JsonConvert.DeserializeObject<string>(serverip);
             }
 		}
 
@@ -80,7 +84,7 @@ namespace Bacc_front
 		{
 			game_setting.Add("printer", new SettingItem()
 			{
-				SelectedIndex = 1,
+				SelectedIndex = 0,
 				Type = SettingItemType.intager,
 				Values = new string[2] { "热敏打印机:1", "热敏打印机:2" }
 			});
@@ -161,7 +165,7 @@ namespace Bacc_front
             //game_str_setting.Add("print_waybill", new SettingStrItem() { desc = "打印露单", value = "打印露单", values = new string[] { "打印露单" } });
             game_setting.Add("single_double", new SettingItem()
             {
-                SelectedIndex =0,
+                SelectedIndex =1,
                 Type = SettingItemType.strings,
                 Values = new string[] { "单张牌", "两张牌" }
             });

@@ -19,22 +19,43 @@
                 <ResourceDictionary Source="Style.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Storyboard x:Key="sbPinCard">
-                <MediaTimeline Source="Wav/XP.wav" Storyboard.TargetName="Audio"/>
+                <MediaTimeline Source="Wav/XP.wav" Storyboard.TargetName="Audio0"/>
+            </Storyboard>
+           
+            <Storyboard x:Key="sbSendP">
+                <MediaTimeline Source="Wav/sendP.wav" Storyboard.TargetName="Audio0"/>
+            </Storyboard>
+            <Storyboard x:Key="sbWinB">
+                <MediaTimeline Source="Wav/winB.wav" Storyboard.TargetName="Audio0"/>
+            </Storyboard>
+            <Storyboard x:Key="sbWinP">
+                <MediaTimeline Source="Wav/winP.wav" Storyboard.TargetName="Audio0"/>
             </Storyboard>
         </ResourceDictionary>
     </Window.Resources>
 
     <Grid>
-        <MediaElement Name="Audio"></MediaElement>
+        <MediaElement Name="Audio0"></MediaElement>
+        <MediaElement Name="Audio1"></MediaElement>
+        <MediaElement Name="Audio2"></MediaElement>
+        <MediaElement Name="Audio3"></MediaElement>
+        <MediaElement Name="Audio4"></MediaElement>
+        <MediaElement Name="Audio5"></MediaElement>
         <!--<Button Visibility="Collapsed" Name="btnBindWaybill" Click="Button_Click"></Button>-->
         <Viewbox Stretch="fill">
             <Canvas x:Name="Casino" Width="1024" Height="768">
                 <Canvas.Background>
                     <ImageBrush ImageSource="img/desk.bmp" />
                 </Canvas.Background>
+                <!--<Button Style="{StaticResource CardButton1}" Visibility="Visible" Canvas.Left="892" Canvas.Top="679"></Button>-->
                 <Image Name="beautyBmp"  Canvas.Left="41" Canvas.Top="10" />
-                <TextBlock x:Name="txtCountDown"  FontSize="20" FontWeight="UltraBold" Foreground="Red" Text="{Binding CountDown}" Canvas.Left="23" Canvas.Top="10" />
-                <TextBlock Name="txtState" FontSize="22" Foreground="Red" Text="{Binding StateText}" Canvas.Left="23" Canvas.Top="61" ></TextBlock>
+                <MediaElement x:Name="g3" MediaEnded="gif_MediaEnded" Canvas.Left="446" Canvas.Top="702" UnloadedBehavior="Manual"  Source="Gif/b_3.gif" LoadedBehavior="Play" Stretch="None"/>
+                <MediaElement x:Name="flag" Opacity="0.1" MediaEnded="gif_MediaEnded" Canvas.Left="779" Canvas.Top="75" UnloadedBehavior="Manual"  Source="Gif/flag.gif" LoadedBehavior="Play" Stretch="None"/>
+                <MediaElement x:Name="fire" MediaEnded="gif_MediaEnded" Canvas.Left="111" UnloadedBehavior="Manual"  Source="Gif/fire.gif" LoadedBehavior="Play" Stretch="None"/>
+                <MediaElement x:Name="bg" MediaEnded="gif_MediaEnded" UnloadedBehavior="Manual"  Source="Gif/g1.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="701" Canvas.Left="8"/>
+                <MediaElement x:Name="pg" MediaEnded="gif_MediaEnded" Canvas.Left="971" UnloadedBehavior="Manual"  Source="Gif/g1.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="701"/>
+                <TextBlock x:Name="txtCountDown"  FontSize="40" FontWeight="UltraBold" Foreground="Green" Text="{Binding CountDown}" Canvas.Left="10" Canvas.Top="10" ></TextBlock>
+                <TextBlock Name="txtState" FontSize="30" Foreground="Red" Text="{Binding StateText}" Canvas.Left="10" Canvas.Top="61" ></TextBlock>
 
                 <Border Width="200" Height="80" 
                         BorderThickness="2"
@@ -74,66 +95,85 @@
                     </StackPanel>
                 </Border>
 
-                <Grid Name="grdSmallWaybill" Width="350" Height="75" Canvas.Left="674" >
-                    <Grid.Background>
-                        <SolidColorBrush Color="AliceBlue" Opacity="0.7"></SolidColorBrush>
-                    </Grid.Background>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                </Grid>
+                <Border  Width="350" Height="75" Canvas.Left="674"
+                         BorderThickness="2" CornerRadius="6" Padding="5">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="LightBlue" />
+                            <!--<GradientStop Offset="0.04" Color="#314151" />-->
+                            <GradientStop Offset="0.3" Color="LightBlue" />
+                            <!--<GradientStop Offset="0.54" Color="#314151" />-->
+                            <GradientStop Offset="0.89" Color="LightBlue" />
+                            <!--<GradientStop Offset="1" Color="#314151" />-->
+                            <!--<GradientStop Offset="1" Color="White" />-->
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush  StartPoint="0,0" EndPoint="1,1" Opacity="0.2">
+                            <GradientStop Offset="0" Color="LightBlue" />
+                            <!--<GradientStop Offset="0.2" Color="Red" />-->
+                            <!--<GradientStop Offset="0.7" Color="Red" />-->
+                            <!--<GradientStop Offset="1" Color="White" />-->
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid Name="grdSmallWaybill" >
 
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </Border>
                 <Label FontSize="22" Foreground="Red" Canvas.Left="444" Canvas.Top="589">第</Label>
                 <TextBlock Name="txtSessionIndex" FontSize="22" Foreground="Red" Text="{Binding _sessionStrIndex}" TextAlignment="Center" Width="60" Canvas.Left="487" Canvas.Top="594" ></TextBlock>
                 <Label FontSize="22" Foreground="Red" Canvas.Left="555" Canvas.Top="589">局</Label>
@@ -227,20 +267,54 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                 </Grid>
-                <Image gif:ImageBehavior.AnimatedSource="Gif/b_3.gif" Canvas.Left="446" Canvas.Top="702"></Image>
-                <Image gif:ImageBehavior.AnimatedSource="Gif/flag.gif" Canvas.Left="779" Canvas.Top="75"></Image>
-                <Image gif:ImageBehavior.AnimatedSource="Gif/fire.gif" gif:ImageBehavior.RepeatBehavior="Forever"  Canvas.Left="111"/>
-                <Border  Width="135" Background="Red" Opacity="0.8" Name="bdBankerState"
-					        Height="56" Canvas.Left="254" Canvas.Top="712">
+               
+                <!--<Button Style="{StaticResource CardButton1}" Canvas.Left="826" Canvas.Top="679" ></Button>
+                <Button Style="{StaticResource CardButton1}" Canvas.Left="856" Canvas.Top="679" ></Button>
+                <Button Style="{StaticResource CardButton1}" Canvas.Left="444" Canvas.Top="319" ></Button>-->
+                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/b_3.gif" Canvas.Left="446" Canvas.Top="702"></Image>-->
+                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/flag.gif" Canvas.Left="779" Canvas.Top="75"></Image>-->
+                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/flag.gif" Canvas.Left="779" Canvas.Top="75"></Image>-->
+                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/fire.gif" gif:ImageBehavior.RepeatBehavior="Forever"  Canvas.Left="111"/>-->
+                <Border  Width="180"  Opacity="0.8" Name="bdBankerState"
+                        CornerRadius="5" BorderThickness="2"
+					        Height="56" Canvas.Left="206" Canvas.Top="712">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Offset="0" Color="White" />
+                            <GradientStop Offset="1" Color="Gray" />
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="White" />
+                            <GradientStop Offset="0.2" Color="Red" />
+                            <GradientStop Offset="0.7" Color="Red" />
+                            <GradientStop Offset="1" Color="White" />
+                        </LinearGradientBrush>
+                    </Border.Background>
                     <TextBlock FontSize="24" TextWrapping="Wrap" FontWeight="UltraBold" Foreground="White"  Name="txtBanker"
                                TextAlignment="Center" Text="{Binding BankerStateText}"
                                VerticalAlignment="Center"
                                ></TextBlock>
                 </Border>
-                <Border Width="135" Name="bdPlayerState"
-                           VerticalAlignment="Stretch"
-                           Background="Blue" Opacity="0.8"
-    					  Height="56" Canvas.Left="637" Canvas.Top="712">
+                <Border Width="180" Name="bdPlayerState"
+                           VerticalAlignment="Stretch" BorderThickness="2"
+                           CornerRadius="5" Opacity="0.8"
+    					  Height="56" Canvas.Left="635" Canvas.Top="712">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                            <GradientStop Offset="0" Color="White" />
+                            <GradientStop Offset="1" Color="Gray" />
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="White" />
+                            <GradientStop Offset="0.2" Color="Blue" />
+                            <GradientStop Offset="0.7" Color="Blue" />
+                            <GradientStop Offset="1" Color="White" />
+                        </LinearGradientBrush>
+                    </Border.Background>
                     <TextBlock  FontSize="24" TextWrapping="Wrap" FontWeight="UltraBold" Foreground="White" 
                                 Name="txtPlayer"
                                 TextAlignment="Center" Text="{Binding PlayerStateText}"

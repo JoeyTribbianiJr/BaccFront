@@ -387,8 +387,8 @@
         </Style.Triggers>
     </Style>
     <Style x:Key="CardButton1" TargetType="Button">
-        <Setter Property="Width" Value="66"/>
-        <Setter Property="Height" Value="99"/>
+        <!--<Setter Property="Width" Value="88"/>
+        <Setter Property="Height" Value="121"/>-->
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontStretch" Value="Medium" />
         <Setter Property="FontWeight" Value="Heavy" />
@@ -401,7 +401,7 @@
         </Setter>
         <Setter Property="Background" >
             <Setter.Value>
-                <ImageBrush ImageSource="Img/card/back.bmp">
+                <ImageBrush ImageSource="Img/card/back.bmp" >
                     <ImageBrush.RelativeTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -416,7 +416,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Grid Width="66" Height="99">
+                    <Grid Width="66" Height="88">
                         <Border Background="{TemplateBinding Background}"></Border>
                     </Grid>
                 </ControlTemplate>

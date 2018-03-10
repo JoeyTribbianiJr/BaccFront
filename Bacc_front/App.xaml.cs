@@ -48,6 +48,7 @@ namespace Bacc_front
             w2.Left = r2.Left;
             w1.Show();
             w2.Show();
+            //w1.Owner = w2;
 
             player = new MediaPlayer();
             string location = System.Environment.CurrentDirectory + "\\Wav\\scene.wav";

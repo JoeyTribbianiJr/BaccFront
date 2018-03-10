@@ -1,15 +1,18 @@
 ﻿
 using System.Collections;
+using System.ComponentModel;
 
 namespace Bacc_front
 {
     public enum BetSide
     {
+        [Description("庄")]
         banker = 0,
+        [Description("和")]
         tie = 1,
+        [Description("闲")]
         player =2
     }
-
     /// <summary>
     /// 每次押注面额
     /// </summary>
@@ -36,10 +39,10 @@ namespace Bacc_front
     }
     public enum Suits
 	{
-		Club,
-		Diamond,
-		Heart,
-		Spade,
+		Spade,  //黑桃
+		Heart,  //红心
+		Club,   //梅花
+		Diamond,    //方块
 	}
 	public enum Weight
 	{
@@ -68,5 +71,23 @@ namespace Bacc_front
         ImportBack =6,
         ImportBackOK =7,
         ImportBackFail =8,
+    }
+
+    public enum GameState
+    {
+        Preparing =-1,
+        Shuffling =0,
+        Betting,
+        Dealing,
+    }
+    public class ParamToServer
+    {
+        public int SessionIndex { get; set; }
+        public int RoundIndex { get; set; }
+        public int Countdown { get; set; }
+        //public int[] Cards { get; set; }
+        public int Winner { get; set; }
+        public int State { get; set; }
+        //public ArrayList Waybill { get; set; }
     }
 }

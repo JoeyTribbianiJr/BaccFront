@@ -17,6 +17,9 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid >
+        <Grid.Background>
+            <ImageBrush ImageSource="Img/ctr_back.jpg"></ImageBrush>
+        </Grid.Background>
         <Grid.Resources>
             <Style BasedOn="{StaticResource GreenButton}" TargetType="Button">
                 <Style.Setters>
@@ -30,10 +33,10 @@
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="8*"></RowDefinition>
-            <RowDefinition Height="2*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
         </Grid.RowDefinitions>
         <DataGrid Name="dgScore" SelectionUnit="FullRow"
-                  ColumnWidth="*"
+                  ColumnWidth="*" 
                   KeyboardNavigation.TabNavigation="None"
                   ItemsSource="{StaticResource hehe}" 
                   SelectedIndex="0"
@@ -41,6 +44,9 @@
                   CanUserSortColumns="False"   Margin="10" IsReadOnly="True"
                   CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
                   CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" >
+            <DataGrid.Background>
+                <DrawingBrush Opacity="0"></DrawingBrush>
+            </DataGrid.Background>
             <DataGrid.Columns >
                 <DataGridTextColumn FocusManager.IsFocusScope="False" FontStyle="Oblique" Header="座位" Width="150" Binding="{Binding Id}" />
                 <DataGridTextColumn Header="上分"  FontStyle="Oblique" Binding="{Binding Add_score}" />
@@ -80,13 +86,28 @@
                                 <Setter Property="Width" Value="80"></Setter>
                             </Style>
                         </StackPanel.Resources>
+                        <Button Name="btnOpenCashBox1" Click="btnOpenCashBox1_Click" >开锁1</Button>
+                        <Button Name="btnOpenCashBox2" Click="btnOpenCashBox2_Click" >开锁2</Button>
+                        <Button Name="btnTest" Click="btnTest_Click" >打印测试</Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="Button" >
+                                <Setter Property="Margin" Value="5"></Setter>
+                                <Setter Property="FontSize" Value="15"></Setter>
+                                <Setter Property="Width" Value="80"></Setter>
+                            </Style>
+                        </StackPanel.Resources>
                         <Button Name="btnSaveConfig" Click="btnSaveConfig_Click" FontSize="15">保存设置</Button>
                         <Button Name="btnClose" Click="OnConfig">取消</Button>
+                        <TextBox Name="txtServerIP" Text="{Binding ServerIP}" Width="150" Height="20"></TextBox>
+                        <Button Name="btnConnet" Click="OnConnetServer">连接服务器</Button>
+                        <TextBlock Name="txtServerState" Width="150" Height="20"></TextBlock>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
         </Grid>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Margin="5,0,5,30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
                 <ColumnDefinition Width="8*"></ColumnDefinition>

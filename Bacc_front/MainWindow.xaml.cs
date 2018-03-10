@@ -20,14 +20,15 @@ namespace Bacc_front
         /// 状态栏文字
         /// </summary>
         public string StateText { get; set; }
-        
         public static MainWindow Instance { get; set; }
-
+        private List<Button> sm_waybill_btns;
         public MainWindow()
         {
             InitializeComponent();
-            
             Instance = this;
+
+            InitPrinter();
+
             spPlayers.DataContext = Desk.Instance;
             cvsHidebar.DataContext = Desk.Instance;
             bdSign.DataContext = Desk.Instance;
@@ -48,13 +49,29 @@ namespace Bacc_front
             Activated += MainWindow_Activated;
             WindowStyle = WindowStyle.None;
         }
-        
+
+        private void InitPrinter()
+        {
+            Game.Instance._COM_PORT = Setting.Instance.GetIntSetting("printer");
+            try
+            {
+                if (!Printer.PrintTest(Game.Instance._COM_PORT))
+                {
+                    MessageBox.Show("端口" + Game.Instance._COM_PORT + "上没有打印机，请设置其他端口");
+                }
+            //Printer.PrintString(Game.Instance._COM_PORT, "test printer hehe \n");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("打印机出错，请检查");
+            }
+        }
+
         private void MainWindow_Activated(object sender, EventArgs e)
         {
             Focus();
             Mouse.Click(MouseButton.Left);
         }
-
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Tab)
@@ -62,7 +79,7 @@ namespace Bacc_front
                 if (System.Windows.Forms.Screen.AllScreens.Length == 1)
                 {
                     ControlBoard.Instance.Topmost = true;
-                    Instance.Topmost = false;
+                    this.Topmost = false;
                     ControlBoard.Instance.Activate();
                 }
             }
@@ -73,18 +90,6 @@ namespace Bacc_front
                 if (keymodel.IsKey)
                 {
                     keymodel.Pressed = true;
-                    //if (e.IsRepeat)
-                    //{
-                    //    if (keymodel.Timer >= Game._bet_rate)
-                    //    {
-                    //        keymodel.Handler();
-                    //        keymodel.Timer = 0;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    keymodel.Handler();
-                    //}
                 }
 
             }
@@ -92,12 +97,15 @@ namespace Bacc_front
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
             var keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
-            //if (Game.Instance._isBetting)
-            //{
-            var key = (int)keycode;
-            Game.Instance.KeyMap[key].Pressed = false;
-            Game.Instance.KeyMap[key].Timer = 0;
-            //}
+            try
+            {
+                var key = (int)keycode;
+                Game.Instance.KeyMap[key].Pressed = false;
+                Game.Instance.KeyMap[key].Timer = 0;
+            }
+            catch (Exception ex)
+            {
+            }
         }
         private void BindWaybills()
         {
@@ -156,7 +164,7 @@ namespace Bacc_front
             //ResetSmWaybill();
         }
 
-        
+
         private void ResetSmWaybill()
         {
             var Waybill = Game.Instance.Waybill;
@@ -219,14 +227,18 @@ namespace Bacc_front
                     }
                 }
 
-
                 sm_waybill_btns[i].SetValue(Grid.ColumnProperty, pre_col);
                 sm_waybill_btns[i].SetValue(Grid.RowProperty, pre_row);
                 pre++;
             }
         }
-       
 
+        private void gif_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            var gif = (MediaElement)sender;
+            gif.Position = new TimeSpan(0, 0, 1);
+            gif.Play();
+        }
     }
 
 }

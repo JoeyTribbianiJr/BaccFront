@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -169,14 +168,14 @@ namespace Bacc_front
         public List<Card>[] DealSingleCard()
         {
             var _curHandCards = new List<Card>[2];
-
-            var banker_card = new List<Card>();
-            banker_card.Add(Deck.Instance.Deal());
+            
             var player_card = new List<Card>();
             player_card.Add(Deck.Instance.Deal());
+            var banker_card = new List<Card>();
+            banker_card.Add(Deck.Instance.Deal());
 
-            _curHandCards[0] = banker_card;
-            _curHandCards[1] = player_card;
+            _curHandCards[0] = player_card;
+            _curHandCards[1] = banker_card;
             return _curHandCards;
         }
         public List<Card>[] DealTwoCard()
@@ -191,8 +190,8 @@ namespace Bacc_front
             player_card.Add(Deck.Instance.Deal());
             banker_card.Add(Deck.Instance.Deal());
 
-            _curHandCards[0] = banker_card;
-            _curHandCards[1] = player_card;
+            _curHandCards[0] = player_card;
+            _curHandCards[1] = banker_card;
 
             CheckThirdCard(_curHandCards);
             return _curHandCards;
@@ -207,10 +206,10 @@ namespace Bacc_front
             {
 
                 //Determine Player Hand first
-                if (handValues[1] < 6)
+                if (handValues[0] < 6)
                 {
                     var d_card = Deck.Instance.Deal();
-                    hand_cards[1].Add(d_card);
+                    hand_cards[0].Add(d_card);
                     playerThirdCard = GetCardValue(d_card);
                     playerDrawStatus = true;
                 }
@@ -220,16 +219,16 @@ namespace Bacc_front
                 //Determine Banker Hand
                 if (playerDrawStatus == false)
                 {
-                    if (handValues[0] < 6)
+                    if (handValues[1] < 6)
                         bankerDrawStatus = true;
                 }
                 else
                 {
-                    if (handValues[0] < 3)
+                    if (handValues[1] < 3)
                         bankerDrawStatus = true;
                     else
                     {
-                        switch (handValues[0])
+                        switch (handValues[1])
                         {
                             case 3:
                                 if (playerThirdCard != 8)
@@ -257,7 +256,7 @@ namespace Bacc_front
             //deal banker third card
             if (bankerDrawStatus == true)
             {
-                hand_cards[0].Add(Deck.Instance.Deal());
+                hand_cards[1].Add(Deck.Instance.Deal());
             }
         }
         private int CalcHandValue(List<Card> hand_cards)
@@ -272,8 +271,8 @@ namespace Bacc_front
         }
         public Tuple<BetSide, int,int> GetWinner(List<Card>[] hand_cards)   //<赢家,庄点数,闲点数>
         {
-            var b_amount = CalcHandValue(hand_cards[0]);
-            var p_amount = CalcHandValue(hand_cards[1]);
+            var p_amount = CalcHandValue(hand_cards[0]);
+            var b_amount = CalcHandValue(hand_cards[1]);
             var value = Math.Abs(b_amount - p_amount);
 
             Tuple<BetSide, int, int> winner;
