@@ -47,9 +47,13 @@ namespace Bacc_front
             txtServerIP.DataContext = Setting.Instance;
 
             lstButton.ItemsSource = Setting.Instance.game_setting;
-            //WindowState = WindowState.Maximized;
+            WindowState = WindowState.Minimized;
             Activated += ControlBoard_Activated;
             WindowStyle = WindowStyle.None;
+
+
+            Game.Instance._isSendingToServer = true;
+            OnStartGame(btnStartGame, new RoutedEventArgs ());
         }
 
         private void ControlBoard_Activated(object sender, EventArgs e)

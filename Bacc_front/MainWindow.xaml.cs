@@ -46,6 +46,7 @@ namespace Bacc_front
             //Game.Instance.NoticeDealCard += StartAnimation;
             Game.Instance.NoticeRoundOver += ResetSmWaybill;
             //WindowState = WindowState.Maximized;
+            WindowState = WindowState.Minimized;
             Activated += MainWindow_Activated;
             WindowStyle = WindowStyle.None;
         }
@@ -179,23 +180,26 @@ namespace Bacc_front
                 var w_i = Waybill[i].Winner;
                 var w_pre = Waybill[pre].Winner;
 
-
                 if (w_pre == (int)WinnerEnum.tie)
                 {
-                    if (cur_side == (int)WinnerEnum.tie)
+                    if (cur_side == (int)WinnerEnum.tie || w_i == (int)WinnerEnum.tie)
                     {
-                        if (++pre_row > 10)
+                        if (++pre_row > 9)
                         {
                             pre_row = 0;
                             pre_col++;
                         }
-                        cur_side = w_i;
+                        if (w_i != (int)WinnerEnum.tie)
+                        {
+
+                            cur_side = w_i;
+                        }
                     }
                     else
                     {
                         if (w_i == cur_side)
                         {
-                            if (++pre_row > 10)
+                            if (++pre_row > 9)
                             {
                                 pre_row = 0;
                                 pre_col++;
@@ -213,7 +217,7 @@ namespace Bacc_front
                 {
                     if (w_i == (int)WinnerEnum.tie || w_i == w_pre)
                     {
-                        if (++pre_row > 10)
+                        if (++pre_row > 9)
                         {
                             pre_row = 0;
                             pre_col++;

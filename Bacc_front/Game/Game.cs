@@ -155,10 +155,9 @@ namespace Bacc_front
         }
         void InitGame()
         {
-
             _betTime = _setting.GetIntSetting("bet_tm");    //押注时间有几秒
             //_betTime = 6;
-            //_shufTime = 4;
+            _shufTime = 120;
             _is3SecOn = _setting.GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
             _roundNumPerSession = _setting.GetIntSetting("round_num_per_session");
             //_roundNumPerSession = 3;
@@ -502,6 +501,7 @@ namespace Bacc_front
         private void OnDealEnter(IState state)
         {
             CurrentState = GameState.Dealing;
+            CountDown = -1; //黑科技，让服务器能收到一条dealing
             SetStateText("");
             MainWindow.Instance.txtCountDown.Text = "开牌中";
         }
@@ -765,7 +765,6 @@ namespace Bacc_front
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -814,23 +813,10 @@ namespace Bacc_front
                         ControlBoard.Instance.Dispatcher.BeginInvoke(new Action(() => { ControlBoard.Instance.txtServerState.Text = "服务器连接正常"; }), DispatcherPriority.DataBind, null);
                     }
                 }
-
             }
             catch (Exception ex)
             {
                 ControlBoard.Instance.Dispatcher.BeginInvoke(new Action(() => { ControlBoard.Instance.txtServerState.Text = "服务器连接丢失"; }), DispatcherPriority.DataBind, null);
-            }
-        }
-
-        private void GetResopnseFromServerSB(IAsyncResult ar)
-        {
-            if (ar != null)
-            {
-                ControlBoard.Instance.Dispatcher.BeginInvoke(new Action(() => { ControlBoard.Instance.txtServerState.Text = "服务器连接正常"; }), DispatcherPriority.DataBind, null);
-            }
-            else
-            {
-                ControlBoard.Instance.Dispatcher.BeginInvoke(new Action(() => { ControlBoard.Instance.txtServerState.Text = "服务器连接失败"; }), DispatcherPriority.DataBind, null);
             }
         }
 
@@ -845,7 +831,6 @@ namespace Bacc_front
         }
         private int[] ConvertHandCardForServerSB()
         {
-
             int[] arr = new int[6];
             var p_cards = CurrentRound.HandCard[0];
             for (int i = 0; i < 2; i++)

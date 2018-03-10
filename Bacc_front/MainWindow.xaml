@@ -95,29 +95,21 @@
                     </StackPanel>
                 </Border>
 
-                <Border  Width="350" Height="75" Canvas.Left="674"
+                <Border  Width="351" Height="85" Canvas.Left="665"
                          BorderThickness="2" CornerRadius="6" Padding="5">
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                             <GradientStop Offset="0" Color="LightBlue" />
-                            <!--<GradientStop Offset="0.04" Color="#314151" />-->
                             <GradientStop Offset="0.3" Color="LightBlue" />
-                            <!--<GradientStop Offset="0.54" Color="#314151" />-->
                             <GradientStop Offset="0.89" Color="LightBlue" />
-                            <!--<GradientStop Offset="1" Color="#314151" />-->
-                            <!--<GradientStop Offset="1" Color="White" />-->
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                     <Border.Background>
                         <LinearGradientBrush  StartPoint="0,0" EndPoint="1,1" Opacity="0.2">
                             <GradientStop Offset="0" Color="LightBlue" />
-                            <!--<GradientStop Offset="0.2" Color="Red" />-->
-                            <!--<GradientStop Offset="0.7" Color="Red" />-->
-                            <!--<GradientStop Offset="1" Color="White" />-->
                         </LinearGradientBrush>
                     </Border.Background>
                     <Grid Name="grdSmallWaybill" >
-
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
@@ -127,10 +119,11 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
-                            <RowDefinition />
+                            <!--<RowDefinition />-->
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
                             <ColumnDefinition />
                             <ColumnDefinition />
                             <ColumnDefinition />
