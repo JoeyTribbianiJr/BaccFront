@@ -35,12 +35,19 @@ namespace WsUtils
             string filePath = Environment.CurrentDirectory + "/Config/" + name;
             FileInfo fi = new FileInfo(filePath);
             StreamReader sr = null;
-            sr = fi.OpenText();
-            data = sr.ReadToEnd();
-            sr.Close();
-            sr.Dispose();
-            //sockectLogger.doLog("Read done: " + data);
-            return data;
+            try
+            {
+                sr = fi.OpenText();
+                data = sr.ReadToEnd();
+                sr.Close();
+                sr.Dispose();
+                return data;
+            }
+            catch (Exception  ex)
+            {
+                //MessageBox.Show("失败：未找到文件 " + filePath);
+                return null;
+            }
         }
 
         public void WriteFile(string name, string info)

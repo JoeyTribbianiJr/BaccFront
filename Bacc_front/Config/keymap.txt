@@ -1,4 +1,4 @@
-[Player1]
+﻿[Player1]
 iKeys1=51
 iKeys2=49
 iKeys3=50

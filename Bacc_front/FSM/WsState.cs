@@ -81,36 +81,24 @@ namespace WsFSM
 
 		public virtual void ExitCallback(IState next)
 		{
-			if (OnExit != null)
-			{
-				OnExit(next);
-			}
-			_timer = 0f;
+            OnExit?.Invoke(next);
+            _timer = 0f;
 		}
 
 		public virtual void FixedUpdateCallback()
 		{
-			if (OnFixedUpdate != null)
-			{
-				OnFixedUpdate();
-			}
-		}
+            OnFixedUpdate?.Invoke();
+        }
 
 		public virtual void LateUpdateCallback(float deltaTime)
 		{
-			if (OnLateUpdate != null)
-			{
-				OnLateUpdate(deltaTime);
-			}
-		}
+            OnLateUpdate?.Invoke(deltaTime);
+        }
 
 		public virtual void UpdateCallback(float deltaTime)
 		{
-			if (OnUpdate != null)
-			{
-				OnUpdate(deltaTime);
-			}
-			_timer += deltaTime;
+            OnUpdate?.Invoke(deltaTime);
+            _timer += deltaTime;
 		}
 
 		private string _name;

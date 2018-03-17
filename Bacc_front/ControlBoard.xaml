@@ -29,11 +29,14 @@
             </Style>
             <x:Array x:Key="hehe" Type="local:Player">
                 <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
+                <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
+                <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
+                <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
             </x:Array>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="8*"></RowDefinition>
-            <RowDefinition Height="3*"></RowDefinition>
+            <RowDefinition Height="8.2*"></RowDefinition>
+            <RowDefinition Height="1.8*"></RowDefinition>
         </Grid.RowDefinitions>
         <DataGrid Name="dgScore" SelectionUnit="FullRow"
                   ColumnWidth="*" 
@@ -62,58 +65,14 @@
                 <DataGridTextColumn Header="最后退分" FontStyle="Oblique"  Binding="{Binding Last_sub}" />
             </DataGrid.Columns>
         </DataGrid>
-        <Grid Name="grdConfig"
-              VerticalAlignment="Bottom" 
-              Background="LightGray"
-              HorizontalAlignment="Right" 
-            Visibility="Hidden">
-            <GroupBox Header="参数设置" Margin="0,0,10,0">
-                <StackPanel Orientation="Vertical" >
-                    <ListBox Name="lstButton" Margin="0,5,0,10" FontSize="16"
-								Width="600"
-								ItemTemplate="{StaticResource listBoxTemplateInt}" >
-                        <ListBox.Template>
-                            <ControlTemplate TargetType="{x:Type ListBox}">
-                                <WrapPanel Width="580" Orientation="Horizontal" IsItemsHost="True"/>
-                            </ControlTemplate>
-                        </ListBox.Template>
-                    </ListBox>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Resources>
-                            <Style TargetType="Button" >
-                                <Setter Property="Margin" Value="5"></Setter>
-                                <Setter Property="FontSize" Value="15"></Setter>
-                                <Setter Property="Width" Value="80"></Setter>
-                            </Style>
-                        </StackPanel.Resources>
-                        <Button Name="btnOpenCashBox1" Click="btnOpenCashBox1_Click" >开锁1</Button>
-                        <Button Name="btnOpenCashBox2" Click="btnOpenCashBox2_Click" >开锁2</Button>
-                        <Button Name="btnTest" Click="btnTest_Click" >打印测试</Button>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Resources>
-                            <Style TargetType="Button" >
-                                <Setter Property="Margin" Value="5"></Setter>
-                                <Setter Property="FontSize" Value="15"></Setter>
-                                <Setter Property="Width" Value="80"></Setter>
-                            </Style>
-                        </StackPanel.Resources>
-                        <Button Name="btnSaveConfig" Click="btnSaveConfig_Click" FontSize="15">保存设置</Button>
-                        <Button Name="btnClose" Click="OnConfig">取消</Button>
-                        <TextBox Name="txtServerIP" Text="{Binding ServerIP}" Width="150" Height="20"></TextBox>
-                        <Button Name="btnConnet" Click="OnConnetServer">连接服务器</Button>
-                        <TextBlock Name="txtServerState" Width="150" Height="20"></TextBlock>
-                    </StackPanel>
-                </StackPanel>
-            </GroupBox>
-        </Grid>
-        <Grid Grid.Row="1" Margin="5,0,5,30">
+
+        <Grid Grid.Row="1" Margin="5,0,5,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="0.9*"></ColumnDefinition>
                 <ColumnDefinition Width="8*"></ColumnDefinition>
-                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="0.9*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button Name="btnStartGame" Width="80" Click="OnStartGame" >开始</Button>
+            <Button Name="btnStartGame" Width="70" Click="OnStartGame" >开始</Button>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition ></RowDefinition>
@@ -122,11 +81,11 @@
                 <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                               ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <StackPanel Orientation="Horizontal" Grid.Row="0" >
-                        <Button Click="OnAddScore" Tag="1">+1</Button>
-                        <Button Click="OnAddScore" Tag="10">+10</Button>
-                        <Button Click="OnAddScore" Tag="100">+100</Button>
-                        <Button Click="OnAddScore" Tag="1000">+1000</Button>
-                        <Button Click="OnAddScore" Tag="10000">+10000</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1">+1</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少"  Tag="10">+10</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="100">+100</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1000">+1000</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="10000">+10000</Button>
                         <Button Click="OnCancleAddScore" >取消上分</Button>
                         <Button Click="OnConfirmAddScore" >确认上分</Button>
                         <!--<Button Click="OnBackupScore" >备份当前</Button>-->
@@ -136,18 +95,111 @@
                               Grid.Row="1" 
                               ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <StackPanel Orientation="Horizontal" >
-                        <Button Click="OnSubScore" Tag="1">-1</Button>
-                        <Button Click="OnSubScore" Tag="10">-10</Button>
-                        <Button Click="OnSubScore" Tag="100">-100</Button>
-                        <Button Click="OnSubScore" Tag="1000">-1000</Button>
-                        <Button Click="OnSubScore" Tag="10000">-10000</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="1">-1</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10">-10</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="100">-100</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="1000">-1000</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10000">-10000</Button>
                         <Button Click="OnSubAllScore" FontSize="20" >全退/取消</Button>
                         <Button Click="OnConfirmSubScore" >确认退分</Button>
                         <!--<Button Click="OnRestoreScore" >恢复最近</Button>-->
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
-            <Button Click="OnConfig" Width="80" Grid.Column="2">配置</Button>
+            <Button Click="OnConfig" Width="70" Grid.Column="2">配置</Button>
+        </Grid>
+
+        <Grid Name="grdConfig" Grid.Row="0" VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"
+              Background="LightGray" Opacity="1"
+             Visibility="Hidden">
+            <GroupBox Header="参数设置" Margin="0,0,10,0">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="410"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Name="spConfigLst" Visibility="Hidden">
+                        <ListBox 
+                        Name="lstButton" Margin="5,5,0,5" FontSize="16"
+                        BorderBrush="Red" BorderThickness="2"
+								ItemTemplate="{StaticResource listBoxTemplateInt}" >
+                            <ListBox.Template>
+                                <ControlTemplate TargetType="{x:Type ListBox}">
+                                    <WrapPanel Width="400" HorizontalAlignment="Left" Orientation="Horizontal" IsItemsHost="True"/>
+                                </ControlTemplate>
+                            </ListBox.Template>
+                        </ListBox>
+                        <StackPanel Grid.Row="1" Margin="5,0,0,0" Width="340">
+                            <StackPanel  Orientation="Horizontal">
+                                <Button Margin="0,0,5,0" FontSize="13"  Background="Salmon" Width="80"  Name="btnOpenCashBox" Style="{StaticResource ColorButton}" Click="btnOpenCashBox1_Click" >开锁</Button>
+                                <Button Margin="0,0,5,0" FontSize="13"  Background="Tan" Width="80"  Name="btnAnalyzeWaybill"  Style="{StaticResource ColorButton}" Click="btnAnalyzeWaybill_Click" >路单分析</Button>
+                                <Button Margin="0,0,5,0" FontSize="13"  Background="WhiteSmoke" Width="80"  Name="btnShudown"  Style="{StaticResource ColorButton}" Click="OnShutdown">关机</Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Name="spAccount" Grid.Column="1" Visibility="Hidden" Grid.RowSpan="2">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="10,0,0,0" FontSize="13" HorizontalAlignment="Center">当前账簿</TextBlock>
+                            <Button Margin="20,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnClearAccount"  Style="{StaticResource ColorButton}" Click="btnClearAccount_Click" >清零</Button>
+                            <Button Margin="20,0,5,0" FontSize="13"  Background="MediumSeaGreen" Width="80"  Name="btnPrintAccount"  Style="{StaticResource ColorButton}" Click="btnPrintAccount_Click" >打印账簿</Button>
+                        </StackPanel>
+                        <DataGrid  SelectionUnit="FullRow" Name="dgAccount"
+                  ColumnWidth="*" 
+                  ItemsSource="{StaticResource hehe}"
+                  KeyboardNavigation.TabNavigation="None"
+                  SelectedIndex="0" 
+                  AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="18"
+                  CanUserSortColumns="False"   Margin="10" IsReadOnly="True"
+                  CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
+                  CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" >
+                            <DataGrid.Columns>
+                                <DataGridTextColumn   Header="座位" Width="150" Binding="{Binding PlayerId}" />
+                                <DataGridTextColumn Header="总上分"  Binding="{Binding TotalAddScore}" />
+                                <DataGridTextColumn Header="总下分"  Binding="{Binding TotalSubScore}" />
+                                <DataGridTextColumn Header="总账" Binding="{Binding TotalAccount}" >
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                    <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,0,0,3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="139"/>
+                        </Grid.RowDefinitions>
+                        <PasswordBox Background="Khaki" Name="txtPwd" Width="340" Margin="20,5,20,0"></PasswordBox>
+                        <Grid Grid.Row="1" Width="360"  Height="135" Margin="20,0,20,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="0" Grid.Column="0" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="1">1</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="0" Grid.Column="1" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="2">2</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="0" Grid.Column="2" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="3">3</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="0" Grid.Column="3" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="4">4</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="1" Grid.Column="0" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="5">5</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="1" Grid.Column="1" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="6">6</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="1" Grid.Column="2" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="7">7</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="1" Grid.Column="3" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="8">8</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="2" Grid.Column="0" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="9">9</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Blue"   Grid.Row="2" Grid.Column="1" Background="AliceBlue"   Click="btnPwdNum_Click"  Tag="0">0</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Red"  Grid.Row="2" Grid.Column="2" Background="AliceBlue" Click="btnDeletePwd"  Tag="0">删除</Button>
+                            <Button Style="{StaticResource ColorButton}" Foreground="Green"  Grid.Row="2" Grid.Column="3" Background="AliceBlue"   Click="btnConfirmPwd"  Tag="0">确定</Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </GroupBox>
         </Grid>
     </Grid>
 </Window>

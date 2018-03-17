@@ -17,16 +17,16 @@ namespace Bacc_front
         MainWindow _window { get; set; }
 
         private List<double[]> xy = new List<double[]>() {
-            new double[4]{330,680,500,886},
-            new double[4]{316,680,436,58},
-            new double[4]{330,680,500,856},
-            new double[4]{316,680,436,88},
             new double[4]{330,680,500,826},
-            new double[4]{316,680,436,118},
+            new double[4]{316,680,436,68},
+            new double[4]{330,680,500,856},
+            new double[4]{316,680,436,98},
+            new double[4]{330,680,500,886},
+            new double[4]{316,680,436,128},
         };
         private double[] start_time = new double[6] { 0, 2, 4, 6, 12.5, 16 };
         private double[] reverse_start_time = new double[6] { 8, 9, 10, 11, 14.5, 18 };
-        private double visibleDuration = 30;
+        private double visibleDuration = 45;
         private Storyboard moveSB;
         private Storyboard reversalSB;
         private Storyboard armSB;
@@ -118,7 +118,7 @@ namespace Bacc_front
             armSB = new Storyboard();
             wavSB = new Storyboard();
             btnLst = new List<Button>();
-           
+
             if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
             {
                 for (int i = 0; i < 1; i++)
@@ -155,27 +155,81 @@ namespace Bacc_front
                 reversalSB.Begin(_window);
             }
 
-           
+
         }
 
         public ObjectAnimationUsingKeyFrames CreateArmAnimation(double startTime, Button btn, int idx)
         {
+            var deal_style = Setting.Instance.GetStrSetting("deal_style");
             ObjectAnimationUsingKeyFrames armChgBg = new ObjectAnimationUsingKeyFrames();
+
             DiscreteObjectKeyFrame deal1 = new DiscreteObjectKeyFrame();
-            deal1.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime ));
+            deal1.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime));
             deal1.Value = images[1];
+
             DiscreteObjectKeyFrame deal2 = new DiscreteObjectKeyFrame();
             deal2.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.4));
             deal2.Value = images[4];
+
             //DiscreteObjectKeyFrame dk1 = new DiscreteObjectKeyFrame();
             //dk1.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.8));
             //dk1.Value = images[4];
-            DiscreteObjectKeyFrame back = new DiscreteObjectKeyFrame();
-            back.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.9));
-            back.Value = images[0];
+
+
             armChgBg.KeyFrames.Add(deal1);
             armChgBg.KeyFrames.Add(deal2);
-            armChgBg.KeyFrames.Add(back);
+
+            if (deal_style == "直接开牌1")  //手不回到桌下
+            {
+                var count = Game.Instance.CurrentRound.HandCard[0].Count + Game.Instance.CurrentRound.HandCard[1].Count;
+                if (idx <3)
+                {
+
+
+                    DiscreteObjectKeyFrame hold = new DiscreteObjectKeyFrame();
+                    hold.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.9));
+                    hold.Value = images[1];
+                    armChgBg.KeyFrames.Add(hold);
+                }
+                else
+                {
+                    DiscreteObjectKeyFrame back = new DiscreteObjectKeyFrame();
+                    back.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.9));
+                    back.Value = images[0];
+                    armChgBg.KeyFrames.Add(back);
+                }
+                //if ( idx == count - 1)    //如果是最后一张
+                //{
+                //    //DiscreteObjectKeyFrame hold = new DiscreteObjectKeyFrame();
+                //    //hold.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.9));
+                //    //hold.Value = images[1];
+                //    //armChgBg.KeyFrames.Add(hold);
+
+                //    if (idx == 5)
+                //    {
+                //        DiscreteObjectKeyFrame back = new DiscreteObjectKeyFrame();
+                //        back.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 1));
+                //        back.Value = images[0];
+                //        armChgBg.KeyFrames.Add(back);
+                //    }
+                //    else
+                //    {
+                //        startTime = reverse_start_time[idx] ;
+                //        DiscreteObjectKeyFrame back = new DiscreteObjectKeyFrame();
+                //        back.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime));
+                //        back.Value = images[0];
+                //        armChgBg.KeyFrames.Add(back);
+                //    }
+                //}
+            }
+            else if (deal_style == "直接开牌2")  //手回到桌下
+            {
+                DiscreteObjectKeyFrame back = new DiscreteObjectKeyFrame();
+                back.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.9));
+                back.Value = images[0];
+                armChgBg.KeyFrames.Add(back);
+
+            }
             Storyboard.SetTargetName(armChgBg, _window.Casino.Name);
             DependencyProperty[] propertyChain2 = new DependencyProperty[]
             {
@@ -196,6 +250,7 @@ namespace Bacc_front
             {
                 uri = new Uri("Wav/sendB.wav", UriKind.Relative);
             }
+            startTime += 0.3f;
             MediaElement audio = (MediaElement)_window.FindName("Audio" + idx);
             MediaTimeline timeline = new MediaTimeline(TimeSpan.FromSeconds(startTime), new Duration(TimeSpan.FromSeconds(1.5)));
             timeline.Source = uri;
@@ -246,7 +301,7 @@ namespace Bacc_front
         }
         public void CreateArm(double startTime, Button btn, int idx)
         {
-            var hehe= CreateArmAnimation(startTime, btn, idx);
+            var hehe = CreateArmAnimation(startTime, btn, idx);
             armSB.Children.Add(hehe);
         }
         public void CreateMove(double startTime, Button btn, int idx)
@@ -289,8 +344,8 @@ namespace Bacc_front
             };
             LinearDoubleKeyFrame widthk2 = new LinearDoubleKeyFrame()
             {
-                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime +0.2 )),
-                Value =66 
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.2)),
+                Value = 66
             };
             //LinearDoubleKeyFrame widthk3 = new LinearDoubleKeyFrame()
             //{
@@ -312,7 +367,7 @@ namespace Bacc_front
             LinearDoubleKeyFrame heightk2 = new LinearDoubleKeyFrame()
             {
                 KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.2)),
-                Value =88 
+                Value = 88
             };
             //LinearDoubleKeyFrame heightk3 = new LinearDoubleKeyFrame()
             //{
@@ -426,11 +481,6 @@ namespace Bacc_front
             reversalSB.Children.Add(transformOrigin);
             reversalSB.Children.Add(d_transform);
             reversalSB.Children.Add(chgBg);
-        }
-        public void lastReversal_Completed(object sender, EventArgs e)
-        {
-            Game.Instance._animating = false;
-            Game.Instance._aniTimer = 0;
         }
     }
 }

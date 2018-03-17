@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using Newtonsoft.Json;
 using PropertyChanged;
 using WsUtils;
+using WsUtils.SqliteEFUtils;
 
 namespace Bacc_front
 {
-    
+
     public delegate int NativeCountRule(BetSide winner, ObservableDictionary<BetSide, int> bet);
 
     [ImplementPropertyChanged]
@@ -39,7 +42,7 @@ namespace Bacc_front
         public bool Bet_hide { get => bet_hide; set => bet_hide = value; }
 
         public int denomination;
-        public BetDenomination choose_denomination;
+        public BetDenomination choose_denomination { get; set; }
         public int[] Denominations { get; set; }
         public event NativeCountRule count_rule;
 
@@ -76,21 +79,34 @@ namespace Bacc_front
         #region 玩家押注的函数
         public void Bet(BetSide side)
         {
-            if (Game.Instance._isIn3)
+            if (Game.Instance._isIn3 && Desk.Instance.CanHeBetIn3Sec(this, side))
             {
-                var winner = Game.Instance.CurrentRound.Winner.Item1;
-                if(side == winner)
-                {
-                    var add_score = 1;
-                    Balance -= add_score;
-                    bet_score[side] += add_score;
+                var add_score = 1;
+                Balance -= add_score;
+                bet_score[side] += add_score;
 
-                    Desk.Instance.UpdateDeskAmount(side, add_score);
+                Desk.Instance.UpdateDeskAmount(side, add_score);
+                switch (side)
+                {
+                    case BetSide.banker:
+                        BetScoreOnBank += add_score;
+                        break;
+                    case BetSide.player:
+                        BetScoreOnPlayer += add_score;
+                        break;
+                    case BetSide.tie:
+                        BetScoreOnTie += add_score;
+                        break;
                 }
             }
             else if (Desk.Instance.CanHeBet(this, side))
             {
                 var add_score = Balance >= denomination ? denomination : Balance;
+
+                if (BetScore.Values.Sum() == 0)
+                {
+                    add_score = Setting.Instance.GetIntSetting("min_limit_bet");
+                }
 
                 Balance -= add_score;
                 bet_score[side] += add_score;
@@ -145,9 +161,10 @@ namespace Bacc_front
         }
         public void SetDenomination()
         {
-            denomination = choose_denomination == BetDenomination.big
-                ? Denominations[(int)BetDenomination.mini]
-                : Denominations[(int)BetDenomination.big];
+            choose_denomination = choose_denomination == BetDenomination.big
+                ? BetDenomination.mini
+                : BetDenomination.big;
+            denomination = Denominations[(int)choose_denomination];
         }
         public void SetHide()
         {
@@ -163,7 +180,14 @@ namespace Bacc_front
         #region 庄家上分退分的函数
         public void AddScore(int add_score)
         {
-            this.Add_score += add_score;
+            if (Add_score + add_score < 0)
+            {
+                Add_score = 0;
+            }
+            else
+            {
+                Add_score += add_score;
+            }
         }
         public void SubScore(int sub_score)
         {
@@ -171,6 +195,10 @@ namespace Bacc_front
             if (ss >= Balance)
             {
                 this.Sub_score = Balance;
+            }
+            else
+            {
+                this.Sub_score = sub_score;
             }
         }
         public void CancleAddOrSub()
@@ -182,7 +210,24 @@ namespace Bacc_front
         {
             Balance += Add_score;
             Last_add = Add_score;
-            Add_score = 0;
+            try
+            {
+                using (var db = new SQLiteDB())
+                {
+                    var acc = db.FrontAccounts.First(a => a.IsClear == false);
+                    var pa = Desk.Instance.Accounts.First(a => Convert.ToInt32(a.PlayerId) == id);
+                    pa.TotalAddScore += Add_score;
+                    pa.TotalAccount += Add_score;
+
+                    acc.JsonPlayerAccount = JsonConvert.SerializeObject(Desk.Instance.Accounts);
+                    db.SaveChanges();
+                }
+                Add_score = 0;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("数据库出错");
+            }
         }
         public void SubAllScore()
         {
@@ -199,7 +244,24 @@ namespace Bacc_front
         {
             Balance -= Sub_score;
             Last_sub = Sub_score;
-            Sub_score = 0;
+            try
+            {
+                using (var db = new SQLiteDB())
+                {
+                    var acc = db.FrontAccounts.First(a => a.IsClear == false);
+                    var pa = Desk.Instance.Accounts.First(a => Convert.ToInt32(a.PlayerId) == id);
+                    pa.TotalSubScore += Sub_score;
+                    pa.TotalAccount -= Sub_score;
+
+                    acc.JsonPlayerAccount = JsonConvert.SerializeObject(Desk.Instance.Accounts);
+                    db.SaveChanges();
+                }
+                Sub_score = 0;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("数据库出错");
+            }
         }
         #endregion
     }

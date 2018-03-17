@@ -11,5 +11,6 @@
         <local:WayBillBackgroundConverter x:Key="WayBillBackgroundConverter"></local:WayBillBackgroundConverter>
         <local:WayBillVisibleConverter x:Key="WayBillVisibleConverter"></local:WayBillVisibleConverter>
         <local:WayBillContentConverter x:Key="WayBillContentConverter"></local:WayBillContentConverter>
+        <local:ChipForegroundConverter x:Key="ChipForegroundConverter"></local:ChipForegroundConverter>
 	</Application.Resources>
 </Application>

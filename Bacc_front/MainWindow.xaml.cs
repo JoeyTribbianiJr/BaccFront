@@ -42,71 +42,38 @@ namespace Bacc_front
             bdBankerState.DataContext = Game.Instance;
             bdPlayerState.DataContext = Game.Instance;
 
+            KeyDown += Game.Instance.KeyListener.Window_KeyDown;
+            KeyUp += Game.Instance.KeyListener.Window_KeyUp;
+
             Game.Instance.NoticeWindowBind += BindWaybills;
             //Game.Instance.NoticeDealCard += StartAnimation;
             Game.Instance.NoticeRoundOver += ResetSmWaybill;
             //WindowState = WindowState.Maximized;
-            WindowState = WindowState.Minimized;
-            Activated += MainWindow_Activated;
-            WindowStyle = WindowStyle.None;
+            //WindowState = WindowState.Minimized;
+            //Activated += MainWindow_Activated;
+            //WindowStyle = WindowStyle.None;
         }
 
         private void InitPrinter()
         {
-            Game.Instance._COM_PORT = Setting.Instance.GetIntSetting("printer");
-            try
+            if (Setting.Instance.is_print_bill)
             {
-                if (!Printer.PrintTest(Game.Instance._COM_PORT))
+                try
                 {
-                    MessageBox.Show("端口" + Game.Instance._COM_PORT + "上没有打印机，请设置其他端口");
+                    if (!Printer.PrintTest(Setting.Instance._COM_PORT))
+                    {
+                        MessageBox.Show("端口" + Setting.Instance._COM_PORT + "上没有打印机，请设置其他端口");
+                    }
+                    //Printer.PrintString(Game.Instance._COM_PORT, "test printer hehe \n");
                 }
-            //Printer.PrintString(Game.Instance._COM_PORT, "test printer hehe \n");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("打印机出错，请检查");
+                catch (Exception ex)
+                {
+                    MessageBox.Show("打印机出错，请检查");
+                }
             }
         }
-
         private void MainWindow_Activated(object sender, EventArgs e)
         {
-            Focus();
-            Mouse.Click(MouseButton.Left);
-        }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Tab)
-            {
-                if (System.Windows.Forms.Screen.AllScreens.Length == 1)
-                {
-                    ControlBoard.Instance.Topmost = true;
-                    this.Topmost = false;
-                    ControlBoard.Instance.Activate();
-                }
-            }
-            else if (Game.Instance._isInBetting)
-            {
-                var keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
-                var keymodel = Game.Instance.KeyMap[(int)keycode];
-                if (keymodel.IsKey)
-                {
-                    keymodel.Pressed = true;
-                }
-
-            }
-        }
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            var keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
-            try
-            {
-                var key = (int)keycode;
-                Game.Instance.KeyMap[key].Pressed = false;
-                Game.Instance.KeyMap[key].Timer = 0;
-            }
-            catch (Exception ex)
-            {
-            }
         }
         private void BindWaybills()
         {
@@ -164,8 +131,6 @@ namespace Bacc_front
 
             //ResetSmWaybill();
         }
-
-
         private void ResetSmWaybill()
         {
             var Waybill = Game.Instance.Waybill;
@@ -184,7 +149,7 @@ namespace Bacc_front
                 {
                     if (cur_side == (int)WinnerEnum.tie || w_i == (int)WinnerEnum.tie)
                     {
-                        if (++pre_row > 9)
+                        if (++pre_row >= 9)
                         {
                             pre_row = 0;
                             pre_col++;
@@ -199,7 +164,7 @@ namespace Bacc_front
                     {
                         if (w_i == cur_side)
                         {
-                            if (++pre_row > 9)
+                            if (++pre_row >= 9)
                             {
                                 pre_row = 0;
                                 pre_col++;
@@ -217,7 +182,7 @@ namespace Bacc_front
                 {
                     if (w_i == (int)WinnerEnum.tie || w_i == w_pre)
                     {
-                        if (++pre_row > 9)
+                        if (++pre_row >= 9)
                         {
                             pre_row = 0;
                             pre_col++;
