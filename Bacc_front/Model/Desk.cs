@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Bacc_front.Properties;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,12 +14,9 @@ namespace Bacc_front
     [PropertyChanged.ImplementPropertyChanged]
     public class Desk
     {
+        private const int player_num = 14;
         public ObservableCollection<Player> Players { get => players; set => players = value; }
-        public ObservableCollection<PlayerAccount> Accounts = new ObservableCollection<PlayerAccount>();
         public Dictionary<BetSide, int> desk_amount;
-        public int AllMostLimit { get; set; }
-        public int LeastBet { get; set; }
-        public int TieMostBet { get; set; }
         public static Desk Instance
         {
             get
@@ -32,17 +31,66 @@ namespace Bacc_front
 
         private Desk()
         {
-            players = new ObservableCollection<Player>();
-            AllMostLimit = Setting.Instance.GetIntSetting("total_limit_red");
-            LeastBet = Setting.Instance.GetIntSetting("mini_chip_facevalue");
-            TieMostBet = Setting.Instance.GetIntSetting("tie_limit_red");
-
+            Players = new ObservableCollection<Player>();
+            if (string.IsNullOrEmpty( Settings.Default.JsonPlayerScores) ) //如果是第一次启动游戏
+            {
+                for (int i = 0; i < player_num + 1; i++)
+                {
+                    if (i == 12)
+                    {
+                        continue;
+                    }
+                    var p = new Player(i + 1, CalcPlayerEarning)
+                    {
+                        Balance = 0
+                    };
+                    Players.Add(p);
+                }
+                SavePlayerScores();
+            }
+            else
+            {
+                var players = JsonConvert.DeserializeObject<ObservableCollection<Player>>(Settings.Default.JsonPlayerScores);
+                //foreach (var p in players)
+                //{
+                //    var cancle_score = p.BetScore.Values.Sum();
+                //    p.Balance += cancle_score;
+                //    p.ClearBet();
+                //}
+                Players = players;
+            }
+            //ControlBoard.Instance.dgScore.ItemsSource = Players;
+            
             desk_amount = new Dictionary<BetSide, int>()
             {
                 {BetSide.banker,0 },
                 {BetSide.player,0 },
                 {BetSide.tie,0 },
             };
+        }
+        public ObservableCollection<AddSubScoreRecord> CreateNewScoreRecord()
+        {
+            var accounts = new ObservableCollection<AddSubScoreRecord>();
+            for (int i = 0; i < player_num + 1; i++)
+            {
+                if (i == 12)
+                {
+                    continue;
+                }
+                accounts.Add(new AddSubScoreRecord()
+                {
+                    PlayerId = (i + 1).ToString(),
+                    TotalAccount = 0,
+                    TotalAddScore = 0,
+                    TotalSubScore = 0
+                });
+            }
+            return accounts;
+        }
+        public void SavePlayerScores()
+        {
+            Settings.Default.JsonPlayerScores = JsonConvert.SerializeObject(Players);
+            Settings.Default.Save();
         }
 
         #region 赌桌规则
@@ -52,7 +100,7 @@ namespace Bacc_front
             //待加入其他限制规则
             bool can_he = p.Balance > 0;
             var winner = Game.Instance.CurrentRound.Winner.Item1;
-            if (_setting.GetStrSetting("limit_red_on_3sec") == "超限红不可试分")
+            if (!_setting._limit_red_on_3sec)
             {
                 if (winner != side)
                 {
@@ -68,11 +116,11 @@ namespace Bacc_front
         }
         public bool CanHeCancleBet(Player p)
         {
-            var can_cancle_bet = _setting.GetIntSetting("can_cancle_bet");
+            var can_cancle_bet = _setting._can_cancle_bet;
 
             var b_amount = desk_amount[BetSide.banker] - p.BetScore[(int)BetSide.banker];
             var p_amount = desk_amount[BetSide.player] - p.BetScore[BetSide.player];
-            var total_limit_red = _setting.GetIntSetting("total_limit_red");
+            var total_limit_red = _setting._total_limit_red;
             //如果撤注后庄闲差仍小于限红则允许撤注
             var limit_red_can = Math.Abs(b_amount - p_amount) <= total_limit_red;
             if (can_cancle_bet == 0)    //根据限红自动调整
@@ -97,7 +145,7 @@ namespace Bacc_front
         {
             if (p.BetScore.Values.Sum() == 0)
             {
-                return p.Balance >= _setting.GetIntSetting("min_limit_bet");
+                return p.Balance >= _setting._min_limit_bet;
             }
             return true;
         }
@@ -108,7 +156,7 @@ namespace Bacc_front
             var t_amount = desk_amount[BetSide.tie];
             var p_amount = desk_amount[BetSide.player];
 
-            var total_limit = _setting.GetIntSetting("total_limit_red");
+            var total_limit = _setting._total_limit_red;
 
             if (side == BetSide.banker)
             {
@@ -128,7 +176,7 @@ namespace Bacc_front
             }
             if (side == BetSide.tie)
             {
-                var tie_limit = _setting.GetIntSetting("tie_limit_red");
+                var tie_limit = _setting._tie_limit_red;
                 var desk_tie_red = Math.Abs(bet_amount + t_amount);
                 if (desk_tie_red > tie_limit)
                 {
@@ -141,14 +189,14 @@ namespace Bacc_front
         private bool DeskLimitRed(int bet_amount, BetSide side)
         {
             var desk_score = desk_amount.Values.Sum();
-            var desk_limit_red = _setting.GetIntSetting("desk_limit_red");
+            var desk_limit_red = _setting._desk_limit_red;
 
             return bet_amount + desk_score <= desk_limit_red;
         }
         private int GetCardValue(Card card)
         {
             var weight = (int)card.GetCardWeight;
-            var singleDouble = Setting.Instance.GetStrSetting("single_double");
+            var singleDouble = _setting._single_double;
             if (singleDouble == "单张牌")
             {
                 if (weight == 1)
@@ -169,13 +217,13 @@ namespace Bacc_front
         public int[] CancleSpace()
         {
             var res = new int[2];
-            var can_cancle_bet = _setting.GetIntSetting("can_cancle_bet");
+            var can_cancle_bet = _setting._can_cancle_bet;
             if (can_cancle_bet == 0)    //根据限红自动调整
             {
                 var banker = desk_amount[BetSide.banker];
                 var player = desk_amount[BetSide.player];
                 var sub = banker - player;
-                var desk_limit = _setting.GetIntSetting("total_limit_red");
+                var desk_limit = _setting._total_limit_red;
                 res[0] = desk_limit - sub;
                 res[1] = desk_limit + sub;
             }

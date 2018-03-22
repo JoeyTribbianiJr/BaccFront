@@ -27,12 +27,12 @@
                     <Setter Property="Width" Value="106"></Setter>
                 </Style.Setters>
             </Style>
-            <x:Array x:Key="hehe" Type="local:Player">
+            <!--<x:Array x:Key="hehe" Type="local:Player">
                 <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
                 <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
                 <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
                 <local:Player Add_score="100" Balance="2000" Sub_score="200" Last_add="0" ></local:Player>
-            </x:Array>
+            </x:Array>-->
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="8.2*"></RowDefinition>
@@ -41,14 +41,13 @@
         <DataGrid Name="dgScore" SelectionUnit="FullRow"
                   ColumnWidth="*" 
                   KeyboardNavigation.TabNavigation="None"
-                  ItemsSource="{StaticResource hehe}" 
                   SelectedIndex="0"
                   AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="28"
                   CanUserSortColumns="False"   Margin="10" IsReadOnly="True"
                   CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
                   CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" >
             <DataGrid.Background>
-                <DrawingBrush Opacity="0"></DrawingBrush>
+                <DrawingBrush Opacity="0.9"></DrawingBrush>
             </DataGrid.Background>
             <DataGrid.Columns >
                 <DataGridTextColumn FocusManager.IsFocusScope="False" FontStyle="Oblique" Header="座位" Width="150" Binding="{Binding Id}" />
@@ -72,8 +71,10 @@
                 <ColumnDefinition Width="8*"></ColumnDefinition>
                 <ColumnDefinition Width="0.9*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button Name="btnStartGame" Width="70" Click="OnStartGame" >开始</Button>
-            <Grid Grid.Column="1">
+            <Grid Name="gdStartGameBtn">
+                <Button Name="btnStartGame" Margin="0,4,0,3" Width="70" Style="{StaticResource GreenButton}" Click="OnStartGame" >开始</Button>
+            </Grid>
+            <Grid Grid.Column="1" Name="gdAddBtns">
                 <Grid.RowDefinitions>
                     <RowDefinition ></RowDefinition>
                     <RowDefinition ></RowDefinition>
@@ -102,17 +103,23 @@
                         <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10000">-10000</Button>
                         <Button Click="OnSubAllScore" FontSize="20" >全退/取消</Button>
                         <Button Click="OnConfirmSubScore" >确认退分</Button>
-                        <!--<Button Click="OnRestoreScore" >恢复最近</Button>-->
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
-            <Button Click="OnConfig" Width="70" Grid.Column="2">配置</Button>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Button Name="btnConfig" Click="OnConfig" Width="70" Grid.Column="2">配置</Button>
+                <Button   Width="70"  Name="btnOpenCashBox" Grid.Row="1" Click="btnOpenCashBox1_Click" >开锁</Button>
+            </Grid>
         </Grid>
 
         <Grid Name="grdConfig" Grid.Row="0" VerticalAlignment="Stretch"
-            HorizontalAlignment="Stretch"
-              Background="LightGray" Opacity="1"
-             Visibility="Hidden">
+            HorizontalAlignment="Stretch" 
+              Background="LightGray" Opacity="1" Visibility="Hidden"
+             >
             <GroupBox Header="参数设置" Margin="0,0,10,0">
                 <Grid >
                     <Grid.ColumnDefinitions>
@@ -134,11 +141,13 @@
                                 </ControlTemplate>
                             </ListBox.Template>
                         </ListBox>
-                        <StackPanel Grid.Row="1" Margin="5,0,0,0" Width="340">
+                        <StackPanel Grid.Row="1" Margin="5,0,0,0" Width="340" >
                             <StackPanel  Orientation="Horizontal">
-                                <Button Margin="0,0,5,0" FontSize="13"  Background="Salmon" Width="80"  Name="btnOpenCashBox" Style="{StaticResource ColorButton}" Click="btnOpenCashBox1_Click" >开锁</Button>
-                                <Button Margin="0,0,5,0" FontSize="13"  Background="Tan" Width="80"  Name="btnAnalyzeWaybill"  Style="{StaticResource ColorButton}" Click="btnAnalyzeWaybill_Click" >路单分析</Button>
-                                <Button Margin="0,0,5,0" FontSize="13"  Background="WhiteSmoke" Width="80"  Name="btnShudown"  Style="{StaticResource ColorButton}" Click="OnShutdown">关机</Button>
+                                <Button Margin="0,0,5,0" FontSize="13"  Background="MediumSeaGreen" Width="80"  Name="btnAnalyzeWaybill"  Style="{StaticResource ColorButton}" Click="btnAnalyzeWaybill_Click" >路单分析</Button>
+                                <Button Click="btnPreActiveSession_Click" Background="Orange" Style="{StaticResource ColorButton}" Name="btnPreActiveSession" Width="35">&lt;&lt;</Button>
+                                <TextBox Name="txtActiveSessionIndex" Background="MediumBlue" VerticalContentAlignment="Center" Width="45" Height="22" Foreground="White" TextAlignment="Center"></TextBox>
+                                <Button Click="btnNextActiveSession_Click" Margin="0,0,5,0" Background="Orange" Style="{StaticResource ColorButton}" Name="btnNextActiveSession" Width="35">&gt;&gt;</Button>
+                                <Button Margin="0,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnShudown"  Style="{StaticResource ColorButton}" Click="OnShutdown">关机</Button>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -150,7 +159,6 @@
                         </StackPanel>
                         <DataGrid  SelectionUnit="FullRow" Name="dgAccount"
                   ColumnWidth="*" 
-                  ItemsSource="{StaticResource hehe}"
                   KeyboardNavigation.TabNavigation="None"
                   SelectedIndex="0" 
                   AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="18"

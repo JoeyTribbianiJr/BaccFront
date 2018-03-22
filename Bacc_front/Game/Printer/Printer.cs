@@ -245,8 +245,10 @@ namespace Bacc_front
         //测试打印机是否接在这个端口
         public static bool PrintTest(int Port)
         {
-            System.IO.Ports.SerialPort sp = new System.IO.Ports.SerialPort();
-            sp.PortName = "COM" + Port.ToString();
+            SerialPort sp = new SerialPort
+            {
+                PortName = "COM" + Port.ToString()
+            };
             sp.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(sp_DataReceived);
             try
             {
@@ -267,11 +269,6 @@ namespace Bacc_front
         {
             System.IO.Ports.SerialPort sp = new System.IO.Ports.SerialPort();
             sp.PortName = "COM" + port.ToString();
-            //sp.BaudRate = a_intBaudRate;
-            //sp.DataBits = a_intDataBits;
-            //sp.ReadTimeout = 2000;
-            //sp.Parity = System.IO.Ports.Parity.None;
-            //sp.StopBits = System.IO.Ports.StopBits.OnePointFive;
             try
             {
                 sp.Open();

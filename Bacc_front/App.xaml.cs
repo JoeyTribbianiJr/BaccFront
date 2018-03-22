@@ -23,17 +23,16 @@ namespace Bacc_front
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-            ControlBoard.Instance.SaveGame();
         }
 
         private void Setup()
         {
             MainWindow w1 = new MainWindow();
             ControlBoard w2 = new ControlBoard();
-            Screen s1 = Screen.AllScreens[0];
-            Screen s2;
+            Screen s2 = Screen.AllScreens[0];
+            Screen s1;
 
-            s2 = Screen.AllScreens.Length >= 2 ? Screen.AllScreens[1] : Screen.AllScreens[0];
+            s1 = Screen.AllScreens.Length >= 2 ? Screen.AllScreens[1] : Screen.AllScreens[0];
 
             Rectangle r1 = s1.Bounds;
             Rectangle r2 = s2.Bounds;
@@ -46,12 +45,6 @@ namespace Bacc_front
             w2.Show();
             w1.Owner = w2;
 
-            
-
-            SuperServer ss = new SuperServer();
-            ss.StartSever();
         }
-
-        
     }
 }

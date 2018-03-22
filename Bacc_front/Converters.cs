@@ -185,4 +185,24 @@ namespace Bacc_front
             throw new NotImplementedException();
         }
     }
+    public class ConfigButtonBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var content= (string)value;
+            if(content== "退出")
+            {
+                return Colors.OrangeRed;
+            }
+            else
+            {
+                return Colors.MediumSeaGreen;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

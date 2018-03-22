@@ -6,6 +6,8 @@ using System.Collections;
 using System.Windows;
 using WsUtils.SqliteEFUtils;
 using Newtonsoft.Json;
+using Bacc_front.Properties;
+using System.Linq;
 
 namespace Bacc_front
 {
@@ -29,6 +31,7 @@ namespace Bacc_front
         public bool _isIn3 = false;
         #endregion
         #region 游戏对象
+        public bool _isGameStarting = false;
         /// <summary>
         /// 动画生成器
         /// </summary>
@@ -64,7 +67,7 @@ namespace Bacc_front
         /// <summary>
         /// http客户端
         /// </summary>
-        SuperServer WebServer { get; set; }
+        public SuperServer WebServer { get; set; }
         /// <summary>
         /// 状态显示器
         /// </summary>
@@ -115,9 +118,11 @@ namespace Bacc_front
         /// </summary>
         public event delegateRoundOver NoticeRoundOver;
         /// <summary>
-        /// 向后台发送和入库
+        /// 向后台发送
         /// </summary>
-        public BetScoreRecord BetRecord { get; set; }
+        public BackLiveData BetBackLiveData { get; set; }
+        public string BetRecordSummationJsonDataToBack { get; set; }
+        public string BetRecordJsonDataToBack { get; set; }
         public static Game Instance
         {
             get
@@ -134,7 +139,11 @@ namespace Bacc_front
         #endregion
         public Game()
         {
+            SessionIndex = _setting.CurSessionIndex;
+
             Manager = new GameDataManager();
+            BetBackLiveData = new BackLiveData();
+
             PriorCountDown = 0;
             PriorState = GameState.Preparing;
 
@@ -143,7 +152,9 @@ namespace Bacc_front
             WavPlayer = new MediaPlayer();
             GamePrinter = new PrintSth();
             Animator = new GameAnimationGenerator();
+
             WebServer = new SuperServer();
+            WebServer.StartServer();
 
             LocalSessions = new ObservableCollection<Session>();
         }
@@ -156,18 +167,25 @@ namespace Bacc_front
         }
         void InitGame()
         {
-            _isGameStarting = true;
+
+            Manager.TestDatabase();
             _isSendingToServer = true;
-            SessionIndex = _setting.CurSessionIndex;
 
             NewSession();
             NoticeWindowBind();
 
             KeyListener.StartListen();
             CoreTimer.StartCountdownTimer(TimeSpan.FromSeconds(_frame_rate), Update);
+            CoreTimer.StartWebTimer();
 
             SetCancleSpace();
+            MainWindow.Instance.txtSessionIndex.Visibility = Visibility.Visible;
+            MainWindow.Instance.txtRoundIndex.Visibility = Visibility.Visible;
+            MainWindow.Instance.txtAllLimit.Text = _setting._desk_limit_red.ToString();
+            MainWindow.Instance.txtLeastBet.Text = _setting._min_limit_bet.ToString();
+            MainWindow.Instance.txtTieMost.Text = _setting._tie_limit_red.ToString();
         }
+
         private void InitFsm()
         {
             _preparingState = new WsState("preparing");
@@ -228,9 +246,8 @@ namespace Bacc_front
         }
         public void Update(object sender, EventArgs e)
         {
-            Manager.SetBetRecord();
+            GamePrinter.TestPrinter();
             WebServer.SendToHttpServer();
-            WebServer.SendToBack();
             _fsm.UpdateCallback(_frame_rate);
         }
         #endregion
@@ -245,23 +262,23 @@ namespace Bacc_front
         {
             var timer = _shufflingState.Timer;
 
-            CoreTimer.SetCountDownWithTimer(timer, _setting._shufTime);
+            CoreTimer.SetCountDownWithTimer(timer, _setting._check_waybill_tm);
 
-            if (Setting.Instance.is_print_bill)
+            if (Setting.Instance._is_print_bill)
             {
-                if (!_waybillPrinted && CoreTimer.IsCountdownTick(timer, 5, _setting._shufTime))
+                if (!_waybillPrinted && CoreTimer.IsCountdownTick(timer, 5, _setting._check_waybill_tm))
                 {
                     GamePrinter.PrintWaybill();
                     _waybillPrinted = true;
                 }
             }
 
-            if (!_place1Played && CoreTimer.IsCountdownTick(timer, 0, _setting._shufTime))
+            if (!_place1Played && CoreTimer.IsCountdownTick(timer, 0, _setting._check_waybill_tm))
             {
                 PlayWav("place1-");
                 _place1Played = true;
             }
-            if (CoreTimer.IsStateTimeOver(timer, _setting._shufTime))
+            if (CoreTimer.IsStateTimeOver(timer, _setting._check_waybill_tm))
             {
                 _isShuffled = true;
                 return;
@@ -325,8 +342,8 @@ namespace Bacc_front
         {
             CurrentState = GameState.Dealing;
             CountDown = -1; //黑科技，让服务器能收到一条dealing
-            SetStateText("");
-            MainWindow.Instance.txtCountDown.Text = "开牌中";
+            SetStateText("开牌中");
+            MainWindow.Instance.txtCountDown.Text = "0";
         }
         private void Dealing(float f)
         {
@@ -343,7 +360,7 @@ namespace Bacc_front
 
             if (timer > endtime + 5f)
             {
-                if (RoundIndex + 1 >= _setting._roundNumPerSession)
+                if (RoundIndex + 1 >= _setting._round_num_per_session)
                 {
                     _sessionOver = true;
                 }
@@ -407,7 +424,7 @@ namespace Bacc_front
 
         private void OnExamining(float f)
         {
-            var check_tm = Setting.Instance.GetIntSetting("check_waybill_tm");
+            var check_tm = Setting.Instance._check_waybill_tm;
             float timer = 0;
             if (_firstExamine)
             {
@@ -440,6 +457,9 @@ namespace Bacc_front
         public void NewSession()
         {
             SessionIndex++;
+            _setting.CurSessionIndex = SessionIndex;
+            Settings.Default.CurrentSessionIndex = SessionIndex;
+            Settings.Default.Save();
             RoundIndex = -1;
 
             try
@@ -454,6 +474,9 @@ namespace Bacc_front
             }
             finally
             {
+                WebServer.SendSessionToBack();
+                WebServer.SendFrontSettingToBack();
+
                 Manager.ResetWaybill();
             }
         }
@@ -465,12 +488,15 @@ namespace Bacc_front
 
             Manager.SavePlayerScoresAndBetRecords();
 
+            WebServer.SendSummationBetRecordToBack();
+
             WebServer.SendDealCommandToHttpServer();
 
             Desk.Instance.CalcAllPlayersEarning(CurrentRound);
             SetWinStateText();
 
             Desk.Instance.ClearDeskAmount();
+            
         }
         private void SetWinStateText()
         {
@@ -584,13 +610,12 @@ namespace Bacc_front
         private WsTransition _examineShuffle;
 
         private bool _isShuffled = false;
-        //private bool _betFinished = false;
         private bool _betRoundOver = false;
         private bool _sessionOver = false;
 
         private static Game instance;
         private Setting _setting = Setting.Instance;
-        public bool _isGameStarting = false;
+        private bool _firstSessionStart = true;
         private bool _firstExamine = true;
         private bool _stopBetPlayed = false;
         private bool _place1Played = false;

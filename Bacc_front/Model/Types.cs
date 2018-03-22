@@ -64,18 +64,23 @@ namespace Bacc_front
     {
         Image = 1,
 
-        ImportFront = 2,
+        ImportFront,
 
-        ReplaceWaybill =3,
-        ReplaceWaybillOK =4,
-        ReplaceWaybillFail = 5,
+        ReplaceWaybill,
+        ReplaceWaybillOK,
+        ReplaceWaybillFail,
 
-        ImportBack =6,
-        ImportBackOK =7,
-        ImportBackFail =8,
+        ImportBack,
+        ImportBackOK,
+        ImportBackFail,
 
-        SendFrontSetting = 9,
-        SendFrontData = 10,
+        SendFrontPassword,
+        SendFrontSetting,
+        SendFrontSummationBetRecord,
+        SendFrontBetRecord,
+        SendFrontLiveData,
+        SendFrontWaybill,
+        SendFrontCurSession,
     }
 
     public enum GameState
@@ -115,7 +120,38 @@ namespace Bacc_front
         integer,
         strings,
     }
-    public class PlayerAccount
+    /// <summary>
+    /// 后台累积押分记录
+    /// </summary>
+    public class BackBetRecord
+    {
+        public int PlayerId { get; set; }
+        public int BetScore { get; set; }
+        public int Profit { get; set; }
+        public int DingFen { get; set; }
+        public int ZhongFen { get; set; }
+    }
+    /// 后台实时盈利
+    /// </summary>
+    public class BackLiveData
+    {
+        public int SessionIndex { get; set; }
+        public int RoundIndex { get; set; }
+        public int DeskBanker { get; set; }
+        public int DeskPlayer { get; set; }
+        public int DeskTie { get; set; }
+        public int Countdown { get; set; }
+        public int State { get; set; }
+        public int Winner { get; set; }
+        public string JsonPlayerScores { get; set; }
+
+        public int Differ { get; set; }
+        public int Profit { get; set; }
+        public int MostPlayer { get; set; }
+        public int DeskCurScore { get; set; }
+    }
+
+    public class AddSubScoreRecord
     {
         public string PlayerId { get; set; }
         public int TotalAddScore { get; set; }

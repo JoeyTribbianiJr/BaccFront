@@ -119,7 +119,7 @@ namespace Bacc_front
             wavSB = new Storyboard();
             btnLst = new List<Button>();
 
-            if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
+            if (Setting.Instance._single_double == "单张牌")
             {
                 for (int i = 0; i < 1; i++)
                 {
@@ -160,7 +160,7 @@ namespace Bacc_front
 
         public ObjectAnimationUsingKeyFrames CreateArmAnimation(double startTime, Button btn, int idx)
         {
-            var deal_style = Setting.Instance.GetStrSetting("deal_style");
+            var deal_style = Setting.Instance._deal_style;
             ObjectAnimationUsingKeyFrames armChgBg = new ObjectAnimationUsingKeyFrames();
 
             DiscreteObjectKeyFrame deal1 = new DiscreteObjectKeyFrame();

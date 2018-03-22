@@ -10,12 +10,13 @@ namespace WsUtils.SqliteEFUtils
     public class SQLiteDB : DbContext
     {
         //public DbSet<Person> Persons { get; set; }
-        public DbSet<FrontAccount> FrontAccounts { get; set; }
+        //public DbSet<FrontAccount> FrontAccounts { get; set; }
         public DbSet<BetScoreRecord> BetScoreRecords { get; set; }
         public SQLiteDB()
             : base("SqliteBacc")
         {
-
+            Database.SetInitializer<SQLiteDB>(null);
+            //Database.SetInitializer<SQLiteDB>(null);
         }
     }
 }

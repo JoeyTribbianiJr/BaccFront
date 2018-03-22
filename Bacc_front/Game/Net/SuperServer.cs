@@ -31,19 +31,13 @@ namespace Bacc_front
         {
             imageSender = new ImageUtils();
             httpClient = new HttpClient();
-            
+
             httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
             httpClient.Timeout = TimeSpan.FromSeconds(0.5);
-            //httpClient.SendAsync(new HttpRequestMessage
-            //{
-            //    Method = new HttpMethod("HEAD"),
-            //    RequestUri = new Uri("http://" + Setting.Instance.ServerIP + "/")
-            //})
-            //.Result.EnsureSuccessStatusCode();
             appServer = new AppServer();
             appSession = new AppSession();
         }
-        public void StartSever()
+        public void StartServer()
         {
             if (!appServer.Setup(port))
             {
@@ -74,15 +68,11 @@ namespace Bacc_front
         private void appServer_NewSessionConnected(AppSession session)
         {
             appSession = session;
-            SendData(RemoteCommand.SendFrontSetting, Setting.Instance.game_setting, session);
+            SendFrontSettingToBack();
         }
 
-        void appServer_NewRequestReceived(AppSession session, SuperSocket.SocketBase.Protocol.StringRequestInfo requestInfo)
+        void appServer_NewRequestReceived(AppSession session, StringRequestInfo requestInfo)
         {
-            //ObservableCollection<Session> local_sessions = Game.Instance.LocalSessions;
-            //Session cur_session = Game.Instance.LocalSessions[Game.Instance.SessionIndex];
-            //int sess_idx = Game.Instance.SessionIndex;
-            //int round_idx = Game.Instance.RoundIndex;
             RemoteCommand type = (RemoteCommand)Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
             switch (type)
             {
@@ -90,32 +80,20 @@ namespace Bacc_front
                     SendData(RemoteCommand.ImportFront, Game.Instance.LocalSessions, session);
                     break;
                 case RemoteCommand.ReplaceWaybill:
-                    try
-                    {
-                        var local = Game.Instance.Manager.ReplaceWaybill(requestInfo, session);
-                        SendData(RemoteCommand.ReplaceWaybillOK, local.RoundsOfSession[Game.Instance.RoundIndex], session);
-                    }
-                    catch (Exception ex)
-                    {
-                        SendData(RemoteCommand.ReplaceWaybillFail, ex.Message, session);
-                    }
+                    OnReplaceWaybill(session, requestInfo);
                     break;
                 case RemoteCommand.ImportBack:
-                    try
-                    {
-                        Game.Instance.Manager.ImportBack(requestInfo, session);
-                        SendData(RemoteCommand.ImportBackOK, Game.Instance.CurrentSession, session);
-                    }
-                    catch (Exception ex)
-                    {
-                        SendData(RemoteCommand.ImportBackFail, ex.Message, session);
-                    }
+                    OnImportBack(session, requestInfo);
+                    break;
+                case RemoteCommand.SendFrontBetRecord:
+                    SendBetRecordToBack();
                     break;
                 default:
                     session.Send("Unknow ");
                     break;
             }
         }
+
         void appServer_SessionClosed(AppSession session, SuperSocket.SocketBase.CloseReason value)
         {
             session.Send("服务已关闭");
@@ -165,14 +143,86 @@ namespace Bacc_front
             }
             session.Send(data, 0, data.Length);
         }
-        public void SendToBack()
+
+        public void SendFrontPasswordToBack()
         {
             if (appSession.Connected)
             {
-                SendData(RemoteCommand.SendFrontData, Game.Instance.BetRecord, appSession);
-                imageSender.SendImage(appSession);
+                SendData(RemoteCommand.SendFrontPassword, Setting.Instance.PasswordMap, appSession);
             }
         }
+        public void SendFrontSettingToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontSetting, Setting.Instance.game_setting, appSession);
+            }
+        }
+        public void SendLiveDataToBack()
+        {
+            if (appSession.Connected)
+            {
+                Game.Instance.Manager.SetBackLiveData();
+                SendData(RemoteCommand.SendFrontLiveData, Game.Instance.BetBackLiveData, appSession);
+                //imageSender.SendImage(appSession);
+            }
+        }
+        public void SendSummationBetRecordToBack()
+        {
+            if (appSession.Connected)
+            {
+                Game.Instance.Manager.SetSummationBackBetRecordData();
+                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.BetRecordSummationJsonDataToBack, appSession);
+            }
+        }
+        public void SendBetRecordToBack()
+        {
+            if (appSession.Connected)
+            {
+                Game.Instance.Manager.SetBackBetRecordData();
+                SendData(RemoteCommand.SendFrontBetRecord, Game.Instance.BetRecordJsonDataToBack, appSession);
+            }
+        }
+        public void SendWaybillToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
+            }
+        }
+        public void SendSessionToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontCurSession, Game.Instance.CurrentSession, appSession);
+            }
+        }
+
+        public void OnReplaceWaybill(AppSession session, StringRequestInfo requestInfo)
+        {
+            try
+            {
+                var local = Game.Instance.Manager.ReplaceWaybill(requestInfo, session);
+                SendData(RemoteCommand.ReplaceWaybillOK, local.RoundsOfSession[Game.Instance.RoundIndex], session);
+            }
+            catch (Exception ex)
+            {
+                SendData(RemoteCommand.ReplaceWaybillFail, ex.Message, session);
+            }
+        }
+        public void OnImportBack(AppSession session, StringRequestInfo requestInfo)
+        {
+            try
+            {
+                Game.Instance.Manager.ImportBack(requestInfo, session);
+                SendData(RemoteCommand.ImportBackOK, Game.Instance.CurrentSession, session);
+            }
+            catch (Exception ex)
+            {
+                SendData(RemoteCommand.ImportBackFail, ex.Message, session);
+            }
+        }
+
         public void SendToHttpServer()
         {
             if (Game.Instance._isSendingToServer)
@@ -195,7 +245,7 @@ namespace Bacc_front
                         Winner = (int)Game.Instance.CurrentRound.Winner.Item1,
                     };
 
-                    var ip = Setting.Instance.ServerIP;
+                    var ip = Setting.Instance.ServerUrl;
                     var url = "http://" + ip + ":98/getmsg";
                     var str = JsonConvert.SerializeObject(msg);
 
@@ -210,7 +260,7 @@ namespace Bacc_front
                     {
                         httpClient.GetAsync(url);
                     }
-                    catch ( Exception)
+                    catch (Exception)
                     {
                     }
                 }
@@ -227,7 +277,7 @@ namespace Bacc_front
                 Winner = (int)Game.Instance.CurrentRound.Winner.Item1,
             };
 
-            var ip = Setting.Instance.ServerIP;
+            var ip = Setting.Instance.ServerUrl;
             var url = "http://" + ip + ":98/getmsg";
             var str = JsonConvert.SerializeObject(msg);
 

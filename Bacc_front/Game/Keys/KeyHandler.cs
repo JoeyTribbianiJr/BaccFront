@@ -119,37 +119,35 @@ namespace Bacc_front
         }
         private void Handle()
         {
-           
-                if (Game.Instance._isInBetting)
+            if (Game.Instance._isInBetting)
+            {
+                var speed = Setting.Instance._betSpeed;
+                foreach (var key in _all_userkeys_lst)
                 {
-                    var speed = Setting.Instance._betSpeed;
-                    foreach (var key in _all_userkeys_lst)
+                    var keymodel = _keyMap[key];
+                    if (keymodel.Pressed)
                     {
-                        var keymodel = _keyMap[key];
-                        if (keymodel.Pressed)
+                        keymodel.Timer += 5;
+                        if (!keymodel.FirstHandled)
                         {
-                            keymodel.Timer += 5;
-                            if (!keymodel.FirstHandled)
-                            {
-                                keymodel.Handler();
-                                keymodel.FirstHandled = true;
-                                Game.Instance.SetCancleSpace();
-                                continue;
-                            }
-                            if (keymodel.Timer >= (110 - speed) && 0 != Setting.Instance._betSpeed)
-                            {
-                                keymodel.Handler();
-                                keymodel.Timer = 0;
-                                Game.Instance.SetCancleSpace();
-                            }
+                            keymodel.Handler();
+                            keymodel.FirstHandled = true;
+                            Game.Instance.SetCancleSpace();
+                            continue;
+                        }
+                        if (keymodel.Timer >= (110 - speed) && 0 != Setting.Instance._betSpeed)
+                        {
+                            keymodel.Handler();
+                            keymodel.Timer = 0;
+                            Game.Instance.SetCancleSpace();
                         }
                     }
                 }
-          
+            }
+
         }
         public void Window_KeyDown(object sender, KeyEventArgs e)
         {
-
             if (e.Key == Key.Tab)
             {
                 //MessageBox.Show("tab");
@@ -162,7 +160,12 @@ namespace Bacc_front
             }
             else if (Game.Instance._isInBetting)
             {
-                var keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
+                System.Windows.Forms.Keys keycode;
+                keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
+                if (e.Key == Key.System)
+                {
+                    keycode = System.Windows.Forms.Keys.F10;
+                }
                 var keymodel = _keyMap[(int)keycode];
                 if (keymodel.IsKey)
                 {
@@ -173,7 +176,12 @@ namespace Bacc_front
         }
         public void Window_KeyUp(object sender, KeyEventArgs e)
         {
-            var keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
+            System.Windows.Forms.Keys keycode;
+            keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
+            if (e.Key == Key.System)
+            {
+                keycode = System.Windows.Forms.Keys.F10;
+            }
             try
             {
                 var key = (int)keycode;

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using Bacc_front.Properties;
+using WsUtils;
 
 namespace Bacc_front
 {
@@ -14,31 +16,44 @@ namespace Bacc_front
     [PropertyChanged.ImplementPropertyChanged]
     public class Setting
     {
-
+        public const string secret_key = "0109010901090109";
+        public const int max_session_num = 1000;
         /// <summary>
         /// 游戏参数
         /// </summary>
         public bool _is3SecOn = false;
-        public string ServerIP;
+        public string ServerUrl;
         public int CurSessionIndex;
-        public string JsonPlayers;
-        public string JsonAccounts;
-        public int _shufTime;
+        public int _check_waybill_tm;
+        public int _mi_deal_time;
+        public string _deal_style;
+        public int _big_chip_facevalue;
+        public int _mini_chip_facevalue;
+        public int _min_limit_bet;
+        public int _total_limit_red;
+        public int _can_cancle_bet;
+        public int _desk_limit_red;
+        public int _tie_limit_red;
+        public bool _limit_red_on_3sec;
+        public string _single_double;
+        public bool _bgm_on;
+        public int _boom;
         public int _betTime;
-        public int _roundNumPerSession;
+        public int _round_num_per_session;
         public int _COM_PORT = 1;
         public bool is_cut_bill;
-        public bool is_print_bill;
+        public bool _is_print_bill;
         public int _betSpeed;    //10,20,30,40,50,60,70,80,90,100。0是不连续押分
 
-        public string AdministratorPwd = "17692135195";
-        public const string waiter_pwd = "54321";
-        public const string manager_pwd = "55321";
-        public const string boss_pwd = "56321";
-        public const string account_pwd = "56789";
-        public const string quit_front_pwd = "999999";
-        public const string shutdown_pwd = "888888";
-        public const string clear_account_pwd = "100000";
+        public const string AdministratorPwd = "17692135195";
+        public Dictionary<string, string> PasswordMap;
+        public string waiter_pwd;
+        public string manager_pwd;
+        public string boss_pwd;
+        public string account_pwd;
+        public string quit_front_pwd;
+        public string shutdown_pwd;
+        public string clear_account_pwd;
         public string[] manager_menu_items = new string[]
         {
             "deal_style","mi_deal_time", "check_waybill_tm","bet_tm","open_3_sec", "big_chip_facevalue",
@@ -66,76 +81,67 @@ namespace Bacc_front
 
         private Setting()
         {
-            var util = new WsUtils.FileUtils();
             try
             {
-            var serverip = util.ReadFile("Config/ServerIP.json");
-            ServerIP = JsonConvert.DeserializeObject<string>(serverip);
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Config/ServerIP.json 文件读取失败");
-            }
-
-            using (var db = new SQLiteDB())
-            {
-                try
+                if (!Settings.Default._isGameInited)
                 {
-                    GameSetting setting = db.GameSettings.First<GameSetting>();
-                    if (setting.IsGameInit == false)
-                    {
-                        foreach (var acc in db.FrontAccounts)
-                        {
-                            db.FrontAccounts.Remove(acc);
-                        }
-                        db.FrontAccounts.Add(new WsUtils.SqliteEFUtils.FrontAccount()
-                        {
-                            IsClear = false,
-                            CreateTime = DateTime.Now,
-                            JsonPlayerAccount = ""
-                        });
-
-                        foreach (var acc in db.BetScoreRecords)
-                        {
-                            db.BetScoreRecords.Remove(acc);
-                        }
-
-                        InitGameSetting();
-                        db.SaveChanges();
-
-                    }
-                    else
-                    {
-                        game_setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(setting.JsonGameSettings);
-                        JsonPlayers = setting.JsonPlayerScores;
-                        CurSessionIndex = setting.CurrentSessionIndex;
-                    }
+                    InitGameSetting();
+                    Settings.Default.GameSetting = JsonConvert.SerializeObject(game_setting);
+                    Settings.Default.CurrentSessionIndex = -1;
+                    Settings.Default._isGameInited = true;
+                    Settings.Default.Save();
                 }
-                catch (Exception ex)
-                {
+                InitPassward();
+                SetGameSetting();
+            }
+            catch (Exception ex)
+            {
 #if DEBUG
-                    MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message);
 #endif
-                    MessageBox.Show("读取数据库出错");
-                }
+                MessageBox.Show("读取用户配置文件出错");
             }
+        }
 
-            is_cut_bill = GetStrSetting("is_cut_bill") == "切单" ? true : false;
-            is_print_bill = GetStrSetting("is_print_bill") == "打印路单" ? true : false;
-
+        public void SetGameSetting()
+        {
+            game_setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(Settings.Default.GameSetting);
+            ServerUrl = Settings.Default.ServerUrl;
+            CurSessionIndex = Settings.Default.CurrentSessionIndex;
+            _is_print_bill = GetStrSetting("is_print_bill") == "打印路单" ? true : false;
             _betSpeed = GetIntSetting("bet_speed");
-            _roundNumPerSession = GetIntSetting("round_num_per_session");
+            _round_num_per_session = GetIntSetting("round_num_per_session");
             _is3SecOn = GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
             _betTime = GetIntSetting("bet_tm");    //押注时间有几秒
-            _betTime = 15;
-            _shufTime = 2;
+            _check_waybill_tm = GetIntSetting("check_waybill_tm");
+            _mi_deal_time = GetIntSetting("mi_deal_time");
+            _deal_style = GetStrSetting("deal_style");
+            _big_chip_facevalue = GetIntSetting("big_chip_facevalue");
+            _mini_chip_facevalue = GetIntSetting("mini_chip_facevalue");
+            _min_limit_bet = GetIntSetting("min_limit_bet");
+            _total_limit_red = GetIntSetting("total_limit_red");
+            _can_cancle_bet = GetIntSetting("can_cancle_bet");
+            _desk_limit_red = GetIntSetting("desk_limit_red");
+            _tie_limit_red = GetIntSetting("tie_limit_red");
+            _limit_red_on_3sec = GetStrSetting("limit_red_on_3sec") == "超限红可试分" ? true : false;
+            _single_double = GetStrSetting("single_double");
+            _bgm_on = GetStrSetting("bgm") == "背景音乐开" ? true : false;
+            _boom = GetIntSetting("boom");
+        }
+        public void ResetGameSetting()
+        {
+            SetGameSetting();
+            foreach (var player in Desk.Instance.Players)
+            {
+                player.Denominations[0] = _big_chip_facevalue;
+                player.Denominations[1] = _mini_chip_facevalue;
+            }
+            Game.Instance.SessionIndex = CurSessionIndex;
         }
 
         private void InitGameSetting()
         {
-            //Game.Instance.SessionIndex = -1;
             CurSessionIndex = -1;
-            JsonAccounts = null;
             game_setting.Add("printer", new SettingItem()
             {
                 SelectedIndex = 0,
@@ -262,6 +268,19 @@ namespace Bacc_front
                 Type = SettingItemType.strings,
                 Values = new string[] { "爆机:0", "爆机:5000", "爆机:10000", "爆机:20000", "爆机:30000", "爆机:50000", "爆机:100000", "爆机:200000", "爆机:300000", "爆机:500000", }
             });
+        }
+        private void InitPassward()
+        {
+            PasswordMap = new Dictionary<string, string>();
+            var set = Settings.Default;
+            PasswordMap.Add("waiter_pwd", AESEncrypt.Decrypt(set.waiter_pwd, secret_key));
+            PasswordMap.Add("manager_pwd", AESEncrypt.Decrypt(set.manager_pwd, secret_key));
+            PasswordMap.Add("boss_pwd", AESEncrypt.Decrypt(set.boss_pwd, secret_key));
+            PasswordMap.Add("audit_account_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
+            PasswordMap.Add("audit_bet_record_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
+            PasswordMap.Add("quit_front_pwd", AESEncrypt.Decrypt(set.quit_front_pwd, secret_key));
+            PasswordMap.Add("shutdown_pwd", AESEncrypt.Decrypt(set.shutdown_pwd, secret_key));
+            PasswordMap.Add("clear_account_pwd", AESEncrypt.Decrypt(set.clear_account_pwd, secret_key));
         }
         public int GetIntSetting(string key)
         {

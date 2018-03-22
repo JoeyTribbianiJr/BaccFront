@@ -123,6 +123,7 @@
     <Compile Include="Game\GameTimer.cs" />
     <Compile Include="Game\Net\WaybillManager.cs" />
     <Compile Include="Game\Printer\PrintSth.cs" />
+    <Compile Include="Game\Utils\AESEncrypt.cs" />
     <Compile Include="Game\Utils\DataTableExtensions.cs" />
     <Compile Include="Game\Utils\FileUtils.cs" />
     <Compile Include="Game\Game.cs" />
@@ -137,6 +138,9 @@
     <Compile Include="Game\Net\SuperServer.cs" />
     <Compile Include="Game\Utils\SqliteEFUtils\Entity.cs" />
     <Compile Include="Game\Utils\SqliteEFUtils\SqliteDb.cs" />
+    <Compile Include="Game\Utils\WaitingBox.xaml.cs">
+      <DependentUpon>WaitingBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Model\Card.cs" />
     <Compile Include="Model\Deck.cs" />
     <Compile Include="Model\Chip.cs" />
@@ -145,6 +149,7 @@
     <Compile Include="Model\Session.cs" />
     <Compile Include="Model\Setting.cs" />
     <Compile Include="Model\Types.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Unused.cs" />
     <Page Include="ControlBoard.xaml">
       <SubType>Designer</SubType>
@@ -153,6 +158,10 @@
     <Page Include="DataGridStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Game\Utils\WaitingBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -195,7 +204,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="BaccFront.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -222,6 +233,7 @@
     <Content Include="Img\deal2.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Img\desk2.bmp" />
     <Content Include="Img\downhead.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -249,6 +261,7 @@
     <Content Include="Img\desk.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Img\send.bmp" />
     <Content Include="Img\throw1.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

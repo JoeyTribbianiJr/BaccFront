@@ -11,7 +11,7 @@ namespace Bacc_front
 		public Session(int id)
 		{
 			SessionId = id;
-			RoundNumber = Setting.Instance.GetIntSetting("round_num_per_session");
+			RoundNumber = Setting.Instance._round_num_per_session;
 			RoundsOfSession= CreateRounds(RoundNumber);
 			StartTime = DateTime.Now;
         }
@@ -25,7 +25,7 @@ namespace Bacc_front
             var rounds = new ObservableCollection<Round>();
             for (int i = 0; i < rounds_num; i++)
             {
-                var singleDouble = Setting.Instance.GetStrSetting("single_double");
+                var singleDouble = Setting.Instance._single_double;
 
                 List<Card>[] hand_card = new List<Card>[2]; 
                 if (singleDouble == "单张牌")

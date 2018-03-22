@@ -9,8 +9,23 @@ namespace Bacc_front
 {
     public class GameTimer
     {
+        private const double _web_frame = 200;
         private DispatcherTimer CountdownTimer { get; set; }
+        private System.Timers.Timer WebTimer { get; set; }
         private Thread KeyListener { get; set; }
+        CancellationTokenSource cts = new CancellationTokenSource();
+
+        public void StartWebTimer()
+        {
+            WebTimer = WebTimer ?? new System.Timers.Timer(_web_frame);
+            WebTimer.Elapsed += WebTimer_Elapsed;
+            WebTimer.Start();
+        }
+
+        private void WebTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Game.Instance.WebServer.SendLiveDataToBack();
+        }
 
         public void StartCountdownTimer(TimeSpan interval, EventHandler handler)
         {
@@ -18,10 +33,15 @@ namespace Bacc_front
             CountdownTimer.Tick += handler;
             CountdownTimer.Start();
         }
+        public void StopTimer()
+        {
+            CountdownTimer.IsEnabled = false;
+            cts.Cancel();
+        }
         public void StartKeyListenTimer(TimeSpan interval,Action handler)
         {
             KeyListener = KeyListener ?? new Thread(new ThreadStart(() => {
-                while (true)
+                while (!cts.IsCancellationRequested)
                 {
                     Thread.Sleep(interval);
                     handler();

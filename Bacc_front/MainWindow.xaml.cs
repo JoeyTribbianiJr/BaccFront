@@ -27,7 +27,6 @@ namespace Bacc_front
             InitializeComponent();
             Instance = this;
 
-            InitPrinter();
 
             spPlayers.DataContext = Desk.Instance;
             cvsHidebar.DataContext = Desk.Instance;
@@ -54,24 +53,7 @@ namespace Bacc_front
             //WindowStyle = WindowStyle.None;
         }
 
-        private void InitPrinter()
-        {
-            if (Setting.Instance.is_print_bill)
-            {
-                try
-                {
-                    if (!Printer.PrintTest(Setting.Instance._COM_PORT))
-                    {
-                        MessageBox.Show("端口" + Setting.Instance._COM_PORT + "上没有打印机，请设置其他端口");
-                    }
-                    //Printer.PrintString(Game.Instance._COM_PORT, "test printer hehe \n");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("打印机出错，请检查");
-                }
-            }
-        }
+        
         private void MainWindow_Activated(object sender, EventArgs e)
         {
         }

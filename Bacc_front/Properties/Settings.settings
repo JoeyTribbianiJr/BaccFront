@@ -1,7 +1,48 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Bacc_front.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="GameSetting" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="_isGameInited" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CurrentSessionIndex" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="JsonPlayerScores" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ServerUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="AdministratorPwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2BDQdbYmfKjQXPjeWEFdBA==</Value>
+    </Setting>
+    <Setting Name="waiter_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">TvLi6ZcIlR/y+wfWr2gFeg==</Value>
+    </Setting>
+    <Setting Name="manager_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1jB7mL0Ap15jh9UoSb2LEw==</Value>
+    </Setting>
+    <Setting Name="boss_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">X0LvbxCGKj6zlK01F1XxXQ==</Value>
+    </Setting>
+    <Setting Name="audit_account_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">otV9Ro5ebUsknIyHD8WZnQ==</Value>
+    </Setting>
+    <Setting Name="quit_front_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mxFwyn3f/izsEE/xasED4w==</Value>
+    </Setting>
+    <Setting Name="shutdown_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">3Sz2sBHexyH4zsfpidi7qA==</Value>
+    </Setting>
+    <Setting Name="clear_account_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">8dTKG4Iz3i4K6I1mOf+Eag==</Value>
+    </Setting>
+    <Setting Name="audit_bet_record_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">krblvv6kZ1s8L9wgeEnv4Q==</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
