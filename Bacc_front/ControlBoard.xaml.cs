@@ -1,24 +1,15 @@
 ﻿using Newtonsoft.Json;
-using WsUtils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using WsUtils.SqliteEFUtils;
 using Bacc_front.Properties;
 
@@ -29,7 +20,6 @@ namespace Bacc_front
     /// </summary>
     public partial class ControlBoard : Window
     {
-
         public MediaPlayer player;
         /// <summary>
         /// 定时器
@@ -47,6 +37,7 @@ namespace Bacc_front
             InitializeComponent();
             Instance = this;
             ServerCountdown = 0;
+            player = new MediaPlayer();
 
             dgScore.ItemsSource = Desk.Instance.Players;
             lstButton.ItemsSource = Setting.Instance.game_setting;
@@ -71,7 +62,6 @@ namespace Bacc_front
             Game.Instance._isGameStarting = true;
             if (Setting.Instance._bgm_on)
             {
-                player = new MediaPlayer();
                 string location = System.Environment.CurrentDirectory + "\\Wav\\BGM\\";
                 var wavs = System.IO.Directory.GetFiles(location);
                 var rdm = new Random().Next(wavs.Length);
@@ -213,7 +203,7 @@ namespace Bacc_front
                 //保存参数
                 if (int.TryParse(txtActiveSessionIndex.Text, out int session_index) && 1 <= session_index && session_index <= Setting.max_session_num)
                 {
-                    SaveSetting(session_index - 2);
+                    SaveSetting(session_index - 1);
 
                     spConfigLst.Visibility = Visibility.Hidden;
                     lstButton.Visibility = Visibility.Hidden;
@@ -245,27 +235,6 @@ namespace Bacc_front
             Setting.Instance.ResetGameSetting();
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Tab)
-            {
-                if (System.Windows.Forms.Screen.AllScreens.Length == 1)
-                {
-                    //Instance.Topmost = false;
-                    //MainWindow.Instance.Topmost = true;
-                    //MainWindow.Instance.Activate();
-                }
-            }
-        }
-
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            //if (Game.Instance._isInBetting)
-            //{
-            //    var key = (int)e.Key;
-            //    Game.Instance.KeyMap[key].Pressed = false;
-            //}
-        }
 
         private void OnBackupScore(object sender, RoutedEventArgs e)
         {
@@ -277,14 +246,16 @@ namespace Bacc_front
 
         }
 
-        private void OnConnetServer(object sender, RoutedEventArgs e)
-        {
-            Game.Instance._isSendingToServer = true;
-        }
-
         private void btnOpenCashBox1_Click(object sender, RoutedEventArgs e)
         {
-            Printer.OpenEPSONCashBox(1);
+            if (Game.Instance._isGameStarting)
+            {
+                OnConfig(btnConfig, new RoutedEventArgs());
+            }
+            else
+            {
+                Printer.OpenEPSONCashBox(1);
+            }
         }
 
         private void btnOpenCashBox2_Click(object sender, RoutedEventArgs e)
@@ -318,6 +289,7 @@ namespace Bacc_front
         private void btnConfirmPwd(object sender, RoutedEventArgs e)
         {
             var pwd = txtPwd.Password;
+            var map = Setting.Instance.PasswordMap;
             var key = Setting.Instance.PasswordMap.FirstOrDefault(p => p.Value == pwd).Key;
             if (string.IsNullOrEmpty(key))
             {
@@ -326,7 +298,7 @@ namespace Bacc_front
             }
             if (Game.Instance._isGameStarting)
             {
-                string[] _close_acc_keys = new string[] { "account_pwd", "clear_account_pwd", "quit_front_pwd", "shutdown_pwd" };
+                string[] _close_acc_keys = new string[] {"middle_check_waybill_pwd", "audit_account_pwd", "clear_account_pwd", "audit_bet_record_pwd", "quit_front_pwd", "shutdown_pwd" };
                 if(!_close_acc_keys.Contains(key))
                 {
                     txtPwd.Password = "";
@@ -406,11 +378,25 @@ namespace Bacc_front
                 case "shutdown_pwd":
                     ShutdownComputer();
                     break;
+                case "middle_check_waybill_pwd":
+                    MiddleCheck();
+                    break;
                 default:
                     txtPwd.Password = "";
                     break;
             }
             txtPwd.Password = "";
+        }
+
+        private void MiddleCheck()
+        {
+            if (!Game.Instance._isGameStarting)
+            {
+                MessageBox.Show("尚未开局");
+                return;
+            }
+            Game.Instance.DisplayAllWaybill();
+            Game.Instance.CoreTimer.StopTimer();
         }
 
         private void btnDeletePwd(object sender, RoutedEventArgs e)
@@ -493,6 +479,15 @@ namespace Bacc_front
         private void btnNextActiveSession_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void dgScore_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            foreach (var p in Desk.Instance.Players)
+            {
+                p.Add_score = 0;
+                p.Sub_score = 0;
+            }
         }
     }
 }

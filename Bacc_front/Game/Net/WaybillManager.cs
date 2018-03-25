@@ -19,28 +19,53 @@ namespace Bacc_front
 {
     public class GameDataManager
     {
+        public ObservableCollection<Session> LocalSessions = new ObservableCollection<Session>();
         private object myobj = new object();
+        internal void ImportBackNextSession(StringRequestInfo requestInfo, AppSession session)
+        {
+            var data = requestInfo.Parameters[0];
+            var back_session = JsonConvert.DeserializeObject<Session>(data) ?? throw new NullReferenceException();
+            back_session.SessionId = Game.Instance.SessionIndex + 1;
+
+            var next = Game.Instance.LocalSessions.FirstOrDefault(s => s.SessionId == Game.Instance.SessionIndex + 1);
+            if(next == null)
+            {
+                Game.Instance.LocalSessions.Add(back_session);
+            }
+            else
+            {
+                next = back_session;
+            }
+            using (var db = new SQLiteDB())
+            {
+                db.LocalSessions.RemoveRange(db.LocalSessions);
+                foreach (var s in Game.Instance.LocalSessions)
+                {
+                    db.LocalSessions.Add(new LocalSession
+                    {
+                        JsonSession = JsonConvert.SerializeObject(s)
+                    });
+                }
+                db.SaveChanges();
+            }
+        }
         public void ImportBack(StringRequestInfo requestInfo, AppSession app_session)
         {
             var data = requestInfo.Parameters[0];
             var back_sessions = JsonConvert.DeserializeObject<ObservableCollection<Session>>(data);
-            Game.Instance.LocalSessions = back_sessions;
-            Game.Instance.LocalSessionIndex = Game.Instance.SessionIndex;
-            //if (back_sessions.Count >= Game.Instance.SessionIndex + 1)
-            //{
-            //    //for (int j = round_idx; j < cur_session.RoundNumber; j++)
-            //    //{
-            //    //    cur_session.RoundsOfSession[j] = back_sessions[sess_idx].RoundsOfSession[round_idx];
-            //    //}
-            //    for (int i = sess_idx + 1; i < local_sessions.Count(); i++)
-            //    {
-            //        local_sessions[i] = back_sessions[i];
-            //    }
-            //    for (int k = local_sessions.Count(); k < back_sessions.Count; k++)
-            //    {
-            //        local_sessions.Add(back_sessions[k]);
-            //    }
-            //}
+            Game.Instance.LocalSessions = back_sessions ?? throw new NullReferenceException();
+            using (var db = new SQLiteDB())
+            {
+                db.LocalSessions.RemoveRange(db.LocalSessions);
+                foreach (var s in back_sessions)
+                {
+                    db.LocalSessions.Add(new LocalSession
+                    {
+                        JsonSession = JsonConvert.SerializeObject(s)
+                    });
+                }
+                db.SaveChanges();
+            }
         }
         public Session ReplaceWaybill(StringRequestInfo requestInfo, AppSession app_session)
         {
@@ -53,31 +78,7 @@ namespace Bacc_front
             }
             return local;
         }
-        public void ResetWaybill()
-        {
-            var rounds = Game.Instance.CurrentSession.RoundsOfSession;
-            if (Game.Instance.Waybill == null)
-            {
-                Game.Instance.Waybill = new ObservableCollection<WhoWin>();
-                for (int i = 0; i < rounds.Count; i++)
-                {
-                    Game.Instance.Waybill.Add(new WhoWin()
-                    {
-                        Winner = (int)WinnerEnum.none
-                    });
-                }
-            }
-            else
-            {
-                for (int i = 0; i < rounds.Count; i++)
-                {
-                    Game.Instance.Waybill[i] = new WhoWin()
-                    {
-                        Winner = (int)WinnerEnum.none
-                    };
-                }
-            }
-        }
+        
         public void SaveAddScoreAccount(int Add_score, int id)
         {
             try
@@ -109,7 +110,7 @@ namespace Bacc_front
 
                         db.SaveChanges();
 
-                    }, "第一次嘛，要有耐心哦~");
+                    }, "数据存储中...");
                 }
 
             }
@@ -118,6 +119,9 @@ namespace Bacc_front
                 MessageBox.Show("数据库出错");
             }
         }
+
+        
+
         public void SaveSubScoreAccount(int Sub_score, int id)
         {
             try
@@ -177,7 +181,7 @@ namespace Bacc_front
             };
             //}
         }
-        
+
         public void SetSummationBackBetRecordData()
         {
             try
@@ -194,8 +198,11 @@ namespace Bacc_front
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+#if DEBUG
+                MessageBox.Show(ex.Message);
+#endif
                 MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
             }
         }
@@ -212,8 +219,11 @@ namespace Bacc_front
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+#if DEBUG
+                MessageBox.Show(ex.Message);
+#endif
                 MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
             }
         }
@@ -236,35 +246,44 @@ namespace Bacc_front
                         JsonPlayerScores = live_data.JsonPlayerScores
                     };
                     db.BetScoreRecords.Add(record);
-                    Settings.Default.JsonPlayerScores = JsonConvert.SerializeObject(Desk.Instance.Players);
-                    Settings.Default.Save();
+                    Setting.Instance.SaveJsonPlayersScoreToDefault(Desk.Instance.Players);
                     db.SaveChanges();
-
-
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+#if DEBUG
+                MessageBox.Show(ex.Message);
+#endif
                 MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
             }
         }
-        public void TestDatabase()
+        public void InitLocalSessions()
         {
             try
             {
-                using (var db = new SQLiteDB())
-                {
-                    WaitingBox.Show(MainWindow.Instance, () =>
-                    {
-                        var test = db.FrontAccounts.FirstOrDefault();
-                        if (test == null)
-                        {
-                        }
-                    }, "初始化数据库...");
-                }
+                WaitingBox.Show(() =>
+               {
+                   using (var db = new SQLiteDB())
+                   {
+                       var sessions = db.LocalSessions;
+                       if (sessions != null && sessions.Count() != 0)
+                       {
+                           LocalSessions.Clear();
+                           foreach (var sess in sessions)
+                           {
+                               var mod = JsonConvert.DeserializeObject<Session>(sess.JsonSession);
+                               LocalSessions.Add(mod);
+                           }
+                       }
+                   }
+               }, "初始化数据库...");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+#if DEBUG
+                MessageBox.Show(ex.Message);
+#endif
                 MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
             }
         }

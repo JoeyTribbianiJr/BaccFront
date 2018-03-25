@@ -1,33 +1,30 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.IO.Ports;
-using System.Collections;
-using System.Windows.Forms;
 using System.Drawing;
-
+using System.ComponentModel;
+using System.Reflection;
+using System.Windows;
 namespace Bacc_front
 {
     public class Printer
     {
+        public bool IsInPrinting;
         private static SerialPort serialPort;   //串口
-
+        public int Fault = 0;
         public Printer(string portName)
         {
             try
             {
-                //
-                //串口初始化
-                //
                 serialPort = new SerialPort();
                 serialPort.PortName = portName;
                 serialPort.BaudRate = 9600;//波特率
-                serialPort.Parity = System.IO.Ports.Parity.Odd;//奇校验
-                serialPort.StopBits = System.IO.Ports.StopBits.One;//停止位
+                serialPort.Parity = Parity.Odd;//奇校验
+                serialPort.StopBits = StopBits.One;//停止位
                 OpenPort();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
@@ -44,14 +41,14 @@ namespace Bacc_front
                 serialPort.BaudRate = 9600;//波特率
                 serialPort.Parity = System.IO.Ports.Parity.Odd;//奇校验
                 serialPort.StopBits = System.IO.Ports.StopBits.One;//停止位
+                serialPort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
                 OpenPort();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
         }
-
         private void OpenPort()
         {
             if (null != serialPort)
@@ -60,15 +57,14 @@ namespace Bacc_front
                 {
                     if (!serialPort.IsOpen)
                         serialPort.Open();
-
                 }
-            catch(Exception e)
+                catch (Exception e)
                 {
-                    MessageBox.Show(e.ToString());
+                    MessageBox.Show("无法打开端口1，请检查");
+                    App.Current.Shutdown();
                 }
             }
         }
-
         private void ClosePort()
         {
             try
@@ -77,12 +73,11 @@ namespace Bacc_front
                     serialPort.Close();
                 serialPort.Dispose();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
         }
-
         public void Write(byte[] data, int len)
         {
             try
@@ -94,11 +89,6 @@ namespace Bacc_front
                 MessageBox.Show(e.ToString());
             }
         }
-
-        /// <summary>
-        /// 向打印机发送命令
-        /// </summary>
-        /// <param name="data">命令数据</param>
         public void Write(params byte[] data)
         {
             try
@@ -110,10 +100,6 @@ namespace Bacc_front
                 MessageBox.Show(e.ToString());
             }
         }
-        /// <summary>
-        /// 发送字符串
-        /// </summary>
-        /// <param name="strBuf">要发送的字符串</param>
         public void Write(string strBuf)
         {
             try
@@ -126,7 +112,6 @@ namespace Bacc_front
                 MessageBox.Show(e.ToString());
             }
         }
-
         /// <summary>
         /// 根据编码方式转换字符串为byte[]
         /// </summary>
@@ -140,7 +125,6 @@ namespace Bacc_front
             Encoding enc = Encoding.GetEncoding(charset);
             return enc.GetBytes(str);
         }
-
         /// <summary>
         /// 图片取模
         /// </summary>
@@ -211,59 +195,57 @@ namespace Bacc_front
                 Write(0x0D);
             }
         }
+        public bool PrintString(int Port, string val)
+        {
+            try
+            {
 
-        public static string PrintString(int Port, string val)
-        {
-            System.IO.Ports.SerialPort sp = new System.IO.Ports.SerialPort();
-            sp.PortName = "COM" + Port.ToString();
-            try
-            {
-                sp.Open();
+                List<byte> data = new List<byte>();
+                data.AddRange(new byte[] { 0x1C, 0x26 });
+                string[] lines = val.Split('\n');
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    byte[] content = ToHex(lines[i].Replace("\r", ""), "GB2312");
+                    //byte[] content = System.Text.Encoding.GetEncoding("GB2312").GetBytes(lines[i].Replace("\r", ""));
+                    byte[] wapbt = { 0x0a };
+                    data.AddRange(content);
+                    data.AddRange(wapbt);
+                }
+                byte[] cutbt = { 0x1d, 0x56, 0x42, 0x11 };
+                data.AddRange(cutbt);
+                byte[] databt = data.ToArray();
+                serialPort.Write(databt, 0, databt.Length);
+                return true;
             }
-            catch
-            {
-                return "端口被占用";
-            }
-            List<byte> data = new List<byte>();
-            data.AddRange(new byte[] { 0x1C, 0x26 });
-            string[] lines = val.Split('\n');
-            for (int i = 0; i < lines.Length; i++)
-            {
-                byte[] content = ToHex(lines[i].Replace("\r", ""), "GB2312");
-                //byte[] content = System.Text.Encoding.GetEncoding("GB2312").GetBytes(lines[i].Replace("\r", ""));
-                byte[] wapbt = { 0x0a };
-                data.AddRange(content);
-                data.AddRange(wapbt);
-            }
-            byte[] cutbt = { 0x1d, 0x56, 0x42, 0x11 };
-            data.AddRange(cutbt);
-            byte[] databt = data.ToArray();
-            sp.Write(databt, 0, databt.Length);
-            sp.Close();
-            return null;
-        }
-        //测试打印机是否接在这个端口
-        public static bool PrintTest(int Port)
-        {
-            SerialPort sp = new SerialPort
-            {
-                PortName = "COM" + Port.ToString()
-            };
-            sp.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(sp_DataReceived);
-            try
-            {
-                sp.Open();
-            }
-            catch
+            catch (Exception ex)
             {
                 return false;
             }
-            Recived = false;
-            byte[] testbt = { 0x1D, 0x49, 0x01 };
-            sp.Write(testbt, 0, testbt.Length);
+        }
+        //测试打印机门是否关闭
+        public void PrintTest()
+        {
+            byte[] testbt = { 0x10, 0x04, 0x02, 0x10, 0x04, 0x04 };
+            serialPort.Write(testbt, 0, testbt.Length);
             System.Threading.Thread.Sleep(100);
-            sp.Close();
-            return Recived;
+        }
+        //主要是在从COM端口中接收数据时触发
+        public void sp_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            byte[] receive = new byte[2];
+            serialPort.Read(receive, 0, 8);
+            if (receive[0] != 80)
+            {
+                Fault = 1;
+            }
+            else if (receive[1] != 13)
+            {
+                Fault = 2;
+            }
+            else
+            {
+                Fault = 0;
+            }
         }
         public static void OpenEPSONCashBox(int port)//, int a_intBaudRate, int a_intDataBits)
         {
@@ -272,11 +254,11 @@ namespace Bacc_front
             try
             {
                 sp.Open();
-                byte[] byteA = { 0x1B, 0x70, 0x00, 0x45, 0x45 };
+                byte[] byteA = { 0x1B, 0x70, 0x00, 0x05, 0x03 };
                 sp.Write(byteA, 0, byteA.Length);
                 System.Threading.Thread.Sleep(100);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("开锁失败");
             }
@@ -286,11 +268,77 @@ namespace Bacc_front
             }
         }
 
-        static bool Recived = false;
-        //主要是在从COM端口中接收数据时触发
-        public static void sp_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        public void TestPrinter(object sender, EventArgs e)
         {
-            Recived = true;
+            //if (Setting.Instance._is_print_bill == "打印路单" || Setting.Instance._is_print_bill == "打印不监控")
+            //{
+            //    {
+            //    }
+            //}
+            if (Setting.Instance._is_print_bill == "打印路单")
+            {
+                try
+                {
+                    PrintTest();
+                    if (Game.Instance.GamePrinter.Fault != 0)
+                    {
+                        HandlePrinterFault();
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+                finally
+                {
+                }
+            }
+        }
+        public void HandlePrinterFault()
+        {
+            var str = Game.Instance.GamePrinter.Fault == 1 ? "钱箱被打开" : "打印机缺纸";
+            Game.Instance.CoreTimer.StopTimer();
+            var result = MessageBox.Show(str, "警告", MessageBoxButton.OK);
+            Game.Instance.CoreTimer.StopPrintTestTimer();
+            if (result == MessageBoxResult.OK)
+            {
+                PrintTest();
+                Game.Instance.Start();
+                Game.Instance.CoreTimer.StartPrintTestTimer();
+            }
+        }
+        public void PrintWaybill()
+        {
+
+            var waybill = Game.Instance.CurrentSession.RoundsOfSession;
+            var str = "";
+            for (int i = 0; i < waybill.Count; i += 6)
+            {
+                for (int j = 0; j < 6; j++)
+                {
+                    var winner = waybill[i + j].Winner.Item1;
+                    Type t = winner.GetType();
+                    FieldInfo info = t.GetField(Enum.GetName(t, winner));
+                    DescriptionAttribute description = (DescriptionAttribute)Attribute.GetCustomAttribute(info, typeof(DescriptionAttribute));
+                    str = str + description.Description;
+                }
+                str += "\n";
+            }
+            str = str.TrimEnd('\n');
+            PrintString(Setting.Instance._COM_PORT, str);
+        }
+        public void PrintAccount()
+        {
+            //var account = Desk.Instance.Accounts;
+            //var str = "";
+            //str += "座位   总上分   总下分   总账\n";
+            //for (int i = 0; i < account.Count; i ++)
+            //{
+            //    var a = account[i];
+            //    str += " " + a.PlayerId + "   " + a.TotalAddScore + " " + a.TotalSubScore + " " + a.TotalAccount;
+            //    str += "\n";
+            //}
+            //str = str.TrimEnd('\n');
+            //Printer.PrintString(Setting.Instance._COM_PORT, str);
         }
 
     }

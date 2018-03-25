@@ -17,16 +17,18 @@ namespace Bacc_front
         MainWindow _window { get; set; }
 
         private List<double[]> xy = new List<double[]>() {
-            new double[4]{330,680,500,826},
-            new double[4]{316,680,436,68},
-            new double[4]{330,680,500,856},
-            new double[4]{316,680,436,98},
-            new double[4]{330,680,500,886},
-            new double[4]{316,680,436,128},
+            new double[4]{330,636,500,846},
+            new double[4]{316,636,436,2},
+            new double[4]{330,636,500,886},
+            new double[4]{316,636,436,42},
+            new double[4]{330,636,500,924},
+            new double[4]{316,636,436,82},
         };
         private double[] start_time = new double[6] { 0, 2, 4, 6, 12.5, 16 };
-        private double[] reverse_start_time = new double[6] { 8, 9, 10, 11, 14.5, 18 };
-        private double visibleDuration = 45;
+        private double[] reverse_start_time = new double[6] { 8, 9, 10, 11, 14, 18 };
+
+        public double visibleDuration;
+
         private Storyboard moveSB;
         private Storyboard reversalSB;
         private Storyboard armSB;
@@ -36,12 +38,13 @@ namespace Bacc_front
         //private DoubleAnimationUsingKeyFrames chgHeight;
         //private DoubleAnimationUsingKeyFrames chgY;
         //private DoubleAnimationUsingKeyFrames chgX;
-        private List<Button> btnLst;
+        public List<Button> btnLst;
         private bool _hasCard5 = true;
 
         public GameAnimationGenerator()
         {
             _window = MainWindow.Instance;
+            btnLst = new List<Button>();
             InitImages();
         }
         private void InitImages()
@@ -54,7 +57,7 @@ namespace Bacc_front
             _window.RegisterName(_window.Audio4.Name, _window.Audio4);
             _window.RegisterName(_window.Audio5.Name, _window.Audio5);
             images = new List<BitmapSource>();
-            images.Add(GetImage("Img/desk.bmp"));
+            images.Add(GetImage("Img/desk2.bmp"));
             images.Add(GetImage("Img/deal1.bmp"));
             images.Add(GetImage("Img/throw1.bmp"));
             images.Add(GetImage("Img/throw2.bmp"));
@@ -117,9 +120,8 @@ namespace Bacc_front
             reversalSB = new Storyboard();
             armSB = new Storyboard();
             wavSB = new Storyboard();
-            btnLst = new List<Button>();
 
-            if (Setting.Instance._single_double == "单张牌")
+            if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
             {
                 for (int i = 0; i < 1; i++)
                 {
@@ -154,13 +156,46 @@ namespace Bacc_front
                 moveSB.Begin(_window);
                 reversalSB.Begin(_window);
             }
-
-
         }
+        public void CreateAnimation(int idx, Card card)
+        {
+            #region 拿到牌的容器button
+            var name = "deal" + (idx + 1);
+            var find = _window.FindName(name);
+            Button btn;
+            if (find == null)
+            {
+                btn = new Button() { Name = name };
+                _window.RegisterName(btn.Name, btn);
+                _window.Casino.Children.Add(btn);
+                btn.Style = (Style)_window.Resources["CardButton"];
+                btnLst.Add(btn);
+            }
+            else
+            {
+                btn = (Button)find;
+            }
+            #endregion
 
+            #region 初始化变量
+            var bmpIdx = card.GetPngName;
+            var cardBmp = new BitmapImage(new Uri("Img/card/" + bmpIdx + ".png", UriKind.Relative));
+            double startTime = start_time[idx];
+            if (!_hasCard5 && idx == 5)
+            {
+                startTime = start_time[4];
+            }
+            #endregion
+
+            CreateWav(startTime, btn, idx);
+            CreateArm(startTime, btn, idx);
+            CreateMove(startTime + 0.4, btn, idx);
+            var rev_start = reverse_start_time[idx];
+            CreateReversal(rev_start, btn, cardBmp);
+        }
         public ObjectAnimationUsingKeyFrames CreateArmAnimation(double startTime, Button btn, int idx)
         {
-            var deal_style = Setting.Instance._deal_style;
+            var deal_style = Setting.Instance.GetStrSetting("deal_style");
             ObjectAnimationUsingKeyFrames armChgBg = new ObjectAnimationUsingKeyFrames();
 
             DiscreteObjectKeyFrame deal1 = new DiscreteObjectKeyFrame();
@@ -182,10 +217,8 @@ namespace Bacc_front
             if (deal_style == "直接开牌1")  //手不回到桌下
             {
                 var count = Game.Instance.CurrentRound.HandCard[0].Count + Game.Instance.CurrentRound.HandCard[1].Count;
-                if (idx <3)
+                if (idx < 3)
                 {
-
-
                     DiscreteObjectKeyFrame hold = new DiscreteObjectKeyFrame();
                     hold.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.9));
                     hold.Value = images[1];
@@ -258,42 +291,7 @@ namespace Bacc_front
             return timeline;
         }
 
-        public void CreateAnimation(int idx, Card card)
-        {
-            #region 拿到牌的容器button
-            var name = "deal" + (idx + 1);
-            var find = _window.FindName(name);
-            Button btn;
-            if (find == null)
-            {
-                btn = new Button() { Name = name };
-                _window.RegisterName(btn.Name, btn);
-                _window.Casino.Children.Add(btn);
-            }
-            else
-            {
-                btn = (Button)find;
-            }
-            btn.Style = (Style)_window.Resources["CardButton1"];
-            btnLst.Add(btn);
-            #endregion
-
-            #region 初始化变量
-            var bmpIdx = card.GetPngName;
-            var cardBmp = new BitmapImage(new Uri("Img/card/" + bmpIdx + ".png", UriKind.Relative));
-            double startTime = start_time[idx];
-            if (!_hasCard5 && idx == 5)
-            {
-                startTime = start_time[4];
-            }
-            #endregion
-
-            CreateWav(startTime, btn, idx);
-            CreateArm(startTime, btn, idx);
-            CreateMove(startTime + 0.4, btn, idx);
-            var rev_start = reverse_start_time[idx];
-            CreateReversal(rev_start, btn, cardBmp);
-        }
+        
         public void CreateWav(double startTime, Button btn, int idx)
         {
             var timeline = CreateWavAnimation(startTime, btn, idx);
@@ -345,7 +343,7 @@ namespace Bacc_front
             LinearDoubleKeyFrame widthk2 = new LinearDoubleKeyFrame()
             {
                 KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.2)),
-                Value = 66
+                Value = 99 
             };
             //LinearDoubleKeyFrame widthk3 = new LinearDoubleKeyFrame()
             //{
@@ -367,7 +365,7 @@ namespace Bacc_front
             LinearDoubleKeyFrame heightk2 = new LinearDoubleKeyFrame()
             {
                 KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.2)),
-                Value = 88
+                Value = 132
             };
             //LinearDoubleKeyFrame heightk3 = new LinearDoubleKeyFrame()
             //{
@@ -472,7 +470,7 @@ namespace Bacc_front
             Storyboard.SetTargetName(d_transform, btn.Name);
             DependencyProperty[] propertyChain3 = new DependencyProperty[]
             {
-                Button.RenderTransformProperty,
+                Control.RenderTransformProperty,
                 TransformGroup.ChildrenProperty,
                 ScaleTransform.ScaleXProperty
             };

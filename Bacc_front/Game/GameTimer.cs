@@ -11,13 +11,14 @@ namespace Bacc_front
     {
         private const double _web_frame = 200;
         private DispatcherTimer CountdownTimer { get; set; }
+        private DispatcherTimer PrintTestTimer{ get; set; }
         private System.Timers.Timer WebTimer { get; set; }
         private Thread KeyListener { get; set; }
         CancellationTokenSource cts = new CancellationTokenSource();
 
         public void StartWebTimer()
         {
-            WebTimer = WebTimer ?? new System.Timers.Timer(_web_frame);
+            WebTimer =  new System.Timers.Timer(_web_frame);
             WebTimer.Elapsed += WebTimer_Elapsed;
             WebTimer.Start();
         }
@@ -29,19 +30,32 @@ namespace Bacc_front
 
         public void StartCountdownTimer(TimeSpan interval, EventHandler handler)
         {
-            CountdownTimer = CountdownTimer ?? new DispatcherTimer { Interval = interval };
+            CountdownTimer = new DispatcherTimer { Interval = interval };
             CountdownTimer.Tick += handler;
             CountdownTimer.Start();
         }
+        public void StartPrintTestTimer()
+        {
+            PrintTestTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            PrintTestTimer.Tick += Game.Instance.GamePrinter.TestPrinter;
+            PrintTestTimer.Start();
+        }
+        public void StopPrintTestTimer()
+        {
+            PrintTestTimer.IsEnabled = false;
+        }
         public void StopTimer()
         {
-            CountdownTimer.IsEnabled = false;
+            ControlBoard.Instance.btnStartGame.IsEnabled = true;
+            Game.Instance._isGameStarting = false;
+
+            CountdownTimer.Stop();
             cts.Cancel();
         }
         public void StartKeyListenTimer(TimeSpan interval,Action handler)
         {
-            KeyListener = KeyListener ?? new Thread(new ThreadStart(() => {
-                while (!cts.IsCancellationRequested)
+            KeyListener =  new Thread(new ThreadStart(() => {
+                while (!cts.Token.IsCancellationRequested)
                 {
                     Thread.Sleep(interval);
                     handler();
@@ -76,6 +90,31 @@ namespace Bacc_front
             if (isActionDone)
             {
                 return true;
+            }
+            if (start <= timer)
+            {
+                if (!hasStartAction)
+                {
+                    hasStartAction = true;
+                    action();
+                }
+                return false;
+            }
+            if (timer >= end)
+            {
+                isActionDone = true;
+            }
+            return false;
+        }
+        public bool DoDealAnimationInTimespan(float timer, ref bool isActionDone, ref bool hasStartAction, float start, float end, Action action)
+        {
+            if (isActionDone)
+            {
+                return true;
+            }
+            if (timer<end && timer >= start + 12)
+            {
+                Game.Instance.Set4CardState();
             }
             if (start <= timer)
             {

@@ -8,6 +8,15 @@ using System.Text;
 namespace WsUtils.SqliteEFUtils
 {
     /// <summary>
+    /// 只保存后台发送过来的
+    /// </summary>
+    public class LocalSession
+    {
+        [Key]
+        public int Id { get; set; }
+        public string JsonSession { get; set; }
+    }
+    /// <summary>
     /// 押分记录,也是路单记录
     /// </summary>
     public class BetScoreRecord

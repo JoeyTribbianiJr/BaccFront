@@ -5,8 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bacc_front"
         mc:Ignorable="d"
-        KeyDown="Window_KeyDown"
-        KeyUp="Window_KeyUp"
         Title="ControlBoard" Height="768" Width="1024">
     <Window.Resources>
         <ResourceDictionary>
@@ -40,6 +38,7 @@
         </Grid.RowDefinitions>
         <DataGrid Name="dgScore" SelectionUnit="FullRow"
                   ColumnWidth="*" 
+                  SelectionChanged="dgScore_SelectionChanged"
                   KeyboardNavigation.TabNavigation="None"
                   SelectedIndex="0"
                   AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="28"
@@ -82,11 +81,11 @@
                 <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                               ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <StackPanel Orientation="Horizontal" Grid.Row="0" >
-                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1">+1</Button>
-                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少"  Tag="10">+10</Button>
-                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="100">+100</Button>
-                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1000">+1000</Button>
-                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="10000">+10000</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1">上1</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少"  Tag="10">上10</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="100">上100</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1000">上1000</Button>
+                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="10000">上10000</Button>
                         <Button Click="OnCancleAddScore" >取消上分</Button>
                         <Button Click="OnConfirmAddScore" >确认上分</Button>
                         <!--<Button Click="OnBackupScore" >备份当前</Button>-->
@@ -96,11 +95,11 @@
                               Grid.Row="1" 
                               ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <StackPanel Orientation="Horizontal" >
-                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="1">-1</Button>
-                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10">-10</Button>
-                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="100">-100</Button>
-                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="1000">-1000</Button>
-                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10000">-10000</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="1">下1</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10">下10</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="100">下100</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="1000">下1000</Button>
+                        <Button Mouse.PreviewMouseDown="OnSubScore"  ToolTip="右键单击减少"  Tag="10000">下10000</Button>
                         <Button Click="OnSubAllScore" FontSize="20" >全退/取消</Button>
                         <Button Click="OnConfirmSubScore" >确认退分</Button>
                     </StackPanel>

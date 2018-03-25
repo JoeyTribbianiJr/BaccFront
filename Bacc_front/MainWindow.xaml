@@ -29,38 +29,62 @@
             <Storyboard x:Key="sbWinP">
                 <MediaTimeline Source="Wav/winP.wav" Storyboard.TargetName="Audio0"/>
             </Storyboard>
+            <Storyboard x:Key="shanshuo"/>
         </ResourceDictionary>
     </Window.Resources>
 
     <Grid>
-        <MediaElement Name="Audio0"></MediaElement>
-        <MediaElement Name="Audio1"></MediaElement>
-        <MediaElement Name="Audio2"></MediaElement>
-        <MediaElement Name="Audio3"></MediaElement>
-        <MediaElement Name="Audio4"></MediaElement>
-        <MediaElement Name="Audio5"></MediaElement>
+        <MediaElement x:Name="Audio0"/>
+        <MediaElement x:Name="Audio1"/>
+        <MediaElement x:Name="Audio2"/>
+        <MediaElement x:Name="Audio3"/>
+        <MediaElement x:Name="Audio4"/>
+        <MediaElement x:Name="Audio5"/>
         <!--<Button Visibility="Collapsed" Name="btnBindWaybill" Click="Button_Click"></Button>-->
         <Viewbox Stretch="fill">
             <Canvas x:Name="Casino" Width="1024" Height="768">
                 <Canvas.Background>
                     <ImageBrush ImageSource="img/desk2.bmp" />
                 </Canvas.Background>
-                <!--<Button Style="{StaticResource CardButton1}" Visibility="Visible" Canvas.Left="892" Canvas.Top="679"></Button>-->
-                <Image Name="beautyBmp"  Canvas.Left="41" Canvas.Top="10" />
+                <!--<Button Style="{StaticResource CardButton}" Canvas.Left="843" Canvas.Top="636" ></Button>
+                <Button Style="{StaticResource CardButton}" Canvas.Left="883" Canvas.Top="636" ></Button>
+                <Button Style="{StaticResource CardButton}" Canvas.Left="922" Canvas.Top="636" ></Button>-->
+                <!--<Image x:Name="beautyBmp"  Canvas.Left="41" Canvas.Top="10" />-->
+                <!--<Canvas Height="344" Name="imgBeauty" Width="301" Canvas.Top="0" Canvas.Left="360">
+                    <Canvas.Background>
+                        <ImageBrush ImageSource="img/back.bmp" />
+                    </Canvas.Background>
+                </Canvas>-->
                 <MediaElement x:Name="g3" MediaEnded="gif_MediaEnded" Canvas.Left="450" Canvas.Top="702" UnloadedBehavior="Manual"  Source="Gif/b_3.gif" LoadedBehavior="Play" Stretch="None"/>
                 <MediaElement x:Name="g2" MediaEnded="gif_MediaEnded" Visibility="Hidden" Canvas.Left="450" Canvas.Top="702" UnloadedBehavior="Manual"  Source="Gif/g2.gif" LoadedBehavior="Play" Stretch="None"/>
-                <MediaElement x:Name="flag" Opacity="0.1" MediaEnded="gif_MediaEnded" Canvas.Left="779" Canvas.Top="75" UnloadedBehavior="Manual"  Source="Gif/flag.gif" LoadedBehavior="Play" Stretch="None"/>
-                <MediaElement x:Name="fire" MediaEnded="gif_MediaEnded" Canvas.Left="111" UnloadedBehavior="Manual"  Source="Gif/fire.gif" LoadedBehavior="Play" Stretch="None"/>
-                <MediaElement x:Name="bg" Visibility="Hidden" MediaEnded="gif_MediaEnded" UnloadedBehavior="Manual"  Source="Gif/g1.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="701" Canvas.Left="8"/>
-                <MediaElement x:Name="pg" Visibility="Hidden" MediaEnded="gif_MediaEnded" Canvas.Left="971" UnloadedBehavior="Manual"  Source="Gif/g1.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="701"/>
-                <TextBlock x:Name="txtCountDown"  FontSize="40" FontWeight="UltraBold" Foreground="Green" Text="{Binding CountDown}" Canvas.Left="10" Canvas.Top="10" ></TextBlock>
-                <TextBlock Name="txtState" FontSize="30" Foreground="Red" Text="{Binding StateText}" Canvas.Left="10" Canvas.Top="61" ></TextBlock>
+                <MediaElement x:Name="fire" MediaEnded="gif_MediaEnded" Canvas.Left="115" UnloadedBehavior="Manual"  Source="Gif/fire.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="-1">
+                    <MediaElement.OpacityMask>
+                        <ImageBrush Opacity="0.7" ImageSource="Gif/fire.gif"/>
+                    </MediaElement.OpacityMask>
+                </MediaElement>
+                <MediaElement x:Name="flag"  MediaEnded="gif_MediaEnded" Canvas.Left="68" Canvas.Top="57" UnloadedBehavior="Manual"  Source="Gif/flag.gif" LoadedBehavior="Play" Height="38" Width="55" >
+                    <MediaElement.OpacityMask>
+                        <ImageBrush ImageSource="Gif/flag.gif"/>
+                    </MediaElement.OpacityMask>
+                </MediaElement>
+                <MediaElement x:Name="bg" Visibility="Hidden" MediaEnded="gif_MediaEnded" UnloadedBehavior="Manual"  Source="Gif/g1.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="701" Canvas.Left="189">
+                    <MediaElement.OpacityMask>
+                        <ImageBrush ImageSource="Gif/g1.gif"/>
+                    </MediaElement.OpacityMask>
+                </MediaElement>
+                <MediaElement x:Name="pg" Visibility="Hidden" MediaEnded="gif_MediaEnded" Canvas.Left="792" UnloadedBehavior="Manual"  Source="Gif/g1.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="702">
+                    <MediaElement.OpacityMask>
+                        <ImageBrush ImageSource="Gif/g1.gif"/>
+                    </MediaElement.OpacityMask>
+                </MediaElement>
+                <TextBlock x:Name="txtCountDown"  FontSize="40" FontWeight="UltraBold" Foreground="Green" Text="{Binding CountDown}" Canvas.Left="10" Canvas.Top="10" />
+                <TextBlock x:Name="txtState" FontSize="30" Foreground="Red" Text="{Binding StateText}" Canvas.Left="10" Canvas.Top="61" />
 
                 <Border Width="200" Height="80" 
                         BorderThickness="2"
-                        Name="bdSign"
+                        x:Name="bdSign"
                         CornerRadius="3"
-                        Canvas.Left="409" Canvas.Top="348">
+                        Canvas.Left="410" Canvas.Top="353">
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                             <GradientStop Offset="0" Color="#A5A5A5" />
@@ -77,23 +101,34 @@
                     </Border.Background>
                     <StackPanel Orientation="Vertical" >
                         <StackPanel Margin="30,3,0,0" Orientation="Horizontal">
-                            <Label FontFamily="楷体" FontWeight="Heavy">全台最高限红</Label>
-                            <TextBlock Name="txtAllLimit" Width="90" Text="{Binding AllMostLimit}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold"  Foreground="Red" ></TextBlock>
+                            <Label FontFamily="楷体" FontWeight="Heavy" Content="全台最高限红"/>
+                            <TextBlock x:Name="txtAllLimit" Width="90" Text="{Binding AllMostLimit}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold"  Foreground="Red" />
                         </StackPanel>
                         <StackPanel Width="116" Margin="30,0,0,0" Orientation="Horizontal" >
-                            <Label FontFamily="楷体" FontWeight="Heavy" HorizontalAlignment="Right">最低投注</Label>
-                            <TextBlock Name="txtLeastBet" Width="90" HorizontalAlignment="Right" Text="{Binding LeastBet}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold"  Foreground="Red" ></TextBlock>
+                            <Label FontFamily="楷体" FontWeight="Heavy" HorizontalAlignment="Right" Content="最低投注"/>
+                            <TextBlock x:Name="txtLeastBet" Width="90" HorizontalAlignment="Right" Text="{Binding LeastBet}" FontSize="14" VerticalAlignment="Center" FontWeight="Bold"  Foreground="Red" />
                         </StackPanel>
                         <StackPanel Margin="44,0,0,0" Orientation="Horizontal">
-                            <Label FontFamily="楷体" FontWeight="Heavy">和最高限红</Label>
-                            <TextBlock Name="txtTieMost" Width="90" 
+                            <Label FontFamily="楷体" FontWeight="Heavy" Content="和最高限红"/>
+                            <TextBlock x:Name="txtTieMost" Width="90" 
                                        Text="{Binding TieMostBet}" FontSize="14"
                                        VerticalAlignment="Center"
-                                       FontWeight="Bold"  Foreground="Red" ></TextBlock>
+                                       FontWeight="Bold"  Foreground="Red" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
-
+                <Border Width="200" Height="90" 
+                        BorderThickness="2"
+                        Name="bdPrepare"
+                        CornerRadius="3" Background="Silver"
+                        Canvas.Left="409" Canvas.Top="348">
+                    <Border CornerRadius="5" Width="190" Height="80" BorderThickness="1" BorderBrush="AliceBlue">
+                        <StackPanel >
+                            <TextBlock  HorizontalAlignment="Center" Margin="0,5,0,0"  Name="txtFrontStateTitle" FontFamily="隶书" FontSize="15">正在洗牌</TextBlock>
+                            <TextBlock FontSize="14" Name="txtShuffleCountdown" Foreground="Red" HorizontalAlignment="Center" Margin="0,15,0,0"  ></TextBlock>
+                        </StackPanel>
+                    </Border>
+                </Border>
                 <Border   Canvas.Left="584" 
                          BorderThickness="2" CornerRadius="6" Padding="0">
                     <Border.BorderBrush>
@@ -104,11 +139,11 @@
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                     <Border.Background>
-                        <LinearGradientBrush  StartPoint="0,0" EndPoint="1,1" Opacity="0.8" >
-                            <GradientStop Offset="0" Color="White" />
+                        <LinearGradientBrush  StartPoint="0,0" EndPoint="1,1" Opacity="1" >
+                            <GradientStop Offset="0" Color="LightGray"/>
                         </LinearGradientBrush>
                     </Border.Background>
-                    <Grid Name="grdSmallWaybill" Margin="3"  Width="430" Height="96">
+                    <Grid x:Name="grdSmallWaybill" Margin="3"  Width="430" Height="96">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
@@ -166,15 +201,16 @@
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </Border>
-                <Label FontSize="22" Foreground="Red" Canvas.Left="444" Canvas.Top="589" >第</Label>
-                <TextBlock Name="txtSessionIndex" Visibility="Hidden" FontSize="22" Foreground="Red" Text="{Binding _sessionStrIndex}" TextAlignment="Center" Width="60" Canvas.Left="487" Canvas.Top="594" ></TextBlock>
-                <Label FontSize="22" Foreground="Red" Canvas.Left="555" Canvas.Top="589">局</Label>
-                <Label FontSize="18" Foreground="Red" Canvas.Left="469" Canvas.Top="645">第</Label>
-                <TextBlock Name="txtRoundIndex" FontSize="22" Visibility="Hidden" Foreground="Red" Text="{Binding _roundStrIndex}" TextAlignment="Center" Width="40" Canvas.Left="497" Canvas.Top="645" RenderTransformOrigin="0.521,0.29" ></TextBlock>
-                <Label FontSize="18" Foreground="Red" Canvas.Left="536" Canvas.Top="645">场</Label>
+                <Label FontSize="22" Foreground="LightYellow" Canvas.Left="444" Canvas.Top="589" Content="第" />
+                <TextBlock x:Name="txtSessionIndex" Visibility="Hidden" FontSize="22" Foreground="Red" Text="{Binding _sessionStrIndex}" TextAlignment="Center" Width="60" Canvas.Left="487" Canvas.Top="594" />
+                <Label FontSize="22" Foreground="LightYellow" Canvas.Left="555" Canvas.Top="589" Content="局"/>
+                <!--<Label FontSize="18" Foreground="Red" Canvas.Left="469" Canvas.Top="645" Content="第"/>-->
+                <TextBlock x:Name="txtBetState" FontSize="22" Visibility="Visible" Foreground="Red" Text="{Binding BetState}" 
+                           TextAlignment="Center" Width="120" Canvas.Left="456" Canvas.Top="648" RenderTransformOrigin="0.521,0.29" />
+                <!--<Label FontSize="18" Foreground="Red" Canvas.Left="536" Canvas.Top="645" Content="场"/>-->
 
-                <Canvas Name="spPlayers" >
-                    <Button  DataContext="{Binding Players[0]}" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
+                <Canvas x:Name="spPlayers" >
+                    <Button DataContext="{Binding Players[0]}" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[1]}" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[2]}" Canvas.Left="58" Canvas.Top="525" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[3]}" Canvas.Left="19" Canvas.Top="399" Style="{StaticResource ChipButton}" />
@@ -189,7 +225,20 @@
                     <Button DataContext="{Binding Players[12]}" Canvas.Left="789" Canvas.Top="581" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[13]}" Canvas.Left="663" Canvas.Top="590" Style="{StaticResource ChipButton}" />
 
-                    
+                    <Button  DataContext="{Binding Players[0].CurEarn}" Canvas.Left="256" Canvas.Top="575" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[1].CurEarn}" Canvas.Left="152" Canvas.Top="564" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[2].CurEarn}" Canvas.Left="58" Canvas.Top="480" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[3].CurEarn}" Canvas.Left="58" Canvas.Top="373" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[4].CurEarn}" Canvas.Left="108" Canvas.Top="296" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[5].CurEarn}" Canvas.Left="184" Canvas.Top="279" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[6].CurEarn}" Canvas.Left="263" Canvas.Top="272" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[7].CurEarn}" Canvas.Left="685" Canvas.Top="268" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[8].CurEarn}" Canvas.Left="783" Canvas.Top="275" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[9].CurEarn}" Canvas.Left="857" Canvas.Top="308" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[10].CurEarn}" Canvas.Left="902" Canvas.Top="382" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[11].CurEarn}" Canvas.Left="896" Canvas.Top="495" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[12].CurEarn}" Canvas.Left="791" Canvas.Top="564" Style="{StaticResource EarnChipButton}" />
+                    <Button  DataContext="{Binding Players[13].CurEarn}" Canvas.Left="693" Canvas.Top="575" Style="{StaticResource EarnChipButton}" />
 
                     <Button DataContext="{Binding Players[7].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[7].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
@@ -238,7 +287,7 @@
                     <Button DataContext="{Binding Players[6].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
                 </Canvas>
                 <Grid  x:Name="grdBigWaybill" 
-								   Width="242" Height="132" Canvas.Left="390" Canvas.Top="442">
+								   Width="242" Height="132" Canvas.Left="390" Canvas.Top="449">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
@@ -262,16 +311,10 @@
                     </Grid.ColumnDefinitions>
                 </Grid>
 
-                <!--<Button Style="{StaticResource CardButton1}" Canvas.Left="826" Canvas.Top="679" ></Button>
-                <Button Style="{StaticResource CardButton1}" Canvas.Left="856" Canvas.Top="679" ></Button>
-                <Button Style="{StaticResource CardButton1}" Canvas.Left="444" Canvas.Top="319" ></Button>-->
-                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/b_3.gif" Canvas.Left="446" Canvas.Top="702"></Image>-->
-                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/flag.gif" Canvas.Left="779" Canvas.Top="75"></Image>-->
-                <!--<Image gif:ImageBehavior.AnimatedSource="Gif/flag.gif" Canvas.Left="779" Canvas.Top="75"></Image>-->
                 <!--<Image gif:ImageBehavior.AnimatedSource="Gif/fire.gif" gif:ImageBehavior.RepeatBehavior="Forever"  Canvas.Left="111"/>-->
-                <Border  Width="180"  Opacity="0.8" Name="bdBankerState"
+                <Border  Width="180"  Opacity="0.8" x:Name="bdBankerState"
                         CornerRadius="5" BorderThickness="2"
-					        Height="56" Canvas.Left="238" Canvas.Top="712">
+					        Height="56" Canvas.Left="238" Canvas.Top="711">
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                             <GradientStop Offset="0" Color="White" />
@@ -286,15 +329,15 @@
                             <GradientStop Offset="1" Color="White" />
                         </LinearGradientBrush>
                     </Border.Background>
-                    <TextBlock FontSize="24" TextWrapping="Wrap" FontWeight="UltraBold" Foreground="White"  Name="txtBanker"
+                    <TextBlock FontSize="24" TextWrapping="Wrap" FontWeight="UltraBold" Foreground="White"  x:Name="txtBanker"
                                TextAlignment="Center" Text="{Binding BankerStateText}"
                                VerticalAlignment="Center"
-                               ></TextBlock>
+                               />
                 </Border>
-                <Border Width="180" Name="bdPlayerState"
+                <Border Width="180" x:Name="bdPlayerState"
                            VerticalAlignment="Stretch" BorderThickness="2"
                            CornerRadius="5" Opacity="0.8"
-    					  Height="56" Canvas.Left="603" Canvas.Top="712">
+    					  Height="56" Canvas.Left="603" Canvas.Top="711">
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                             <GradientStop Offset="0" Color="White" />
@@ -310,28 +353,30 @@
                         </LinearGradientBrush>
                     </Border.Background>
                     <TextBlock  FontSize="24" TextWrapping="Wrap" FontWeight="UltraBold" Foreground="White" 
-                                Name="txtPlayer"
+                                x:Name="txtPlayer"
                                 TextAlignment="Center" Text="{Binding PlayerStateText}"
                                 VerticalAlignment="Center"
-                        ></TextBlock>
+                        />
                 </Border>
-                <Canvas Name="cvsHidebar" Visibility="Hidden">
-                    <Image Visibility="{Binding Players[0].Bet_hide,Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="539" Width="186" Height="38" ></Image>
-                    <Image Visibility="{Binding Players[1].Bet_hide,Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="501" Width="186" Height="38" ></Image>
-                    <Image Visibility="{Binding Players[2].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="463" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[3].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="425" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[4].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="387" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[5].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="349" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[6].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="311" Width="186" Height="38" />
+                <Canvas x:Name="cvsHidebar" Visibility="Hidden">
+                    <Image Visibility="{Binding Players[0].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="539" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[1].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="501" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[2].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="463" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[3].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="425" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[4].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="387" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[5].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="349" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[6].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="311" Width="196" Height="38" />
 
-                    <Image Visibility="{Binding Players[13].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="539" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[12].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="501" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[11].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="463" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[10].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="425" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[9].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="387" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[8].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="349" Width="186" Height="38" />
-                    <Image Visibility="{Binding Players[7].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="648" Canvas.Top="311" Width="186" Height="38" />
+                    <Image Visibility="{Binding Players[13].Bet_hide, Converter={StaticResource ChipVisibleConverter}}"  Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="539" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[12].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="501" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[11].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="463" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[10].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="425" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[9].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="387" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[8].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="349" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[7].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="311" Width="196" Height="38" />
                 </Canvas>
+
+                <Image Name="imgBoom" Source="img/boom.bmp" Visibility="Hidden" Canvas.Left="375" Canvas.Top="285" ></Image>
             </Canvas>
         </Viewbox>
     </Grid>

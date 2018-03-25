@@ -73,7 +73,7 @@ namespace Bacc_front.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("QYI180A80lye/8e6s3EJhQ==")]
         public string ServerUrl {
             get {
                 return ((string)(this["ServerUrl"]));
@@ -188,6 +188,18 @@ namespace Bacc_front.Properties {
             }
             set {
                 this["audit_bet_record_pwd"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("NnhIUm6cmCSSDTCb37jb+w==")]
+        public string middle_check_waybill_pwd {
+            get {
+                return ((string)(this["middle_check_waybill_pwd"]));
+            }
+            set {
+                this["middle_check_waybill_pwd"] = value;
             }
         }
     }

@@ -15,7 +15,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ServerUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">QYI180A80lye/8e6s3EJhQ==</Value>
     </Setting>
     <Setting Name="AdministratorPwd" Type="System.String" Scope="User">
       <Value Profile="(Default)">2BDQdbYmfKjQXPjeWEFdBA==</Value>
@@ -43,6 +43,9 @@
     </Setting>
     <Setting Name="audit_bet_record_pwd" Type="System.String" Scope="User">
       <Value Profile="(Default)">krblvv6kZ1s8L9wgeEnv4Q==</Value>
+    </Setting>
+    <Setting Name="middle_check_waybill_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NnhIUm6cmCSSDTCb37jb+w==</Value>
     </Setting>
   </Settings>
 </SettingsFile>

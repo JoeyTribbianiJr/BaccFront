@@ -122,7 +122,6 @@
     <Compile Include="FSM\WsTransition.cs" />
     <Compile Include="Game\GameTimer.cs" />
     <Compile Include="Game\Net\WaybillManager.cs" />
-    <Compile Include="Game\Printer\PrintSth.cs" />
     <Compile Include="Game\Utils\AESEncrypt.cs" />
     <Compile Include="Game\Utils\DataTableExtensions.cs" />
     <Compile Include="Game\Utils\FileUtils.cs" />
@@ -149,6 +148,9 @@
     <Compile Include="Model\Session.cs" />
     <Compile Include="Model\Setting.cs" />
     <Compile Include="Model\Types.cs" />
+    <Compile Include="pathButtonLeft.xaml.cs">
+      <DependentUpon>pathButtonLeft.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Unused.cs" />
     <Page Include="ControlBoard.xaml">
@@ -176,6 +178,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="pathButtonLeft.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ScrollViewerStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -224,6 +230,12 @@
     <None Include="supersocket.sh" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Img\back.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\boom.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Img\ctr_back.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -233,11 +245,14 @@
     <Content Include="Img\deal2.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Img\desk2.bmp" />
+    <Content Include="Img\desk2.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Img\downhead.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Img\hidebar.bmp">
+    <Resource Include="Img\hidebar.bmp" />
+    <Content Include="Img\hidebar1.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="GIF\g1.gif">
@@ -261,13 +276,17 @@
     <Content Include="Img\desk.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Img\send.bmp" />
+    <Content Include="Img\send.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Img\throw1.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Img\throw2.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Img\X10.GIF" />
+    <Resource Include="send.bmp" />
     <Content Include="Wav\addB.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -582,10 +601,6 @@
     <Content Include="Config\keymap.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Img\opencard.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <Resource Include="opencard.bmp" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

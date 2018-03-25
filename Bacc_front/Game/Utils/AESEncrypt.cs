@@ -69,6 +69,10 @@ namespace WsUtils
 
         public static string Decrypt(string decryptStr, string key)
         {
+            if(string.IsNullOrEmpty(decryptStr))
+            {
+                return "";
+            }
             key = FormatKey(key);
 
             byte[] keyArray = Encoding.UTF8.GetBytes(key);

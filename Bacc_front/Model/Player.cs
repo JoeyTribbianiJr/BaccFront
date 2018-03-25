@@ -12,7 +12,6 @@ using WsUtils.SqliteEFUtils;
 
 namespace Bacc_front
 {
-
     public delegate int NativeCountRule(BetSide winner, ObservableDictionary<BetSide, int> bet);
 
     [ImplementPropertyChanged]
@@ -25,6 +24,7 @@ namespace Bacc_front
         private int last_sub;
         private int sub_score;
         private bool bet_hide;
+        private int curEarn;
         private ObservableDictionary<BetSide, int> bet_score;
         public ObservableDictionary<BetSide, int> BetScore
         {
@@ -46,6 +46,8 @@ namespace Bacc_front
         public int denomination;
         public BetDenomination choose_denomination { get; set; }
         public int[] Denominations { get; set; }
+        public int CurEarn { get => curEarn; set => curEarn = value; }
+
         public event NativeCountRule count_rule;
 
 
@@ -66,48 +68,60 @@ namespace Bacc_front
                 {BetSide.player,0 },
                 {BetSide.tie,0 },
             };
-            Denominations = new int[2];
-            Denominations[0] = Setting.Instance._big_chip_facevalue;
-            Denominations[1] = Setting.Instance._mini_chip_facevalue;
-            choose_denomination = BetDenomination.mini;  //押注筹码大小
-            SetDenomination();
+            SetDenomination(BetDenomination.mini);
 
             Bet_hide = false;       //是否隐藏压哪边
 
             this.count_rule = count_rule;
         }
 
+        public void SetDenomination(BetDenomination bd)
+        {
+            Denominations = new int[2];
+            Denominations[0] = Setting.Instance._big_chip_facevalue;
+            Denominations[1] = Setting.Instance._mini_chip_facevalue;
+            choose_denomination = bd;  //押注筹码大小
+            denomination = Denominations[(int)choose_denomination];
+        }
         #region 玩家押注的函数
         public void Bet(BetSide side)
         {
-            if (Game.Instance._isIn3 && Desk.Instance.CanHeBetIn3Sec(this, side))
+            if (Game.Instance._isIn3)
             {
-                var add_score = 1;
-                Balance -= add_score;
-                bet_score[side] += add_score;
-
-                Desk.Instance.UpdateDeskAmount(side, add_score);
-                switch (side)
+                if (Desk.Instance.CanHeBetIn3Sec(this, side))
                 {
-                    case BetSide.banker:
-                        BetScoreOnBank += add_score;
-                        break;
-                    case BetSide.player:
-                        BetScoreOnPlayer += add_score;
-                        break;
-                    case BetSide.tie:
-                        BetScoreOnTie += add_score;
-                        break;
+                    var add_score = 1;
+                    Balance -= add_score;
+                    bet_score[side] += add_score;
+
+                    Desk.Instance.UpdateDeskAmount(side, add_score);
+                    switch (side)
+                    {
+                        case BetSide.banker:
+                            BetScoreOnBank += add_score;
+                            break;
+                        case BetSide.player:
+                            BetScoreOnPlayer += add_score;
+                            break;
+                        case BetSide.tie:
+                            BetScoreOnTie += add_score;
+                            break;
+                    }
                 }
             }
             else if (Desk.Instance.CanHeBet(this, side))
             {
                 var add_score = Balance >= denomination ? denomination : Balance;
 
-                if (BetScore.Values.Sum() == 0)
+                if (BetScore.Values.Sum() == 0 )
                 {
-                    add_score = Setting.Instance._min_limit_bet;
+                    if(denomination < Setting.Instance._min_limit_bet && Balance  >= Setting.Instance._min_limit_bet)
+                    {
+                        add_score = Setting.Instance._min_limit_bet;
+                    }
                 }
+
+                add_score= Desk.Instance.SetTotalLimitRedDenomination(add_score,side);
 
                 Balance -= add_score;
                 bet_score[side] += add_score;
@@ -160,16 +174,23 @@ namespace Bacc_front
         {
             denomination = 1;
         }
-        public void SetDenomination()
+        public void ChangeDenomination()
         {
-            choose_denomination = choose_denomination == BetDenomination.big
-                ? BetDenomination.mini
-                : BetDenomination.big;
-            denomination = Denominations[(int)choose_denomination];
+            if (choose_denomination == BetDenomination.mini && Balance >= Denominations[(int)BetDenomination.big])
+            {
+                SetDenomination(BetDenomination.big);
+            }
+            else
+            {
+                SetDenomination(BetDenomination.mini);
+            }
         }
         public void SetHide()
         {
-            Bet_hide = Bet_hide == true ? false : true;
+            if (Desk.Instance.CanHeHide(this))
+            {
+                Bet_hide = Bet_hide == true ? false : true;
+            }
         }
 
         public void Count(BetSide winner)
@@ -181,6 +202,8 @@ namespace Bacc_front
         #region 庄家上分退分的函数
         public void AddScore(int add_score)
         {
+            Sub_score = 0;
+
             if (Add_score + add_score < 0)
             {
                 Add_score = 0;
@@ -192,14 +215,16 @@ namespace Bacc_front
         }
         public void SubScore(int sub_score)
         {
-            var ss = this.Sub_score + sub_score;
+            Add_score = 0;
+
+            var ss = Sub_score + sub_score;
             if (ss >= Balance)
             {
-                this.Sub_score = Balance;
+                Sub_score = Balance;
             }
             else
             {
-                this.Sub_score = sub_score;
+                Sub_score = ss < 0 ? 0 : ss;
             }
         }
         public void CancleAddOrSub()
@@ -210,8 +235,15 @@ namespace Bacc_front
         public void ConfirmAdd()
         {
             Game.Instance.Manager.SaveAddScoreAccount(Add_score, Id);
+            if(Balance == 0)
+            {
+                SetDenomination(BetDenomination.mini);
+            }
             Balance += Add_score;
-            Last_add = Add_score;
+            if (Add_score != 0)
+            {
+                Last_add = Add_score;
+            }
             Add_score = 0;
             Desk.Instance.SavePlayerScores();
         }
@@ -230,7 +262,14 @@ namespace Bacc_front
         {
             Game.Instance.Manager.SaveSubScoreAccount(Sub_score, Id);
             Balance -= Sub_score;
-            Last_sub = Sub_score;
+            if(Balance == 0)
+            {
+                SetDenomination(BetDenomination.mini);
+            }
+            if (Add_score != 0)
+            {
+                Last_sub = Sub_score;
+            }
             Sub_score = 0;
             Desk.Instance.SavePlayerScores();
         }

@@ -76,14 +76,20 @@ namespace Bacc_front
             RemoteCommand type = (RemoteCommand)Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
             switch (type)
             {
-                case RemoteCommand.ImportFront:
-                    SendData(RemoteCommand.ImportFront, Game.Instance.LocalSessions, session);
+                case RemoteCommand.Login:
+                    CheckLogin(requestInfo);
                     break;
-                case RemoteCommand.ReplaceWaybill:
-                    OnReplaceWaybill(session, requestInfo);
+                case RemoteCommand.ImportFrontLocalSessions:
+                    SendData(RemoteCommand.ImportFrontLocalSessions, Game.Instance.LocalSessions, session);
                     break;
+                //case RemoteCommand.ReplaceWaybill:
+                //    OnReplaceWaybill(session, requestInfo);
+                //    break;
                 case RemoteCommand.ImportBack:
                     OnImportBack(session, requestInfo);
+                    break;
+                case RemoteCommand.ImportBackNextSession:
+                    OnImportBackNextSession(session, requestInfo);
                     break;
                 case RemoteCommand.SendFrontBetRecord:
                     SendBetRecordToBack();
@@ -94,6 +100,110 @@ namespace Bacc_front
             }
         }
 
+        private void OnImportBackNextSession(AppSession session, StringRequestInfo requestInfo)
+        {
+            try
+            {
+                Game.Instance.Manager.ImportBackNextSession(requestInfo, session);
+                SendData(RemoteCommand.ImportBackNextSessionOK, Game.Instance.CurrentSession, session);
+            }
+            catch (Exception ex)
+            {
+                SendData(RemoteCommand.ImportBackNextSessionFail, ex.Message, session);
+            }
+        }
+        public void OnImportBack(AppSession session, StringRequestInfo requestInfo)
+        {
+            try
+            {
+                Game.Instance.Manager.ImportBack(requestInfo, session);
+                SendData(RemoteCommand.ImportBackOK, Game.Instance.CurrentSession, session);
+            }
+            catch (Exception ex)
+            {
+                SendData(RemoteCommand.ImportBackFail, ex.Message, session);
+            }
+        }
+
+        private void CheckLogin(StringRequestInfo requestInfo)
+        {
+            var data = requestInfo.Parameters[0];
+            var pass = JsonConvert.DeserializeObject<string>(data);
+            if(Setting.connect_pass != pass)
+            {
+                SendData(RemoteCommand.Login, "False", appSession);
+            }
+            else
+            {
+                SendData(RemoteCommand.Login, "OK", appSession);
+            }
+        }
+        public void SendFrontPasswordToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontPassword, Setting.Instance.PasswordMap, appSession);
+            }
+        }
+        public void SendFrontSettingToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontSetting, Setting.Instance.game_setting, appSession);
+            }
+        }
+        public void SendLiveDataToBack()
+        {
+            if (appSession.Connected)
+            {
+                Game.Instance.Manager.SetBackLiveData();
+                SendData(RemoteCommand.SendFrontLiveData, Game.Instance.BetBackLiveData, appSession);
+            }
+        }
+        public void SendSummationBetRecordToBack()
+        {
+            if (appSession.Connected)
+            {
+                Game.Instance.Manager.SetSummationBackBetRecordData();
+                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.BetRecordSummationJsonDataToBack, appSession);
+            }
+        }
+        public void SendBetRecordToBack()
+        {
+            if (appSession.Connected)
+            {
+                Game.Instance.Manager.SetBackBetRecordData();
+                SendData(RemoteCommand.SendFrontBetRecord, Game.Instance.BetRecordJsonDataToBack, appSession);
+            }
+        }
+        public void SendWaybillToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
+            }
+        }
+        public void SendCurSessionToBack()
+        {
+            if (appSession.Connected)
+            {
+                SendData(RemoteCommand.SendFrontCurSession, Game.Instance.CurrentSession, appSession);
+            }
+        }
+
+
+        //public void OnReplaceWaybill(AppSession session, StringRequestInfo requestInfo)
+        //{
+        //    try
+        //    {
+        //        var local = Game.Instance.Manager.ReplaceWaybill(requestInfo, session);
+        //        SendData(RemoteCommand.ReplaceWaybillOK, local.RoundsOfSession[Game.Instance.RoundIndex], session);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        SendData(RemoteCommand.ReplaceWaybillFail, ex.Message, session);
+        //    }
+        //}
         void appServer_SessionClosed(AppSession session, SuperSocket.SocketBase.CloseReason value)
         {
             session.Send("服务已关闭");
@@ -144,84 +254,6 @@ namespace Bacc_front
             session.Send(data, 0, data.Length);
         }
 
-        public void SendFrontPasswordToBack()
-        {
-            if (appSession.Connected)
-            {
-                SendData(RemoteCommand.SendFrontPassword, Setting.Instance.PasswordMap, appSession);
-            }
-        }
-        public void SendFrontSettingToBack()
-        {
-            if (appSession.Connected)
-            {
-                SendData(RemoteCommand.SendFrontSetting, Setting.Instance.game_setting, appSession);
-            }
-        }
-        public void SendLiveDataToBack()
-        {
-            if (appSession.Connected)
-            {
-                Game.Instance.Manager.SetBackLiveData();
-                SendData(RemoteCommand.SendFrontLiveData, Game.Instance.BetBackLiveData, appSession);
-                //imageSender.SendImage(appSession);
-            }
-        }
-        public void SendSummationBetRecordToBack()
-        {
-            if (appSession.Connected)
-            {
-                Game.Instance.Manager.SetSummationBackBetRecordData();
-                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.BetRecordSummationJsonDataToBack, appSession);
-            }
-        }
-        public void SendBetRecordToBack()
-        {
-            if (appSession.Connected)
-            {
-                Game.Instance.Manager.SetBackBetRecordData();
-                SendData(RemoteCommand.SendFrontBetRecord, Game.Instance.BetRecordJsonDataToBack, appSession);
-            }
-        }
-        public void SendWaybillToBack()
-        {
-            if (appSession.Connected)
-            {
-                SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
-            }
-        }
-        public void SendSessionToBack()
-        {
-            if (appSession.Connected)
-            {
-                SendData(RemoteCommand.SendFrontCurSession, Game.Instance.CurrentSession, appSession);
-            }
-        }
-
-        public void OnReplaceWaybill(AppSession session, StringRequestInfo requestInfo)
-        {
-            try
-            {
-                var local = Game.Instance.Manager.ReplaceWaybill(requestInfo, session);
-                SendData(RemoteCommand.ReplaceWaybillOK, local.RoundsOfSession[Game.Instance.RoundIndex], session);
-            }
-            catch (Exception ex)
-            {
-                SendData(RemoteCommand.ReplaceWaybillFail, ex.Message, session);
-            }
-        }
-        public void OnImportBack(AppSession session, StringRequestInfo requestInfo)
-        {
-            try
-            {
-                Game.Instance.Manager.ImportBack(requestInfo, session);
-                SendData(RemoteCommand.ImportBackOK, Game.Instance.CurrentSession, session);
-            }
-            catch (Exception ex)
-            {
-                SendData(RemoteCommand.ImportBackFail, ex.Message, session);
-            }
-        }
 
         public void SendToHttpServer()
         {

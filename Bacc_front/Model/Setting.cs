@@ -17,6 +17,7 @@ namespace Bacc_front
     public class Setting
     {
         public const string secret_key = "0109010901090109";
+        public const string connect_pass = "11111111";
         public const int max_session_num = 1000;
         /// <summary>
         /// 游戏参数
@@ -42,7 +43,7 @@ namespace Bacc_front
         public int _round_num_per_session;
         public int _COM_PORT = 1;
         public bool is_cut_bill;
-        public bool _is_print_bill;
+        public string _is_print_bill;
         public int _betSpeed;    //10,20,30,40,50,60,70,80,90,100。0是不连续押分
 
         public const string AdministratorPwd = "17692135195";
@@ -102,13 +103,13 @@ namespace Bacc_front
                 MessageBox.Show("读取用户配置文件出错");
             }
         }
-
         public void SetGameSetting()
         {
             game_setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(Settings.Default.GameSetting);
-            ServerUrl = Settings.Default.ServerUrl;
+            //ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
+            ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
             CurSessionIndex = Settings.Default.CurrentSessionIndex;
-            _is_print_bill = GetStrSetting("is_print_bill") == "打印路单" ? true : false;
+            _is_print_bill = GetStrSetting("is_print_bill");
             _betSpeed = GetIntSetting("bet_speed");
             _round_num_per_session = GetIntSetting("round_num_per_session");
             _is3SecOn = GetStrSetting("open_3_sec") == "3秒功能开" ? true : false;
@@ -138,7 +139,6 @@ namespace Bacc_front
             }
             Game.Instance.SessionIndex = CurSessionIndex;
         }
-
         private void InitGameSetting()
         {
             CurSessionIndex = -1;
@@ -218,7 +218,7 @@ namespace Bacc_front
             {
                 SelectedIndex = 2,
                 Type = SettingItemType.integer,
-                Values = new string[] { "总限红:1000", "总限红:2000", "总限红:3000", "总限红:5000", "总限红:10000", "总限红:20000" }
+                Values = new string[] { "全台限红:1000", "全台限红:2000", "全台限红:3000", "全台限红:5000", "全台限红:10000", "全台限红:20000" }
             });
             game_setting.Add("can_cancle_bet", new SettingItem()
             {
@@ -269,19 +269,6 @@ namespace Bacc_front
                 Values = new string[] { "爆机:0", "爆机:5000", "爆机:10000", "爆机:20000", "爆机:30000", "爆机:50000", "爆机:100000", "爆机:200000", "爆机:300000", "爆机:500000", }
             });
         }
-        private void InitPassward()
-        {
-            PasswordMap = new Dictionary<string, string>();
-            var set = Settings.Default;
-            PasswordMap.Add("waiter_pwd", AESEncrypt.Decrypt(set.waiter_pwd, secret_key));
-            PasswordMap.Add("manager_pwd", AESEncrypt.Decrypt(set.manager_pwd, secret_key));
-            PasswordMap.Add("boss_pwd", AESEncrypt.Decrypt(set.boss_pwd, secret_key));
-            PasswordMap.Add("audit_account_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
-            PasswordMap.Add("audit_bet_record_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
-            PasswordMap.Add("quit_front_pwd", AESEncrypt.Decrypt(set.quit_front_pwd, secret_key));
-            PasswordMap.Add("shutdown_pwd", AESEncrypt.Decrypt(set.shutdown_pwd, secret_key));
-            PasswordMap.Add("clear_account_pwd", AESEncrypt.Decrypt(set.clear_account_pwd, secret_key));
-        }
         public int GetIntSetting(string key)
         {
             var item = game_setting[key];
@@ -294,6 +281,33 @@ namespace Bacc_front
             var item = game_setting[key];
             var str = item.Values[item.SelectedIndex];
             return str;
+        }
+
+        public ObservableCollection<Player> GetJsonPlayersScore()
+        {
+            var json = AESEncrypt.Decrypt(Settings.Default.JsonPlayerScores,secret_key);
+            return JsonConvert.DeserializeObject<ObservableCollection<Player>>(json);
+        }
+        public void SaveJsonPlayersScoreToDefault(ObservableCollection<Player> players)
+        {
+            var json = JsonConvert.SerializeObject(players);
+            var text = AESEncrypt.Encrypt(json,secret_key);
+            Settings.Default.JsonPlayerScores = text;
+            Settings.Default.Save();
+        }
+        private void InitPassward()
+        {
+            PasswordMap = new Dictionary<string, string>();
+            var set = Settings.Default;
+            PasswordMap.Add("waiter_pwd", AESEncrypt.Decrypt(set.waiter_pwd, secret_key));
+            PasswordMap.Add("manager_pwd", AESEncrypt.Decrypt(set.manager_pwd, secret_key));
+            PasswordMap.Add("boss_pwd", AESEncrypt.Decrypt(set.boss_pwd, secret_key));
+            PasswordMap.Add("audit_account_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
+            PasswordMap.Add("audit_bet_record_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
+            PasswordMap.Add("quit_front_pwd", AESEncrypt.Decrypt(set.quit_front_pwd, secret_key));
+            PasswordMap.Add("shutdown_pwd", AESEncrypt.Decrypt(set.shutdown_pwd, secret_key));
+            PasswordMap.Add("clear_account_pwd", AESEncrypt.Decrypt(set.clear_account_pwd, secret_key));
+            PasswordMap.Add("middle_check_waybill_pwd", AESEncrypt.Decrypt(set.middle_check_waybill_pwd, secret_key));
         }
     }
 }

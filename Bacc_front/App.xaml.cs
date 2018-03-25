@@ -27,6 +27,7 @@ namespace Bacc_front
 
         private void Setup()
         {
+            
             MainWindow w1 = new MainWindow();
             ControlBoard w2 = new ControlBoard();
             Screen s2 = Screen.AllScreens[0];
@@ -44,7 +45,6 @@ namespace Bacc_front
             w1.Show();
             w2.Show();
             w1.Owner = w2;
-
         }
     }
 }

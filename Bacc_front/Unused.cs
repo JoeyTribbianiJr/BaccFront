@@ -5,6 +5,150 @@ using System.Text;
 
 namespace Bacc_front
 {
+    //<Storyboard x:Key="move" >
+    //    <PointAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)" >
+    //        <!--Storyboard.TargetName= "card"-- >
+    //        < EasingPointKeyFrame KeyTime= "0:0:0" Value= "0.5,0" />
+    //        < EasingPointKeyFrame KeyTime= "0:0:3" Value= "0.5,0" />
+    //        < EasingPointKeyFrame KeyTime= "0:0:4" Value= "0.5,0.5" />
+    //    </ PointAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" >
+    //        < !--Storyboard.TargetName = "card"-- >
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:3" Value= "-1" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:0" Value= "-1" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:4" Value= "1" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
+    //< Storyboard x:Key= "deal1" >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Top)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "316" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:0.5" Value= "640" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Left)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "436" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:0.5" Value= "54" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
+    //< Storyboard x:Key= "deal2" >
+    //    < ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty= "Visibility" Duration= "0:0:4" >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:0" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Hidden </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:1.5" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Visible </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //    </ ObjectAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Top)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:0" Value= "330" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:1.5" Value= "330" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:2" Value= "640" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Left)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:0" Value= "500" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:1.5" Value= "500" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:2" Value= "888" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
+    //< Storyboard x:Key= "deal3" >
+    //    < ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty= "Visibility" Duration= "0:0:4" >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:0" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Hidden </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:3" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Visible </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //    </ ObjectAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Top)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "316" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:3" Value= "316" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:3.5" Value= "640" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Left)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "436" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:3" Value= "436" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:3.5" Value= "78" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
+    //< Storyboard x:Key= "deal4" >
+    //    < ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty= "Visibility" Duration= "0:0:4" >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:0" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Hidden </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:4.5" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Visible </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //    </ ObjectAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Top)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:0" Value= "330" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:4.5" Value= "330" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:5" Value= "640" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Left)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "500" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:4.5" Value= "500" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:5" Value= "864" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
+    //< Storyboard x:Key= "deal5" >
+    //    < ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty= "Visibility" Duration= "0:0:4" >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:0" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Hidden </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:6.5" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Visible </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //    </ ObjectAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Top)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "316" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:6.5" Value= "316" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:7" Value= "640" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Left)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "436" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:6.5" Value= "102" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:7" Value= "102" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
+    //< Storyboard x:Key= "deal6" >
+    //    < ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty= "Visibility" Duration= "0:0:4" >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:0" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Hidden </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //        < DiscreteObjectKeyFrame KeyTime= "0:0:7.5" >
+    //            < DiscreteObjectKeyFrame.Value >
+    //                < Visibility > Visible </ Visibility >
+    //            </ DiscreteObjectKeyFrame.Value >
+    //        </ DiscreteObjectKeyFrame >
+    //    </ ObjectAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Top)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "330" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:7.5" Value= "330" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:8" Value= "640" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //    < DoubleAnimationUsingKeyFrames Storyboard.TargetProperty= "(Canvas.Left)" >
+    //        < EasingDoubleKeyFrame KeyTime= "0" Value= "500" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:7.5" Value= "500" />
+    //        < EasingDoubleKeyFrame KeyTime= "0:0:8" Value= "840" />
+    //    </ DoubleAnimationUsingKeyFrames >
+    //</ Storyboard >
     class Unused
     {
         //private void ScanAndHandleKeyMap()

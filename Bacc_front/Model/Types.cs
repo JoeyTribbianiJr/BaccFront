@@ -62,17 +62,18 @@ namespace Bacc_front
 	}
     public enum RemoteCommand
     {
-        Image = 1,
+        //Image = 1,
+        Login=1,
 
-        ImportFront,
-
-        ReplaceWaybill,
-        ReplaceWaybillOK,
-        ReplaceWaybillFail,
+        ImportFrontLocalSessions,
 
         ImportBack,
         ImportBackOK,
         ImportBackFail,
+
+        ImportBackNextSession,
+        ImportBackNextSessionOK,
+        ImportBackNextSessionFail,
 
         SendFrontPassword,
         SendFrontSetting,

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using WsUtils;
@@ -103,7 +100,7 @@ namespace Bacc_front
                     action = new Action(() => Desk.Instance.Players[p_id].Bet(BetSide.player));
                     break;
                 case 4:
-                    action = new Action(() => Desk.Instance.Players[p_id].SetDenomination());
+                    action = new Action(() => Desk.Instance.Players[p_id].ChangeDenomination());
                     break;
                 case 3:
                     action = new Action(() => Desk.Instance.Players[p_id].CancleBet());
@@ -116,6 +113,16 @@ namespace Bacc_front
                     break;
             }
             return action;
+        }
+        public void CanclePressed()
+        {
+            foreach (var key in _all_userkeys_lst)
+            {
+                var keymodel = _keyMap[key];
+                keymodel.Pressed = false;
+                keymodel.Timer = 0;
+                keymodel.FirstHandled = false;
+            }
         }
         private void Handle()
         {
@@ -133,6 +140,7 @@ namespace Bacc_front
                             keymodel.Handler();
                             keymodel.FirstHandled = true;
                             Game.Instance.SetCancleSpace();
+                            keymodel.Timer = -60;
                             continue;
                         }
                         if (keymodel.Timer >= (110 - speed) && 0 != Setting.Instance._betSpeed)
@@ -162,10 +170,29 @@ namespace Bacc_front
             {
                 System.Windows.Forms.Keys keycode;
                 keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
-                if (e.Key == Key.System)
+                if(e.SystemKey == Key.F10)
                 {
                     keycode = System.Windows.Forms.Keys.F10;
+                    e.Handled = true;
                 }
+                if(e.SystemKey == Key.F9)
+                {
+                    keycode = System.Windows.Forms.Keys.F9;
+                    e.Handled = true;
+                }
+                if(e.SystemKey == Key.PageUp)
+                {
+                    keycode = System.Windows.Forms.Keys.PageUp;
+                    e.Handled = true;
+                }
+                if(e.SystemKey == Key.PageDown)
+                {
+                    keycode = System.Windows.Forms.Keys.PageDown;
+                    e.Handled = true;
+                }
+                //if (e.Key == Key.System)
+                //{
+                //}
                 var keymodel = _keyMap[(int)keycode];
                 if (keymodel.IsKey)
                 {

@@ -26,7 +26,7 @@ namespace Bacc_front
         {
             InitializeComponent();
             Instance = this;
-
+            cvsHidebar.Visibility = Visibility.Visible;
 
             spPlayers.DataContext = Desk.Instance;
             cvsHidebar.DataContext = Desk.Instance;
@@ -34,8 +34,8 @@ namespace Bacc_front
 
             txtCountDown.DataContext = Game.Instance;
             txtState.DataContext = Game.Instance;
-            txtRoundIndex.DataContext = Game.Instance;
             txtSessionIndex.DataContext = Game.Instance;
+            txtBetState.DataContext = Game.Instance;
             txtBanker.DataContext = Game.Instance;
             txtPlayer.DataContext = Game.Instance;
             bdBankerState.DataContext = Game.Instance;

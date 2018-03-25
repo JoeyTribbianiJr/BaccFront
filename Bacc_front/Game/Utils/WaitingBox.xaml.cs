@@ -57,5 +57,12 @@ namespace WsUtils
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             win.ShowDialog();
         }
+        public static void Show(Action callback, string mes = "有一种幸福，叫做等待...")
+        {
+            WaitingBox win = new WaitingBox(callback);
+            win.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            win.Text = mes;
+            win.ShowDialog();
+        }
     }
 }

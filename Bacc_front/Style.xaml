@@ -21,7 +21,6 @@
                                Content="{TemplateBinding Content}"/>
                     </Border>
                     <ControlTemplate.Triggers>
-                        
                         <Trigger Property="IsMouseOver" Value="True">
                             <Trigger.Setters>
                                 <!--<Setter Property="Opacity" Value="0.7"></Setter>-->
@@ -60,16 +59,13 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <!--<Style x:Key="ChipButton" TargetType="Button">
-        <Setter Property="Width" Value="70"/>
-        <Setter Property="Height" Value="70"/>
+    <Style x:Key="EarnChipButton" TargetType="Button">
+        <Setter Property="Width" Value="60"/>
+        <Setter Property="Height" Value="40"/>
         <Setter Property="Foreground" Value="Black"/>
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="12" />
         <Setter Property="FontStretch" Value="Medium" />
         <Setter Property="FontWeight" Value="Heavy" />
-        <Setter Property="BorderBrush" Value="Red"></Setter>
-        <Setter Property="BorderThickness" Value="5"></Setter>
-        <Setter Property="Padding" Value="50" />
         <Setter Property="Content" >
             <Setter.Value>
                 <Binding Path="." ></Binding>
@@ -83,11 +79,7 @@
         <Setter Property="Foreground" Value="Red"></Setter>
         <Setter Property="Background" >
             <Setter.Value>
-                <ImageBrush >
-                    <ImageBrush.ImageSource >
-                        <Binding  Path="."  Converter="{StaticResource ChipBackgroundConverter}"></Binding>
-                    </ImageBrush.ImageSource>
-                </ImageBrush>
+                <ImageBrush ImageSource="img/X10.gif" />
             </Setter.Value>
         </Setter>
         <Setter Property="Template">
@@ -95,17 +87,18 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
                         <Border Background="{TemplateBinding Background}">
-
-                            <ContentPresenter Name="BtnContent"
-											  Margin="{TemplateBinding Content,Converter={StaticResource ChipTextMarginConverter}}"
+                            <Viewbox>
+                                <ContentPresenter Name="BtnContent" 
+                                    Margin="12,6,12,6" VerticalAlignment="Center"
 											  HorizontalAlignment="Center"
 											  Content="{TemplateBinding Content}"/>
+                            </Viewbox>
                         </Border>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>-->
+    </Style>
     <Style x:Key="ChipButton" TargetType="Button">
         <Setter Property="Width" Value="70"/>
         <Setter Property="Height" Value="70"/>
@@ -200,13 +193,13 @@
     </Style>
     <!--大路单按钮样式-->
     <Style x:Key="WaybillBlock" TargetType="Button">
-        <Setter Property="Width" Value="21"></Setter>
-        <Setter Property="Height" Value="21"></Setter>
+        <Setter Property="Width" Value="20"></Setter>
+        <Setter Property="Height" Value="20"></Setter>
         <Setter Property="FontFamily" Value="隶书"></Setter>
         <Setter Property="FontSize" Value="15"></Setter>
-        <!--<Setter Property="Margin" Value="1"></Setter>-->
-        <Setter Property="VerticalAlignment" Value="Center"></Setter>
-        <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+        <Setter Property="Margin" Value="1"></Setter>
+        <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
+        <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
         <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
         <Setter Property="TextBlock.TextAlignment" Value="Center"></Setter>
@@ -216,7 +209,7 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
                         <Border Background="{TemplateBinding Background}" CornerRadius="0" 
-                                BorderThickness="2" BorderBrush="Gray" 
+                                BorderThickness="1" BorderBrush="Gray" 
                                 >
 
                             <ContentPresenter Name="BtnContent"
@@ -283,216 +276,6 @@
         </Setter>
     </Style>
     <Style x:Key="CardButton" TargetType="Button">
-        <Setter Property="Width" Value="66"/>
-        <Setter Property="Height" Value="99"/>
-        <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontStretch" Value="Medium" />
-        <Setter Property="FontWeight" Value="Heavy" />
-        <Setter Property="Content" >
-            <Setter.Value>
-                <Binding Path="." ></Binding>
-            </Setter.Value>
-        </Setter>
-        <!--<Setter Property="Visibility" >
-            <Setter.Value>
-                <Binding Path="." Converter="{StaticResource ChipVisibleConverter}"></Binding>
-            </Setter.Value>
-        </Setter>-->
-        <!--<Setter Property="Background" >
-            <Setter.Value>
-                <ImageBrush >
-                    <ImageBrush.ImageSource >
-                        <Binding  Path="."  Converter="{StaticResource ChipBackgroundConverter}"></Binding>
-                    </ImageBrush.ImageSource>
-                </ImageBrush>
-            </Setter.Value>
-        </Setter>-->
-        <!--<Setter Property="Template" Value="{StaticResource flipCardTemplate}"></Setter>-->
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate>
-                    <Grid Width="66" Height="99">
-                        <!-- Provides 3D rotation transition. Hidden except for when animation is
-       active. -->
-                        <Viewport3D Grid.Column="0" x:Name="vp3D" Visibility="Hidden">
-                            <Viewport3D.Camera>
-                                <!--<PerspectiveCamera x:Name="camera" Position="0,0,5" LookDirection="0,0,-1" FieldOfView="90" />-->
-                                <OrthographicCamera x:Name="camera" Position="0,0,5" LookDirection="0,0,-1" />
-                            </Viewport3D.Camera>
-                            <Viewport3D.Children>
-                                <ModelVisual3D>
-                                    <ModelVisual3D.Content>
-                                        <Model3DGroup>
-                                            <DirectionalLight Color="#444" Direction="0,0,-1" />
-                                            <AmbientLight Color="#BBB" />
-                                        </Model3DGroup>
-                                    </ModelVisual3D.Content>
-                                </ModelVisual3D>
-                                <ModelVisual3D>
-                                    <ModelVisual3D.Content>
-                                        <GeometryModel3D>
-                                            <!-- Simple flat, square surface -->
-                                            <GeometryModel3D.Geometry>
-                                                <MeshGeometry3D TriangleIndices="0,1,2 2,3,0" TextureCoordinates="0,1 1,1 1,0 0,0" Positions="-0.5,-0.5,0 0.5,-0.5,0 0.5,0.5,0 -0.5,0.5,0" />
-                                            </GeometryModel3D.Geometry>
-                                            <!-- Front of shape shows the content of 'frontHost' -->
-                                            <GeometryModel3D.Material>
-                                                <DiffuseMaterial>
-                                                    <DiffuseMaterial.Brush>
-                                                        <VisualBrush Visual="{Binding ElementName=frontHost}" />
-                                                    </DiffuseMaterial.Brush>
-                                                </DiffuseMaterial>
-                                            </GeometryModel3D.Material>
-                                            <!-- Back of shape shows the content of 'backHost' -->
-                                            <GeometryModel3D.BackMaterial>
-                                                <DiffuseMaterial>
-                                                    <DiffuseMaterial.Brush>
-                                                        <VisualBrush Visual="{Binding ElementName=backHost}">
-                                                            <VisualBrush.RelativeTransform>
-                                                                <!-- By default, this would come out backwards because we're on the
-                                   back on the shape. Flip it to make it right. -->
-                                                                <ScaleTransform ScaleX="-1" CenterX="0.5" />
-                                                            </VisualBrush.RelativeTransform>
-                                                        </VisualBrush>
-                                                    </DiffuseMaterial.Brush>
-                                                </DiffuseMaterial>
-                                            </GeometryModel3D.BackMaterial>
-                                            <!-- Rotation transform used for transition. -->
-                                            <GeometryModel3D.Transform>
-                                                <RotateTransform3D>
-                                                    <RotateTransform3D.Rotation>
-                                                        <AxisAngleRotation3D x:Name="rotate" Axis="0,3,0" Angle="0" />
-                                                    </RotateTransform3D.Rotation>
-                                                </RotateTransform3D>
-                                            </GeometryModel3D.Transform>
-                                        </GeometryModel3D>
-                                    </ModelVisual3D.Content>
-                                </ModelVisual3D>
-                            </Viewport3D.Children>
-                        </Viewport3D>
-                        <!-- We use a pair of nested Borders to wrap the content that's going to go on
-       each side of the rotating model.
-       The reason is that we need to be able to fade these real bits of UI in and out
-       as we transition from front to back, but we need to make sure the VisualBrush
-       in the 3D model doesn't also get faded out. So the VisualBrush uses the inner
-       Border, while the fade is applied to the outer one.-->
-                        <Border x:Name="frontWrapper">
-                            <!-- Note, it's important that this element has visuals that completely fill the space, as
-       otherwise it messes with the VisualBrush's size in the 3D model. Setting the background
-       has that effect, even a transparent one. -->
-                            <Border x:Name="frontHost" >
-                                <Border.Background>
-                                    <ImageBrush ImageSource="Img/card/back.bmp" />
-                                </Border.Background>
-                                <Border.Triggers >
-                                    <EventTrigger RoutedEvent="Grid.MouseDown">
-                                        <BeginStoryboard >
-                                            <Storyboard >
-                                                <!-- Make the Viewport3D visible only for the duration of the rotation. -->
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="vp3D" Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}" />
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:1.1" Value="{x:Static Visibility.Hidden}" />
-                                                </ObjectAnimationUsingKeyFrames>
-
-                                                <!-- Make the background element visible. (It won't actually appear until it is
-                 faded in right at the end of the animation.) -->
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="backWrapper" Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:1" Value="{x:Static Visibility.Visible}"/>
-                                                </ObjectAnimationUsingKeyFrames>
-
-
-                                                <!-- Hide the foreground element. It will already be invisible by this time
-                 because we fade it out right at the start of the animation. However, until
-                 we set its Visibility to Hidden, it will still be visible to the mouse -->
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="frontWrapper" Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.05" Value="{x:Static Visibility.Hidden}" />
-                                                </ObjectAnimationUsingKeyFrames>
-
-
-                                                <!-- Fade the front wrapper out. The Viewport3D is behind us, so it'll fade into
-                 view at this point. The reason for fading is to avoid a visible step as we
-                 switch from the real UI to the copy projected onto the 3D model. -->
-                                                <DoubleAnimation To="0" Duration="0:0:0.05" Storyboard.TargetName="frontWrapper" Storyboard.TargetProperty="Opacity" />
-
-                                                <!-- Fade the back wrapper in. Once the spin completes, we fade the real back UI
-                 in over the Viewport3D - using a fade to avoid a sudden jolt between the
-                 slightly fuzzy 3D look and the real UI. -->
-                                                <DoubleAnimation BeginTime="0:0:1.05" Duration="0:0:0.05" To="1" Storyboard.TargetName="backWrapper" Storyboard.TargetProperty="Opacity" />
-
-                                                <!-- 3D animation. Move the camera out slightly as we spin, so the model fits entirely
-                 within the field of view. Rotate the model 180 degrees. -->
-                                                <Point3DAnimation To="0,0,1.1" From="0,0,0.5" BeginTime="0:0:0.05" Duration="0:0:0.5" AutoReverse="True" DecelerationRatio="0.3"
-                           Storyboard.TargetName="camera" Storyboard.TargetProperty="(PerspectiveCamera.Position)" />
-                                                <DoubleAnimation From="0" To="180" AccelerationRatio="0.3" DecelerationRatio="0.3"
-                           BeginTime="0:0:0.05" Duration="0:0:1" Storyboard.TargetName="rotate" Storyboard.TargetProperty="Angle" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Border.Triggers>
-                                <ContentPresenter  Content="{Binding}" Visibility="Collapsed"  />
-                            </Border>
-                        </Border>
-                        <Border x:Name="backWrapper" Grid.Column="0"  Visibility="Hidden" Opacity="0">
-                            <Border x:Name="backHost" >
-                                <Border.Background>
-                                    <ImageBrush ImageSource="Img/card/1.png" />
-                                </Border.Background>
-                                <Border.Triggers>
-                                    <EventTrigger RoutedEvent="Grid.MouseDown">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ObjectAnimationUsingKeyFrames   Storyboard.TargetName="vp3D" Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}" />
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:1.1" Value="{x:Static Visibility.Hidden}" />
-                                                </ObjectAnimationUsingKeyFrames>
-
-                                                <ObjectAnimationUsingKeyFrames  Storyboard.TargetName="frontWrapper" Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:1" Value="{x:Static Visibility.Visible}"/>
-                                                </ObjectAnimationUsingKeyFrames>
-                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="backWrapper" Storyboard.TargetProperty="Visibility">
-                                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.05" Value="{x:Static Visibility.Hidden}" />
-                                                </ObjectAnimationUsingKeyFrames>
-
-                                                <DoubleAnimation To="0" Duration="0:0:0.05" Storyboard.TargetName="backWrapper" Storyboard.TargetProperty="Opacity" />
-                                                <DoubleAnimation BeginTime="0:0:1.05" Duration="0:0:0.05" Storyboard.TargetName="frontWrapper"  Storyboard.TargetProperty="Opacity" />
-
-                                                <Point3DAnimation To="0,0,1.1" From="0,0,0.5" BeginTime="0:0:0.05" Duration="0:0:0.5" AutoReverse="True" DecelerationRatio="0.3"  Storyboard.TargetName="camera"
-                           Storyboard.TargetProperty="(PerspectiveCamera.Position)" />
-                                                <DoubleAnimation From="180" To="360" AccelerationRatio="0.3" DecelerationRatio="0.3"
-                           BeginTime="0:0:0.05" Duration="0:0:1" Storyboard.TargetName="rotate" Storyboard.TargetProperty="Angle" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Border.Triggers>
-                                <ContentPresenter Content="{Binding}" Visibility="Collapsed"  />
-                            </Border>
-                        </Border>
-
-
-                    </Grid>
-                </ControlTemplate>
-                
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style x:Key="DataGridRowStyle1" TargetType="{x:Type DataGridRow}">
-        <Setter Property="Foreground" Value="#FFB3B3B3"/>
-        <Setter Property="Height" Value="25"/>
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="Template" Value="{DynamicResource DataGridRowControlTemplate1}"/>
-        <Style.Triggers>
-            <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="#FF262626"/>
-            </Trigger>
-            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
-                <Setter Property="Background" Value="#FF383838"/>
-            </Trigger>
-            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
-                <Setter Property="Background" Value="#FF333333"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-    <Style x:Key="CardButton1" TargetType="Button">
         <!--<Setter Property="Width" Value="88"/>
         <Setter Property="Height" Value="121"/>-->
         <Setter Property="FontSize" Value="13" />
@@ -522,7 +305,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Grid Width="66" Height="88">
+                    <Grid Width="99" Height="132">
                         <Border Background="{TemplateBinding Background}"></Border>
                     </Grid>
                 </ControlTemplate>
@@ -539,6 +322,24 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="DataGridRowStyle1" TargetType="{x:Type DataGridRow}">
+        <Setter Property="Foreground" Value="#FFB3B3B3"/>
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template" Value="{DynamicResource DataGridRowControlTemplate1}"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#FF262626"/>
+            </Trigger>
+            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                <Setter Property="Background" Value="#FF383838"/>
+            </Trigger>
+            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                <Setter Property="Background" Value="#FF333333"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
     <DataTemplate x:Key="listBoxTemplateInt">
         <StackPanel Margin="2">
             <DockPanel>
@@ -548,150 +349,7 @@
             </DockPanel>
         </StackPanel>
     </DataTemplate>
-    <Storyboard x:Key="move" >
-        <PointAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)" >
-            <!--Storyboard.TargetName="card"-->
-            <EasingPointKeyFrame KeyTime="0:0:0" Value="0.5,0"/>
-            <EasingPointKeyFrame KeyTime="0:0:3" Value="0.5,0"/>
-            <EasingPointKeyFrame KeyTime="0:0:4" Value="0.5,0.5"/>
-        </PointAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" >
-            <!--Storyboard.TargetName="card"-->
-            <EasingDoubleKeyFrame KeyTime="0:0:3" Value="-1"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="-1"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:4" Value="1"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-    <Storyboard x:Key="deal1">
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Top)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="316"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="640"/>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Left)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="436"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="54"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-    <Storyboard x:Key="deal2">
-        <ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty="Visibility" Duration="0:0:4">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Hidden</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-            <DiscreteObjectKeyFrame KeyTime="0:0:1.5" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Visible</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-        </ObjectAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Top)">
-            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="330"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="330"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:2" Value="640"/>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Left)">
-            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="500"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="500"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:2" Value="888"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-    <Storyboard x:Key="deal3">
-        <ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty="Visibility" Duration="0:0:4">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Hidden</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-            <DiscreteObjectKeyFrame KeyTime="0:0:3" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Visible</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-        </ObjectAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Top)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="316"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:3" Value="316"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:3.5" Value="640"/>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Left)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="436"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:3" Value="436"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:3.5" Value="78"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-    <Storyboard x:Key="deal4">
-        <ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty="Visibility" Duration="0:0:4">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Hidden</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-            <DiscreteObjectKeyFrame KeyTime="0:0:4.5" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Visible</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-        </ObjectAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Top)">
-            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="330"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:4.5" Value="330"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:5" Value="640"/>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Left)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="500"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:4.5" Value="500"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:5" Value="864"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-    <Storyboard x:Key="deal5">
-        <ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty="Visibility" Duration="0:0:4">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Hidden</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-            <DiscreteObjectKeyFrame KeyTime="0:0:6.5" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Visible</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-        </ObjectAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Top)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="316"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:6.5" Value="316"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:7" Value="640"/>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Left)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="436"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:6.5" Value="102"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:7" Value="102"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
-    <Storyboard x:Key="deal6">
-        <ObjectAnimationUsingKeyFrames  Storyboard.TargetProperty="Visibility" Duration="0:0:4">
-            <DiscreteObjectKeyFrame KeyTime="0:0:0" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Hidden</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-            <DiscreteObjectKeyFrame KeyTime="0:0:7.5" >
-                <DiscreteObjectKeyFrame.Value>
-                    <Visibility>Visible</Visibility>
-                </DiscreteObjectKeyFrame.Value>
-            </DiscreteObjectKeyFrame>
-        </ObjectAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Top)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="330"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:7.5" Value="330"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:8" Value="640"/>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Canvas.Left)">
-            <EasingDoubleKeyFrame KeyTime="0" Value="500"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:7.5" Value="500"/>
-            <EasingDoubleKeyFrame KeyTime="0:0:8" Value="840"/>
-        </DoubleAnimationUsingKeyFrames>
-    </Storyboard>
+    
     <Style x:Key="commBtn" TargetType="Button">
         <Setter Property="Foreground" Value="Black"/>
         <!--修改模板属性-->

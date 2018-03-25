@@ -8,6 +8,7 @@ namespace Bacc_front
 	public class Session
 	{
 		public int SessionId;
+        public int BoomAcc = 0;
 		public Session(int id)
 		{
 			SessionId = id;
