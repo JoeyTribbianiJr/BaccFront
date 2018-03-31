@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace Bacc_front
 {
-    public class GameAnimationGenerator
+    public class GameAnimationGenerator1
     {
         public BitmapImage BeautyBmp { get; set; }
         List<BitmapSource> images { get; set; }
@@ -24,10 +24,10 @@ namespace Bacc_front
             new double[4]{330,636,500,924},
             new double[4]{316,636,436,82},
         };
-        private double[] start_time = new double[6] { 0, 1.4, 2.8, 4.2, 10, 12 };
-        private double[] reverse_start_time = new double[6] { 6, 7, 8, 9, 11, 13 };
-        private double move_time = 0.8;
-        private double reverse_time = 0.8;
+        private double[] start_time = new double[6] { 0, 2, 4, 6, 12.5, 16 };
+        private double[] reverse_start_time = new double[6] { 8, 9, 10, 11, 14, 18 };
+        private double move_time = 0.5;
+        private double reverse_time = 0.5;
 
         public double visibleDuration;
 
@@ -43,7 +43,7 @@ namespace Bacc_front
         public List<Button> btnLst;
         private bool _hasCard5 = true;
 
-        public GameAnimationGenerator()
+        public GameAnimationGenerator1()
         {
             _window = MainWindow.Instance;
             btnLst = new List<Button>();
@@ -395,7 +395,7 @@ namespace Bacc_front
             };
             var yEnd = new EasingDoubleKeyFrame()
             {
-                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + move_time)),
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.7)),
                 Value = xy[1]
             };
             chgY.KeyFrames.Add(y0);
@@ -417,7 +417,7 @@ namespace Bacc_front
             };
             var xEnd = new EasingDoubleKeyFrame()
             {
-                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + move_time)),
+                KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.7)),
                 Value = xy[3]
             };
             chgX.KeyFrames.Add(x0);
@@ -437,7 +437,7 @@ namespace Bacc_front
         {
             var chgBg = new ObjectAnimationUsingKeyFrames();
             DiscreteObjectKeyFrame dk = new DiscreteObjectKeyFrame(background);
-            dk.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + reverse_time/2));
+            dk.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.5));
             dk.Value = background;
             chgBg.KeyFrames.Add(dk);
             Storyboard.SetTargetName(chgBg, btn.Name);
@@ -451,7 +451,7 @@ namespace Bacc_front
             var transformOrigin = new PointAnimationUsingKeyFrames();
             EasingPointKeyFrame kf1 = new EasingPointKeyFrame(new System.Windows.Point(0.5, 0), KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)));
             EasingPointKeyFrame kf2 = new EasingPointKeyFrame(new System.Windows.Point(0.5, 0), KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime)));
-            EasingPointKeyFrame kf3 = new EasingPointKeyFrame(new System.Windows.Point(0.5, 0.5), KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + reverse_time)));
+            EasingPointKeyFrame kf3 = new EasingPointKeyFrame(new System.Windows.Point(0.5, 0.5), KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 1)));
             transformOrigin.KeyFrames.Add(kf1);
             transformOrigin.KeyFrames.Add(kf2);
             transformOrigin.KeyFrames.Add(kf3);
@@ -465,7 +465,7 @@ namespace Bacc_front
             var d_transform = new DoubleAnimationUsingKeyFrames();
             EasingDoubleKeyFrame kf4 = new EasingDoubleKeyFrame(-1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0)));
             EasingDoubleKeyFrame kf5 = new EasingDoubleKeyFrame(-1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime)));
-            EasingDoubleKeyFrame kf6 = new EasingDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + reverse_time)));
+            EasingDoubleKeyFrame kf6 = new EasingDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 1)));
             d_transform.KeyFrames.Add(kf4);
             d_transform.KeyFrames.Add(kf5);
             d_transform.KeyFrames.Add(kf6);

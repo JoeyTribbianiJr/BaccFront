@@ -26,6 +26,7 @@ namespace Bacc_front
         private bool bet_hide;
         private int curEarn;
         private ObservableDictionary<BetSide, int> bet_score;
+        public int IntChoose { get; set; }
         public ObservableDictionary<BetSide, int> BetScore
         {
             get { return bet_score; }
@@ -44,7 +45,7 @@ namespace Bacc_front
         public bool Bet_hide { get => bet_hide; set => bet_hide = value; }
 
         public int denomination;
-        public BetDenomination choose_denomination { get; set; }
+        public BetDenomination Choose_denomination { get; set; }
         public int[] Denominations { get; set; }
         public int CurEarn { get => curEarn; set => curEarn = value; }
 
@@ -80,8 +81,9 @@ namespace Bacc_front
             Denominations = new int[2];
             Denominations[0] = Setting.Instance._big_chip_facevalue;
             Denominations[1] = Setting.Instance._mini_chip_facevalue;
-            choose_denomination = bd;  //押注筹码大小
-            denomination = Denominations[(int)choose_denomination];
+            Choose_denomination = bd;  //押注筹码大小
+            IntChoose = (int)Choose_denomination;
+            denomination = Denominations[(int)Choose_denomination];
         }
         #region 玩家押注的函数
         public void Bet(BetSide side)
@@ -176,7 +178,7 @@ namespace Bacc_front
         }
         public void ChangeDenomination()
         {
-            if (choose_denomination == BetDenomination.mini && Balance >= Denominations[(int)BetDenomination.big])
+            if (Choose_denomination == BetDenomination.mini && Balance >= Denominations[(int)BetDenomination.big])
             {
                 SetDenomination(BetDenomination.big);
             }
@@ -266,7 +268,7 @@ namespace Bacc_front
             {
                 SetDenomination(BetDenomination.mini);
             }
-            if (Add_score != 0)
+            if (Sub_score != 0)
             {
                 Last_sub = Sub_score;
             }

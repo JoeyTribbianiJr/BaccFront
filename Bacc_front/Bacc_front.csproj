@@ -120,7 +120,9 @@
     <Compile Include="FSM\WsState.cs" />
     <Compile Include="FSM\WsStateMachine.cs" />
     <Compile Include="FSM\WsTransition.cs" />
+    <Compile Include="Game\GameAnimations - 复制.cs" />
     <Compile Include="Game\GameTimer.cs" />
+    <Compile Include="Game\Net\MyServerConfig.cs" />
     <Compile Include="Game\Net\WaybillManager.cs" />
     <Compile Include="Game\Utils\AESEncrypt.cs" />
     <Compile Include="Game\Utils\DataTableExtensions.cs" />
@@ -234,6 +236,60 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Img\boom.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\10.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\11.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\12.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\13.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\14.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\15.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\16.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\17.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\18.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X10.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X11.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X12.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X13.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X14.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X15.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X16.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X17.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Img\chips\X18.GIF">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Img\ctr_back.jpg">

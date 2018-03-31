@@ -73,7 +73,7 @@ namespace Bacc_front.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("QYI180A80lye/8e6s3EJhQ==")]
+        [global::System.Configuration.DefaultSettingValueAttribute("HLM8PJ4hL7RE6db2B6TJ2g==")]
         public string ServerUrl {
             get {
                 return ((string)(this["ServerUrl"]));
@@ -200,6 +200,18 @@ namespace Bacc_front.Properties {
             }
             set {
                 this["middle_check_waybill_pwd"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int Room {
+            get {
+                return ((int)(this["Room"]));
+            }
+            set {
+                this["Room"] = value;
             }
         }
     }

@@ -59,7 +59,11 @@ namespace Bacc_front
 
         private void OnStartGame(object sender, RoutedEventArgs e)
         {
-            Game.Instance._isGameStarting = true;
+            
+            if( Game.Instance._isGameStarting == false)
+            {
+                //Game.Instance.GamePrinter.TestPrinter();
+            }
             if (Setting.Instance._bgm_on)
             {
                 string location = System.Environment.CurrentDirectory + "\\Wav\\BGM\\";

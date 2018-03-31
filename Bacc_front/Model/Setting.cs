@@ -1,18 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections;
-using WsUtils.SqliteEFUtils;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using Bacc_front.Properties;
 using WsUtils;
 
 namespace Bacc_front
 {
-
-
     [PropertyChanged.ImplementPropertyChanged]
     public class Setting
     {
@@ -107,7 +102,14 @@ namespace Bacc_front
         {
             game_setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(Settings.Default.GameSetting);
             //ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
-            ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
+            if (string.IsNullOrEmpty(Settings.Default.ServerUrl))
+            {
+                ServerUrl = "127.0.0.1";
+            }
+            else
+            {
+                ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
+            }
             CurSessionIndex = Settings.Default.CurrentSessionIndex;
             _is_print_bill = GetStrSetting("is_print_bill");
             _betSpeed = GetIntSetting("bet_speed");
@@ -156,7 +158,7 @@ namespace Bacc_front
             });
             game_setting.Add("is_print_bill", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 1,
                 Type = SettingItemType.strings,
                 Values = new string[2] { "打印路单", "不打印路单" }
             });
@@ -285,13 +287,13 @@ namespace Bacc_front
 
         public ObservableCollection<Player> GetJsonPlayersScore()
         {
-            var json = AESEncrypt.Decrypt(Settings.Default.JsonPlayerScores,secret_key);
+            var json = AESEncrypt.Decrypt(Settings.Default.JsonPlayerScores, secret_key);
             return JsonConvert.DeserializeObject<ObservableCollection<Player>>(json);
         }
         public void SaveJsonPlayersScoreToDefault(ObservableCollection<Player> players)
         {
             var json = JsonConvert.SerializeObject(players);
-            var text = AESEncrypt.Encrypt(json,secret_key);
+            var text = AESEncrypt.Encrypt(json, secret_key);
             Settings.Default.JsonPlayerScores = text;
             Settings.Default.Save();
         }

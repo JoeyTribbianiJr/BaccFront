@@ -27,9 +27,9 @@ namespace Bacc_front
 
         private Desk()
         {
-            Players = new ObservableCollection<Player>();
             if (Setting.Instance.GetJsonPlayersScore() == null) //如果是第一次启动游戏
             {
+                Players = new ObservableCollection<Player>();
                 for (int i = 0; i < player_num + 1; i++)
                 {
                     if (i == 12)
@@ -309,12 +309,13 @@ namespace Bacc_front
         {
             foreach (var p in Players)
             {
-                if (p.choose_denomination == BetDenomination.big)
+                if (p.Choose_denomination == BetDenomination.big)
                 {
                     if (p.Balance < p.Denominations[(int)BetDenomination.big])
                     {
-                        p.choose_denomination = BetDenomination.mini;
-                        p.denomination = p.Denominations[(int)p.choose_denomination];
+                        p.Choose_denomination = BetDenomination.mini;
+                        p.IntChoose = (int)p.Choose_denomination;
+                        p.denomination = p.Denominations[(int)p.Choose_denomination];
                     }
                 }
             }
@@ -353,6 +354,7 @@ namespace Bacc_front
                 player.Balance += player.CurEarn;
                 player.CurEarn = 0;
             }
+            Setting.Instance.SaveJsonPlayersScoreToDefault(Desk.Instance.Players);
             Desk.Instance.ChangeDenomationType();
         }
         public int CalcPlayerEarning(BetSide winner, ObservableDictionary<BetSide, int> p_bets)

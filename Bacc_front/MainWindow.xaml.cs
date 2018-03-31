@@ -53,7 +53,6 @@ namespace Bacc_front
             //WindowStyle = WindowStyle.None;
         }
 
-        
         private void MainWindow_Activated(object sender, EventArgs e)
         {
         }

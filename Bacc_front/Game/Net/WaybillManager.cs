@@ -152,7 +152,7 @@ namespace Bacc_front
                         acc.JsonScoreRecord = JsonConvert.SerializeObject(record);
 
                         db.SaveChanges();
-                    }, "第一次嘛，要有耐心哦~");
+                    }, "数据存储中...");
                 }
 
             }
@@ -227,7 +227,7 @@ namespace Bacc_front
                 MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
             }
         }
-        public void SavePlayerScoresAndBetRecords()
+        public void SaveBetRecords()
         {
             try
             {
@@ -246,7 +246,6 @@ namespace Bacc_front
                         JsonPlayerScores = live_data.JsonPlayerScores
                     };
                     db.BetScoreRecords.Add(record);
-                    Setting.Instance.SaveJsonPlayersScoreToDefault(Desk.Instance.Players);
                     db.SaveChanges();
                 }
             }

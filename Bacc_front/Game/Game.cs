@@ -197,7 +197,7 @@ namespace Bacc_front
             {
                 CurrentSession = LocalSessions.First(s => s.SessionId == SessionIndex);
             }
-            catch (Exception  e)
+            catch (Exception e)
             {
                 CurrentSession = new Session(SessionIndex);
                 //LocalSessions.Insert(SessionIndex, newSession);
@@ -276,9 +276,15 @@ namespace Bacc_front
         {
             if (Setting.Instance._is_print_bill == "打印路单" || Setting.Instance._is_print_bill == "打印不监控")
             {
+                try
                 {
                     GamePrinter.PrintWaybill();
                     _waybillPrinted = true;
+                }
+                catch (Exception ex)
+                {
+
+                    throw;
                 }
             }
             return true;
@@ -308,9 +314,8 @@ namespace Bacc_front
 
             if (timer >= 10)
             {
-                ControlBoard.Instance.Dispatcher.Invoke(new Action(() => {ControlBoard.Instance.btnStartGame.IsEnabled = true; }));
+                ControlBoard.Instance.Dispatcher.Invoke(new Action(() => { ControlBoard.Instance.btnStartGame.IsEnabled = true; }));
             }
-
             if (!_place1Played && CoreTimer.IsCountdownTick(timer, 0, _setting._check_waybill_tm))
             {
                 PlayWav("place1-");
@@ -351,13 +356,13 @@ namespace Bacc_front
                 _isInBetting = false;
                 return;
             }
-            if(Animator.btnLst != null)
+            if (Animator.btnLst != null)
             {
                 foreach (var card in Animator.btnLst)
                 {
-                    if(!_hideCards&& CoreTimer.IsCountdownTick(timer, 10, _setting._betTime))
+                    if (!_hideCards && CoreTimer.IsCountdownTick(timer, 10, _setting._betTime))
                     {
-                       card.Visibility = Visibility.Hidden;
+                        card.Visibility = Visibility.Hidden;
                         _hideCards = true;
                     }
                     else
@@ -391,8 +396,8 @@ namespace Bacc_front
             _stopBetPlayed = false;
             _hideCards = false;
             _isIn3 = false;
-            BankerStateText = "";
-            PlayerStateText = "";
+            BankerStateText = "庄";
+            PlayerStateText = "闲";
             Desk.Instance.CancelHide();
             KeyListener.CanclePressed();
         }
@@ -409,10 +414,10 @@ namespace Bacc_front
             var timer = _dealingState.Timer;
 
             CoreTimer.DoOneThingInTimespan(timer, ref _isPinCardDone, ref _isInPinCard, 0f, 1f, Animator.PinCardAnimation);
-            float endtime = 21f;
+            float endtime = 17f;
             if (CurrentRound.HandCard[1].Count == 2)
             {
-                endtime -= 4f;
+                endtime -= 3f;
             }
             Animator.visibleDuration = _setting._betTime - 10 + endtime + 8;
             //CoreTimer.DoOneThingInTimespan(timer, ref _isDeal4CardDone, ref _isDealing4Card, 2f, endtime, Animator.StartDealAnimation);
@@ -446,7 +451,6 @@ namespace Bacc_front
                 PlayWav("place1-");
                 _place1Played = true;
             }
-
             return true;
         }
         private bool IsSessionOver()
@@ -541,15 +545,13 @@ namespace Bacc_front
                 BetState = "";
             }
         }
-
-
         #region 开牌
         private void CalcEarning()
         {
             Waybill[RoundIndex].Winner = (int)CurrentRound.Winner.Item1;
             NoticeRoundOver();
 
-            Manager.SavePlayerScoresAndBetRecords();
+            Manager.SaveBetRecords();
 
             WebServer.SendSummationBetRecordToBack();
 
@@ -642,11 +644,11 @@ namespace Bacc_front
             BankerStateText = b_str;
             PlayerStateText = p_str;
         }
-        #endregion
         void SetStateText(string state)
         {
             StateText = state;
         }
+        #endregion
         #region 音乐播放器
         public void PlayWav(string name)
         {

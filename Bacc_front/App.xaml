@@ -7,6 +7,7 @@
     <Application.Resources>
 		<local:ChipVisibleConverter x:Key="ChipVisibleConverter"></local:ChipVisibleConverter>
 		<local:ChipBackgroundConverter x:Key="ChipBackgroundConverter"></local:ChipBackgroundConverter>
+        <local:ChipBackgroundMultiConverter x:Key="ChipBackgroundMultiConverter"></local:ChipBackgroundMultiConverter>
 		<local:ChipTextMarginConverter x:Key="ChipTextMarginConverter"></local:ChipTextMarginConverter>
         <local:WayBillBackgroundConverter x:Key="WayBillBackgroundConverter"></local:WayBillBackgroundConverter>
         <local:WayBillVisibleConverter x:Key="WayBillVisibleConverter"></local:WayBillVisibleConverter>

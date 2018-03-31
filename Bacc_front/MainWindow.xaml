@@ -3,7 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Title="MainWindow" Height="768" Width="1024">
     <!--WindowState="Maximized"-->
@@ -211,19 +210,19 @@
 
                 <Canvas x:Name="spPlayers" >
                     <Button DataContext="{Binding Players[0]}" Canvas.Left="291" Canvas.Top="589" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[1]}" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
+                    <!--<Button DataContext="{Binding Players[1]}" Canvas.Left="167" Canvas.Top="586" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[2]}" Canvas.Left="58" Canvas.Top="525" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[3]}" Canvas.Left="19" Canvas.Top="399" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[4]}" Canvas.Left="58" Canvas.Top="286" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[5]}" Canvas.Left="167" Canvas.Top="230" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[6]}" Canvas.Left="268" Canvas.Top="227" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[7]}" Canvas.Left="683" Canvas.Top="227" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[8]}" Canvas.Left="789" Canvas.Top="225" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[9]}" Canvas.Left="888" Canvas.Top="281" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[3]}" Canvas.Left="7" Canvas.Top="400" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[4]}" Canvas.Left="52" Canvas.Top="272" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[5]}" Canvas.Left="165" Canvas.Top="220" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[6]}" Canvas.Left="266" Canvas.Top="213" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[7]}" Canvas.Left="673" Canvas.Top="209" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[8]}" Canvas.Left="780" Canvas.Top="212" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[9]}" Canvas.Left="890" Canvas.Top="278" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[10]}" Canvas.Left="938" Canvas.Top="393" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[11]}" Canvas.Left="907" Canvas.Top="516" Style="{StaticResource ChipButton}" />
                     <Button DataContext="{Binding Players[12]}" Canvas.Left="789" Canvas.Top="581" Style="{StaticResource ChipButton}" />
-                    <Button DataContext="{Binding Players[13]}" Canvas.Left="663" Canvas.Top="590" Style="{StaticResource ChipButton}" />
+                    <Button DataContext="{Binding Players[13]}" Canvas.Left="663" Canvas.Top="590" Style="{StaticResource ChipButton}" />-->
 
                     <Button  DataContext="{Binding Players[0].CurEarn}" Canvas.Left="256" Canvas.Top="575" Style="{StaticResource EarnChipButton}" />
                     <Button  DataContext="{Binding Players[1].CurEarn}" Canvas.Left="152" Canvas.Top="564" Style="{StaticResource EarnChipButton}" />

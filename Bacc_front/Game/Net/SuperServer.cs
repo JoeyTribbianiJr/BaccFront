@@ -1,32 +1,26 @@
-﻿using Newtonsoft.Json;
+﻿using Bacc_front.Properties;
+using Newtonsoft.Json;
 using SuperSocket.SocketBase;
+using SuperSocket.SocketBase.Config;
 using SuperSocket.SocketBase.Protocol;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Windows.Forms;
-using System.Windows.Threading;
 using WsUtils;
 
 namespace Bacc_front
 {
+    
     public class SuperServer : AppServer
     {
+        
         public static AppSession appSession;
-        private AppServer appServer;
         private ImageUtils imageSender;
         private HttpClient httpClient;
         private const int port = 54322;
+        public bool Login = false;
         public SuperServer()
         {
             imageSender = new ImageUtils();
@@ -34,28 +28,34 @@ namespace Bacc_front
 
             httpClient.DefaultRequestHeaders.Connection.Add("keep-alive");
             httpClient.Timeout = TimeSpan.FromSeconds(0.5);
-            appServer = new AppServer();
             appSession = new AppSession();
         }
         public void StartServer()
         {
-            if (!appServer.Setup(port))
+            var config = new ServerConfig()
+            {
+                Port = port,
+                MaxRequestLength = 2048 *2048,
+                ReceiveBufferSize = 2048 *2048,
+                SendBufferSize = 2048*2048
+            };
+            if (!Setup(config))
             {
                 Trace.WriteLine("端口设置失败");
                 return;
             }
             //连接时
-            appServer.NewSessionConnected += appServer_NewSessionConnected;
+            NewSessionConnected += appServer_NewSessionConnected;
             //接收信息时
-            appServer.NewRequestReceived += appServer_NewRequestReceived;
+            NewRequestReceived += appServer_NewRequestReceived;
             //关闭服务时
-            appServer.SessionClosed += appServer_SessionClosed;
+            SessionClosed += appServer_SessionClosed;
             Accept();
 
         }
         private void Accept()
         {
-            if (!appServer.Start())
+            if (!Start())
             {
                 Trace.WriteLine("启动服务失败");
                 return;
@@ -68,7 +68,6 @@ namespace Bacc_front
         private void appServer_NewSessionConnected(AppSession session)
         {
             appSession = session;
-            SendFrontSettingToBack();
         }
 
         void appServer_NewRequestReceived(AppSession session, StringRequestInfo requestInfo)
@@ -79,12 +78,12 @@ namespace Bacc_front
                 case RemoteCommand.Login:
                     CheckLogin(requestInfo);
                     break;
+                case RemoteCommand.SendFrontCurSession:
+                    SendCurSessionToBack();
+                    break;
                 case RemoteCommand.ImportFrontLocalSessions:
                     SendData(RemoteCommand.ImportFrontLocalSessions, Game.Instance.LocalSessions, session);
                     break;
-                //case RemoteCommand.ReplaceWaybill:
-                //    OnReplaceWaybill(session, requestInfo);
-                //    break;
                 case RemoteCommand.ImportBack:
                     OnImportBack(session, requestInfo);
                     break;
@@ -95,7 +94,7 @@ namespace Bacc_front
                     SendBetRecordToBack();
                     break;
                 default:
-                    session.Send("Unknow ");
+                    //session.Send("Unknow ");
                     break;
             }
         }
@@ -135,26 +134,28 @@ namespace Bacc_front
             }
             else
             {
+                Login = true;
                 SendData(RemoteCommand.Login, "OK", appSession);
+                SendFrontSettingToBack();
             }
         }
         public void SendFrontPasswordToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 SendData(RemoteCommand.SendFrontPassword, Setting.Instance.PasswordMap, appSession);
             }
         }
         public void SendFrontSettingToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 SendData(RemoteCommand.SendFrontSetting, Setting.Instance.game_setting, appSession);
             }
         }
         public void SendLiveDataToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 Game.Instance.Manager.SetBackLiveData();
                 SendData(RemoteCommand.SendFrontLiveData, Game.Instance.BetBackLiveData, appSession);
@@ -162,7 +163,7 @@ namespace Bacc_front
         }
         public void SendSummationBetRecordToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 Game.Instance.Manager.SetSummationBackBetRecordData();
                 SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.BetRecordSummationJsonDataToBack, appSession);
@@ -170,7 +171,7 @@ namespace Bacc_front
         }
         public void SendBetRecordToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 Game.Instance.Manager.SetBackBetRecordData();
                 SendData(RemoteCommand.SendFrontBetRecord, Game.Instance.BetRecordJsonDataToBack, appSession);
@@ -178,14 +179,14 @@ namespace Bacc_front
         }
         public void SendWaybillToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
             }
         }
         public void SendCurSessionToBack()
         {
-            if (appSession.Connected)
+            if (appSession.Connected && Login)
             {
                 SendData(RemoteCommand.SendFrontCurSession, Game.Instance.CurrentSession, appSession);
             }
@@ -206,6 +207,7 @@ namespace Bacc_front
         //}
         void appServer_SessionClosed(AppSession session, SuperSocket.SocketBase.CloseReason value)
         {
+            Login = false;
             session.Send("服务已关闭");
         }
         void SendData(RemoteCommand command, object obj, AppSession session)
@@ -286,7 +288,7 @@ namespace Bacc_front
                     {
                         Cards = JsonConvert.SerializeObject(Game.Instance.ConvertHandCardForServerSB());
                     }
-                    url += ("?" + "msg=" + str + "&cards=" + Cards);
+                    url += ("?" + "msg=" + str + "&cards=" + Cards + "&room=" + Settings.Default.Room);
 
                     try
                     {
@@ -314,7 +316,7 @@ namespace Bacc_front
             var str = JsonConvert.SerializeObject(msg);
 
             var waybill = JsonConvert.SerializeObject(Game.Instance.ConvertWaybillForServerSB());
-            url += ("?" + "msg=" + str + "&waybill=" + waybill);
+            url += ("?" + "msg=" + str + "&waybill=" + waybill +"&room=" + Settings.Default.Room);
 
             try
             {

@@ -11,6 +11,7 @@ namespace Bacc_front
     public class Printer
     {
         public bool IsInPrinting;
+        public bool HasPaper = true;
         private static SerialPort serialPort;   //串口
         public int Fault = 0;
         public Printer(string portName)
@@ -60,7 +61,7 @@ namespace Bacc_front
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("无法打开端口1，请检查");
+                    MessageBox.Show("没有端口1或者被占用，请检查");
                     App.Current.Shutdown();
                 }
             }
@@ -199,7 +200,10 @@ namespace Bacc_front
         {
             try
             {
+                if (!TestPaper())
+                {
 
+                }
                 List<byte> data = new List<byte>();
                 data.AddRange(new byte[] { 0x1C, 0x26 });
                 string[] lines = val.Split('\n');
@@ -222,8 +226,14 @@ namespace Bacc_front
                 return false;
             }
         }
-        //测试打印机门是否关闭
-        public void PrintTest()
+
+        private bool TestPaper()
+        {
+            throw new NotImplementedException();
+        }
+
+        //测试打印机门是否打开
+        public static void PrintTest()
         {
             byte[] testbt = { 0x10, 0x04, 0x02, 0x10, 0x04, 0x04 };
             serialPort.Write(testbt, 0, testbt.Length);
@@ -247,10 +257,18 @@ namespace Bacc_front
                 Fault = 0;
             }
         }
+        public static bool TextCashBoxAndPaper()
+        {
+            OpenEPSONCashBox(1);
+            PrintTest();
+            return true;
+        }
         public static void OpenEPSONCashBox(int port)//, int a_intBaudRate, int a_intDataBits)
         {
-            System.IO.Ports.SerialPort sp = new System.IO.Ports.SerialPort();
-            sp.PortName = "COM" + port.ToString();
+            SerialPort sp = new SerialPort
+            {
+                PortName = "COM" + port.ToString()
+            };
             try
             {
                 sp.Open();
@@ -308,7 +326,6 @@ namespace Bacc_front
         }
         public void PrintWaybill()
         {
-
             var waybill = Game.Instance.CurrentSession.RoundsOfSession;
             var str = "";
             for (int i = 0; i < waybill.Count; i += 6)
