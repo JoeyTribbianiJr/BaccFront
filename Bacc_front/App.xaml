@@ -8,11 +8,13 @@
 		<local:ChipVisibleConverter x:Key="ChipVisibleConverter"></local:ChipVisibleConverter>
 		<local:ChipBackgroundConverter x:Key="ChipBackgroundConverter"></local:ChipBackgroundConverter>
         <local:ChipBackgroundMultiConverter x:Key="ChipBackgroundMultiConverter"></local:ChipBackgroundMultiConverter>
+        <local:BetRecordSmallContentConverter x:Key="BetRecordSmallContentConverter"></local:BetRecordSmallContentConverter>
 		<local:ChipTextMarginConverter x:Key="ChipTextMarginConverter"></local:ChipTextMarginConverter>
         <local:WayBillBackgroundConverter x:Key="WayBillBackgroundConverter"></local:WayBillBackgroundConverter>
         <local:WayBillVisibleConverter x:Key="WayBillVisibleConverter"></local:WayBillVisibleConverter>
         <local:WayBillContentConverter x:Key="WayBillContentConverter"></local:WayBillContentConverter>
         <local:ChipForegroundConverter x:Key="ChipForegroundConverter"></local:ChipForegroundConverter>
         <local:ConfigButtonBackgroundConverter x:Key="ConfigButtonBackgroundConverter"></local:ConfigButtonBackgroundConverter>
+        <local:PlayerScoreSumConverter x:Key="PlayerScoreSumConverter"></local:PlayerScoreSumConverter>
 	</Application.Resources>
 </Application>

@@ -9,13 +9,13 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="CurrentSessionIndex" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">-1</Value>
     </Setting>
     <Setting Name="JsonPlayerScores" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ServerUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">HLM8PJ4hL7RE6db2B6TJ2g==</Value>
+      <Value Profile="(Default)">P9GYoDWQyQCWMX61e9tVNQ==</Value>
     </Setting>
     <Setting Name="AdministratorPwd" Type="System.String" Scope="User">
       <Value Profile="(Default)">2BDQdbYmfKjQXPjeWEFdBA==</Value>

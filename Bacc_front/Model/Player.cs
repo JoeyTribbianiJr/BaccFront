@@ -37,7 +37,7 @@ namespace Bacc_front
         public int BetScoreOnTie { get; set; }
 
         public int Id { get => id; set => id = value; }
-        public int Balance { get => balance; set => balance = value; }
+        public int Balance { get => balance; set => balance = value;}
         public int Last_add { get => last_add; set => last_add = value; }
         public int Add_score { get => add_score; set => add_score = value; }
         public int Last_sub { get => last_sub; set => last_sub = value; }
@@ -115,6 +115,7 @@ namespace Bacc_front
             {
                 var add_score = Balance >= denomination ? denomination : Balance;
 
+                //第一手计算最小限注
                 if (BetScore.Values.Sum() == 0 )
                 {
                     if(denomination < Setting.Instance._min_limit_bet && Balance  >= Setting.Instance._min_limit_bet)

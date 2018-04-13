@@ -1,0 +1,187 @@
+﻿<Window x:Class="Bacc_front.BetRecord"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Bacc_front"
+        mc:Ignorable="d"
+        Title="BetRecord" Height="740" Width="1110">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Style.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition  Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Width="1080" Height="198" Margin="10"
+                BorderThickness="2" BorderBrush="LightBlue" CornerRadius="6" Padding="0">
+            <Border.Background>
+                <LinearGradientBrush  StartPoint="0,0" EndPoint="1,1" Opacity="1" >
+                    <GradientStop Offset="0" Color="LightGray"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid x:Name="grdSmallWaybill"  
+                  >
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid  x:Name="grdBigWaybill" VerticalAlignment="Stretch" Grid.Column="0"
+				Width="682" Height="372" >
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+            </Grid>
+            <GroupBox Grid.Column="1" Header="本局详情" Width="370"
+                      Margin="20,0,0,0"
+                      HorizontalAlignment="Stretch">
+                <TextBlock FontSize="14" TextWrapping="Wrap" Name="txtSessionDetails"></TextBlock>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="选择玩家" >
+                <Grid Name="gdPickPlayer" Height="50" Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <CheckBox  >1</CheckBox>
+                    <CheckBox Grid.Column="1" >2</CheckBox>
+                    <CheckBox Grid.Column="2" >3</CheckBox>
+                    <CheckBox Grid.Column="3" >4</CheckBox>
+                    <CheckBox Grid.Column="4" >5</CheckBox>
+                    <CheckBox Grid.Column="5" >6</CheckBox>
+                    <CheckBox Grid.Column="6" >7</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="0" >8</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="1" >9</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="2" >10</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="3" >11</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="4" >12</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="5" >14</CheckBox>
+                    <CheckBox Grid.Row="1" Grid.Column="6" >15</CheckBox>
+                </Grid>
+            </GroupBox>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Style="{StaticResource ColorButton}"
+                        Click="Button_Click" Margin="20,0,0,0"
+                        Width="30" Height="60" Content="全&#x0a;选"></Button>
+                <Button Style="{StaticResource ColorButton}"
+                        Click="Button_Click_1" Margin="20,0,0,0"
+                        Width="30" Height="60" Content="全&#x0a;不&#x0a;选"></Button>
+                <StackPanel Margin="20">
+                    <TextBlock Name="txtBetRate"></TextBlock>
+                    <StackPanel Height="20" Margin="0,10,0,0" Orientation="Horizontal">
+                        <TextBlock >第 </TextBlock>
+                        <ComboBox Margin="10,0,10,0" 
+                                  Name="cmbSessionStrIndex" Width="60"></ComboBox>
+                        <TextBlock > 局</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+</Window>

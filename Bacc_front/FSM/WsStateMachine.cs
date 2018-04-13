@@ -33,7 +33,7 @@ namespace WsFSM
 		{
 			if (_isTransition)
 			{
-				if(_curT.TransitionCallback ()) //执行耗时操作
+				if(_curT.TransitionCallback()) //执行耗时操作
 				{
 					DoTransition(_curT);
 				}
@@ -45,6 +45,7 @@ namespace WsFSM
 			{
 				_currentState = _defaultState;
 			}
+			_currentState.UpdateCallback(deltaTime);
 			var trans = _currentState.Transitions;
 			var count = trans.Count;
 			for (int i = 0; i < count; i++)
@@ -57,7 +58,6 @@ namespace WsFSM
 					return;
 				}
 			}
-			_currentState.UpdateCallback(deltaTime);
 		}
 
 		private void DoTransition(ITransition t)

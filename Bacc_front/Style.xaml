@@ -166,13 +166,11 @@
         <Setter Property="FontSize" Value="10" />
         <Setter Property="FontStretch" Value="Medium" />
         <Setter Property="FontWeight" Value="Black" />
-
         <Setter Property="Content" >
             <Setter.Value>
                 <Binding Path="." ></Binding>
             </Setter.Value>
         </Setter>
-
         <Setter Property="Visibility" >
             <Setter.Value>
                 <Binding Path="." Converter="{StaticResource ChipVisibleConverter}"></Binding>
@@ -348,7 +346,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
+
     <DataTemplate x:Key="listBoxTemplateInt">
         <StackPanel Margin="2">
             <DockPanel>
@@ -358,7 +356,107 @@
             </DockPanel>
         </StackPanel>
     </DataTemplate>
-    
+
+    <Style x:Key="BetRecordSmallWaybillButton" TargetType="Button">
+        <Setter Property="Width" Value="16"></Setter>
+        <Setter Property="Height" Value="16"></Setter>
+        <!--<Setter Property="Margin" Value="1"></Setter>-->
+        <Setter Property="FontFamily" Value="隶书"></Setter>
+        <!--<Setter Property="FontSize" Value="17"></Setter>-->
+        <Setter Property="FontWeight" Value="ExtraBold"></Setter>
+        <Setter Property="VerticalAlignment" Value="Center"></Setter>
+        <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+        <Setter Property="Foreground" Value="White"></Setter>
+        <Setter Property="BorderThickness" Value="0"></Setter>
+        <!--<Setter Property="Content" Value="big"></Setter>-->
+        <Setter Property="Content">
+            <Setter.Value>
+                <MultiBinding Converter="{StaticResource BetRecordSmallContentConverter}">
+                    <Binding Path="DeskBanker"></Binding>
+                    <Binding Path="DeskTie"></Binding>
+                    <Binding Path="DeskPlayer"></Binding>
+                    <Binding Path="Winner"></Binding>
+                </MultiBinding>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}" CornerRadius="0" 
+                                BorderThickness="0" 
+                                >
+                            <ContentPresenter Name="BtnContent" Height="16" Width="16"
+											  HorizontalAlignment="Center"
+             TextBlock.TextAlignment="Center" Margin="0,-7,0,0"
+             VerticalAlignment="Center" TextBlock.FontSize="18"
+											  Content="{TemplateBinding Content}"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Background" >
+            <Setter.Value>
+                <Binding Path="Winner" Converter="{StaticResource WayBillBackgroundConverter}" />
+            </Setter.Value>
+        </Setter>
+        <!--<Setter Property="Visibility" >
+            <Setter.Value>
+                <Binding Path="." Converter="{StaticResource WayBillVisibleConverter}" />
+            </Setter.Value>
+        </Setter>-->
+    </Style>
+    <Style x:Key="BetRecordBigWaybillBlock" TargetType="Button">
+        <Setter Property="Width" Value="60"></Setter>
+        <Setter Property="Height" Value="60"></Setter>
+        <Setter Property="FontFamily" Value="隶书"></Setter>
+        <Setter Property="FontSize" Value="18"></Setter>
+        <Setter Property="FontWeight" Value="UltraBold"></Setter>
+        <Setter Property="Margin" Value="1"></Setter>
+        <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
+        <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
+        <Setter Property="TextBlock.TextAlignment" Value="Left"></Setter>
+        <!--<Setter Property="Content" Value="jfkdjdkl" ></Setter>
+        <Setter Property="BorderBrush">
+            <Setter.Value>
+                 <Binding Path="Winner" Converter="{StaticResource WayBillBackgroundConverter}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderThickness" Value="3" ></Setter>-->
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border Background="White" CornerRadius="6" 
+                                BorderThickness="3" >
+                            <Border.BorderBrush>
+                                <Binding Path="Winner" Converter="{StaticResource WayBillBackgroundConverter}" />
+                            </Border.BorderBrush>
+                            <StackPanel Margin="2,0,0,2" Orientation="Vertical">
+                                <TextBlock Height="18" Text="{Binding  DeskBanker }" Foreground="Red" FontStretch="Medium"></TextBlock>
+                                <TextBlock Height="18" Text="{Binding  DeskTie}" Foreground="Green"></TextBlock>
+                                <TextBlock Height="18" Text="{Binding  DeskPlayer}" Foreground="Blue"></TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!--<Setter Property="Content" >
+            <Setter.Value>
+                <Binding Path="Winner" Converter="{StaticResource WayBillContentConverter}"></Binding>
+            </Setter.Value>
+        </Setter>-->
+        <!--<Setter Property="Visibility" >
+            <Setter.Value>
+                <Binding Path="." Converter="{StaticResource WayBillVisibleConverter}"></Binding>
+            </Setter.Value>
+        </Setter>-->
+    </Style>
     <Style x:Key="commBtn" TargetType="Button">
         <Setter Property="Foreground" Value="Black"/>
         <!--修改模板属性-->

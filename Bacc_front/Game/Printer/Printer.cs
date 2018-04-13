@@ -11,7 +11,8 @@ namespace Bacc_front
     public class Printer
     {
         public bool IsInPrinting;
-        public bool HasPaper = true;
+        public static bool HasPaper = true;
+        public static bool IsDoorClosed = true;
         private static SerialPort serialPort;   //串口
         public int Fault = 0;
         public Printer(string portName)
@@ -34,15 +35,13 @@ namespace Bacc_front
         {
             try
             {
-                //
-                //串口初始化
-                //
                 serialPort = new SerialPort();
                 serialPort.PortName = "COM1";
                 serialPort.BaudRate = 9600;//波特率
                 serialPort.Parity = System.IO.Ports.Parity.Odd;//奇校验
                 serialPort.StopBits = System.IO.Ports.StopBits.One;//停止位
                 serialPort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
+                //serialPort.PinChanged += SerialPort_PinChanged;
                 OpenPort();
             }
             catch (Exception e)
@@ -62,7 +61,7 @@ namespace Bacc_front
                 catch (Exception e)
                 {
                     MessageBox.Show("没有端口1或者被占用，请检查");
-                    App.Current.Shutdown();
+                    //App.Current.Shutdown();
                 }
             }
         }
@@ -200,12 +199,19 @@ namespace Bacc_front
         {
             try
             {
-                if (!TestPaper())
-                {
-
-                }
                 List<byte> data = new List<byte>();
-                data.AddRange(new byte[] { 0x1C, 0x26 });
+                data.AddRange(new byte[] { 0x1C, 0x26, 0x1B, 0x61, 0x01, });
+                var beilv = new byte[] { 0x1C, 0X21, 0x0C, };
+                if (Setting.Instance._print_font == "大字体路单")
+                {
+                    var big_font = new byte[] { 0x1D, 0X21, 0x11, };
+                    data.AddRange(big_font);
+                }
+                if (Setting.Instance._print_font == "小字体路单")
+                {
+                    var mini_font = new byte[] { 0x1D, 0X21, 0x00, };
+                    data.AddRange(mini_font);
+                }
                 string[] lines = val.Split('\n');
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -227,53 +233,104 @@ namespace Bacc_front
             }
         }
 
-        private bool TestPaper()
+        //测试打印机是否缺纸
+        public static void PaperTest()
         {
-            throw new NotImplementedException();
-        }
-
-        //测试打印机门是否打开
-        public static void PrintTest()
-        {
-            byte[] testbt = { 0x10, 0x04, 0x02, 0x10, 0x04, 0x04 };
+            byte[] testbt = { 0x10, 0x04, 0x04 };
             serialPort.Write(testbt, 0, testbt.Length);
-            System.Threading.Thread.Sleep(100);
+            //System.Threading.Thread.Sleep(100);
+        }
+        //测试打印机是否开门
+        public static void DoorTest()
+        {
+            byte[] testbt = { 0x10, 0x04, 0x02 };
+            serialPort.Write(testbt, 0, testbt.Length);
+            //System.Threading.Thread.Sleep(100);
+        }
+        private void SerialPort_PinChanged(object sender, SerialPinChangedEventArgs e)
+        {
+            // 如果上面说的三个输入信号中，任意一个输入发生变化
+            // 都会引发PinChanged事件。因此，需要判断究竟是哪个
+            // 引脚信号变化引发此事件
+            bool b;
+            try
+            {
+                switch (e.EventType)
+                {
+                    case System.IO.Ports.SerialPinChange.CDChanged:
+                        b = serialPort.CDHolding;
+                        break;
+                    case System.IO.Ports.SerialPinChange.CtsChanged:
+                        b = serialPort.CtsHolding;
+                        break;
+                    case System.IO.Ports.SerialPinChange.DsrChanged:
+                        b = serialPort.DsrHolding;
+                        if (!b && Setting.Instance._is_print_bill == "打印路单" && !Game.Instance._isShulffling)
+                        {
+                            Game.Instance.CoreTimer.StopTimer();
+                            //ControlBoard.Instance.btnStartGame.IsEnabled = true;
+                            MessageBox.Show("打印机故障，本局作废");
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
         }
         //主要是在从COM端口中接收数据时触发
         public void sp_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            byte[] receive = new byte[2];
-            serialPort.Read(receive, 0, 8);
-            if (receive[0] != 80)
+            byte[] door = new byte[1] { 0x00 };
+            try
             {
-                Fault = 1;
+                serialPort.Read(door, 0, 1);
+                if (door[0] == 0x00)
+                {
+                    return;
+                }
+                if (door[0] == 0x1E)
+                {
+                    HasPaper = true;
+                }
+                if (door[0] == 0x7E)
+                {
+                    HasPaper = false;
+                }
+                if (door[0] == 0x44)
+                {
+                    IsDoorClosed = true;
+                }
+                if (door[0] == 0x88)
+                {
+                    IsDoorClosed = false;
+                }
+                if (Setting.Instance._is_print_bill == "打印路单" && Game.Instance._isGameStarting && !Game.Instance._isShulffling)
+                {
+                    if (door[0] == 0x88)
+                    {
+                        IsDoorClosed = false;
+                        MessageBox.Show("打印机门开，本局作废");
+                        Game.Instance.CoreTimer.StopTimer();
+                    }
+                }
             }
-            else if (receive[1] != 13)
+            catch (Exception ex)
             {
-                Fault = 2;
+#if DEBUG
+                MessageBox.Show(door[0].ToString() + ex.Message + ex.StackTrace);
+#endif
+
             }
-            else
-            {
-                Fault = 0;
-            }
-        }
-        public static bool TextCashBoxAndPaper()
-        {
-            OpenEPSONCashBox(1);
-            PrintTest();
-            return true;
         }
         public static void OpenEPSONCashBox(int port)//, int a_intBaudRate, int a_intDataBits)
         {
-            SerialPort sp = new SerialPort
-            {
-                PortName = "COM" + port.ToString()
-            };
             try
             {
-                sp.Open();
                 byte[] byteA = { 0x1B, 0x70, 0x00, 0x05, 0x03 };
-                sp.Write(byteA, 0, byteA.Length);
+                serialPort.Write(byteA, 0, byteA.Length);
                 System.Threading.Thread.Sleep(100);
             }
             catch (Exception ex)
@@ -282,55 +339,20 @@ namespace Bacc_front
             }
             finally
             {//如果端口被占用需要重新设置
-                sp.Close();
             }
         }
 
-        public void TestPrinter(object sender, EventArgs e)
-        {
-            //if (Setting.Instance._is_print_bill == "打印路单" || Setting.Instance._is_print_bill == "打印不监控")
-            //{
-            //    {
-            //    }
-            //}
-            if (Setting.Instance._is_print_bill == "打印路单")
-            {
-                try
-                {
-                    PrintTest();
-                    if (Game.Instance.GamePrinter.Fault != 0)
-                    {
-                        HandlePrinterFault();
-                    }
-                }
-                catch (Exception ex)
-                {
-                }
-                finally
-                {
-                }
-            }
-        }
-        public void HandlePrinterFault()
-        {
-            var str = Game.Instance.GamePrinter.Fault == 1 ? "钱箱被打开" : "打印机缺纸";
-            Game.Instance.CoreTimer.StopTimer();
-            var result = MessageBox.Show(str, "警告", MessageBoxButton.OK);
-            Game.Instance.CoreTimer.StopPrintTestTimer();
-            if (result == MessageBoxResult.OK)
-            {
-                PrintTest();
-                Game.Instance.Start();
-                Game.Instance.CoreTimer.StartPrintTestTimer();
-            }
-        }
         public void PrintWaybill()
         {
+            var title = "百乐2号\n";
+            var cur_date = DateTime.Now.ToString("yyyy年M月d日\n");
+            var cur_time = DateTime.Now.ToString("HH:mm:ss\n");
+            var s_idx = "第" + Game.Instance._sessionStrIndex + "局\n";
             var waybill = Game.Instance.CurrentSession.RoundsOfSession;
-            var str = "";
-            for (int i = 0; i < waybill.Count; i += 6)
+            var str = title + cur_date + cur_time + s_idx;
+            for (int j = 0; j < 6; j++)
             {
-                for (int j = 0; j < 6; j++)
+                for (int i = 0; i < waybill.Count; i += 6)
                 {
                     var winner = waybill[i + j].Winner.Item1;
                     Type t = winner.GetType();

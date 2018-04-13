@@ -37,7 +37,7 @@ namespace Bacc_front
         public int _betTime;
         public int _round_num_per_session;
         public int _COM_PORT = 1;
-        public bool is_cut_bill;
+        public string _print_font;
         public string _is_print_bill;
         public int _betSpeed;    //10,20,30,40,50,60,70,80,90,100。0是不连续押分
 
@@ -110,7 +110,8 @@ namespace Bacc_front
             {
                 ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
             }
-            CurSessionIndex = Settings.Default.CurrentSessionIndex;
+            //保存的是上一局的局数
+            CurSessionIndex = Settings.Default.CurrentSessionIndex ;
             _is_print_bill = GetStrSetting("is_print_bill");
             _betSpeed = GetIntSetting("bet_speed");
             _round_num_per_session = GetIntSetting("round_num_per_session");
@@ -127,6 +128,7 @@ namespace Bacc_front
             _desk_limit_red = GetIntSetting("desk_limit_red");
             _tie_limit_red = GetIntSetting("tie_limit_red");
             _limit_red_on_3sec = GetStrSetting("limit_red_on_3sec") == "超限红可试分" ? true : false;
+            _print_font = GetStrSetting("print_font");
             _single_double = GetStrSetting("single_double");
             _bgm_on = GetStrSetting("bgm") == "背景音乐开" ? true : false;
             _boom = GetIntSetting("boom");
@@ -139,7 +141,8 @@ namespace Bacc_front
                 player.Denominations[0] = _big_chip_facevalue;
                 player.Denominations[1] = _mini_chip_facevalue;
             }
-            Game.Instance.SessionIndex = CurSessionIndex;
+            Game.Instance.SessionIndex = CurSessionIndex;   //读取的是上一局数
+            Game.Instance.NewSession(); //局数加1
         }
         private void InitGameSetting()
         {
@@ -150,11 +153,11 @@ namespace Bacc_front
                 Type = SettingItemType.integer,
                 Values = new string[2] { "热敏打印机:1", "热敏打印机:2" }
             });
-            game_setting.Add("is_cut_bill", new SettingItem()
+            game_setting.Add("print_font", new SettingItem()
             {
                 SelectedIndex = 0,
                 Type = SettingItemType.strings,
-                Values = new string[2] { "切单", "不切单" }
+                Values = new string[2] { "小字体路单", "大字体路单" }
             });
             game_setting.Add("is_print_bill", new SettingItem()
             {
@@ -196,7 +199,7 @@ namespace Bacc_front
             {
                 SelectedIndex = 0,
                 Type = SettingItemType.integer,
-                Values = new string[] { "押分时间:10", "押分时间:15", "押分时间:20", "押分时间:30", "押分时间:35", "押分时间:40", "押分时间:45", "押分时间:50", "押分时间:55", "押分时间:60", "押分时间:65", "押分时间:70", "押分时间:75", "押分时间:80", "押分时间:90", }
+                Values = new string[] { "押分时间:10", "押分时间:15", "押分时间:20", "押分时间:25", "押分时间:30", "押分时间:35", "押分时间:40", "押分时间:45", "押分时间:50", "押分时间:55", "押分时间:60", "押分时间:65", "押分时间:70", "押分时间:75", "押分时间:80", "押分时间:90", }
             });
             game_setting.Add("big_chip_facevalue", new SettingItem()
             {
@@ -305,7 +308,7 @@ namespace Bacc_front
             PasswordMap.Add("manager_pwd", AESEncrypt.Decrypt(set.manager_pwd, secret_key));
             PasswordMap.Add("boss_pwd", AESEncrypt.Decrypt(set.boss_pwd, secret_key));
             PasswordMap.Add("audit_account_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
-            PasswordMap.Add("audit_bet_record_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
+            PasswordMap.Add("audit_bet_record_pwd", AESEncrypt.Decrypt(set.audit_bet_record_pwd, secret_key));
             PasswordMap.Add("quit_front_pwd", AESEncrypt.Decrypt(set.quit_front_pwd, secret_key));
             PasswordMap.Add("shutdown_pwd", AESEncrypt.Decrypt(set.shutdown_pwd, secret_key));
             PasswordMap.Add("clear_account_pwd", AESEncrypt.Decrypt(set.clear_account_pwd, secret_key));

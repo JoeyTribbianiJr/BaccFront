@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bacc_front"
+        xmlns:ex="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="ControlBoard" Height="768" Width="1024">
     <Window.Resources>
@@ -36,33 +37,36 @@
             <RowDefinition Height="8.2*"></RowDefinition>
             <RowDefinition Height="1.8*"></RowDefinition>
         </Grid.RowDefinitions>
-        <DataGrid Name="dgScore" SelectionUnit="FullRow"
+        <StackPanel>
+            <DataGrid Name="dgScore" SelectionUnit="FullRow"
                   ColumnWidth="*" 
                   SelectionChanged="dgScore_SelectionChanged"
                   KeyboardNavigation.TabNavigation="None"
+                  ItemsSource="{Binding Players}"
                   SelectedIndex="0"
                   AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="28"
                   CanUserSortColumns="False"   Margin="10" IsReadOnly="True"
                   CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
                   CanUserReorderColumns="False" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" >
-            <DataGrid.Background>
-                <DrawingBrush Opacity="0.9"></DrawingBrush>
-            </DataGrid.Background>
-            <DataGrid.Columns >
-                <DataGridTextColumn FocusManager.IsFocusScope="False" FontStyle="Oblique" Header="座位" Width="150" Binding="{Binding Id}" />
-                <DataGridTextColumn Header="上分"  FontStyle="Oblique" Binding="{Binding Add_score}" />
-                <DataGridTextColumn Header="最后上分" FontStyle="Oblique"  Binding="{Binding Last_add}" />
-                <DataGridTextColumn Header="当前分数" FontStyle="Normal"  Binding="{Binding Balance}" >
-                    <DataGridTextColumn.ElementStyle>
-                        <Style>
-                            <Setter Property="TextBlock.Background"  Value="skyblue"></Setter>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="退分" FontStyle="Oblique"  Binding="{Binding Sub_score}" />
-                <DataGridTextColumn Header="最后退分" FontStyle="Oblique"  Binding="{Binding Last_sub}" />
-            </DataGrid.Columns>
-        </DataGrid>
+                <DataGrid.Background>
+                    <DrawingBrush Opacity="0.9"></DrawingBrush>
+                </DataGrid.Background>
+                <DataGrid.Columns >
+                    <DataGridTextColumn FocusManager.IsFocusScope="False" FontStyle="Oblique" Header="座位" Width="150" Binding="{Binding Id}" />
+                    <DataGridTextColumn Header="上分"  FontStyle="Oblique" Binding="{Binding Add_score}" />
+                    <DataGridTextColumn Header="最后上分" FontStyle="Oblique"  Binding="{Binding Last_add}" />
+                    <DataGridTextColumn Header="当前分数" FontStyle="Normal"  Binding="{Binding Balance}" >
+                        <DataGridTextColumn.ElementStyle>
+                            <Style>
+                                <Setter Property="TextBlock.Background"  Value="skyblue"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="退分" FontStyle="Oblique"  Binding="{Binding Sub_score}" />
+                    <DataGridTextColumn Header="最后退分" FontStyle="Oblique"  Binding="{Binding Last_sub}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
 
         <Grid Grid.Row="1" Margin="5,0,5,10">
             <Grid.ColumnDefinitions>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -117,6 +119,7 @@ namespace Bacc_front
     //        throw new NotImplementedException();
     //    }
     //}
+
     public class ChipBackgroundMultiConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
@@ -249,7 +252,8 @@ namespace Bacc_front
             {
                 return new SolidColorBrush(Colors.Green);
             }
-            return new SolidColorBrush(Colors.AliceBlue);
+            //return new SolidColorBrush(Colors.AliceBlue);
+            return new SolidColorBrush(Colors.Red);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -324,6 +328,56 @@ namespace Bacc_front
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class PlayerScoreSumConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var ps = (ObservableCollection<Player>)value;
+            //DataTable table = WsUtils.DataTableExtensions.ToDataTable(ps);
+            DataTable table = new DataTable();
+            table.Columns.Add("Title", typeof(string));
+            table.Columns.Add("Add_score", typeof(int));
+            table.Columns.Add("Last_add", typeof(int));
+            table.Columns.Add("Balance", typeof(int));
+            table.Columns.Add("Last_sub", typeof(int));
+            table.Columns.Add("Sub_score", typeof(int));
+            var dr = table.NewRow();
+            dr["Title"] = "总 计";
+            dr["Add_score"] = ps.Sum(p => p.Add_score);
+            dr["Last_add"] = ps.Sum(p => p.Last_add);
+            dr["Balance"] = ps.Sum(p => p.Balance);
+            dr["Last_sub"] = ps.Sum(p => p.Last_sub);
+            dr["Sub_score"] = ps.Sum(p => p.Sub_score);
+            table.Rows.Add(dr);
+            return table;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class BetRecordSmallContentConverter: IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            var winner = (int)values[3];
+            if(winner == (int)WinnerEnum.none)
+            {
+                return "";
+            }
+            var b = (int)values[0];
+            var t = (int)values[1];
+            var p = (int)values[2];
+            var profit = Desk.GetProfit(winner, b, p, t);
+            return profit > 0 ? "+" :(profit == 0)?"": "-";
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

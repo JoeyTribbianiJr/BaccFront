@@ -6,12 +6,19 @@ using WsUtils;
 
 namespace Bacc_front
 {
-
     [PropertyChanged.ImplementPropertyChanged]
     public class Desk
     {
         private const int player_num = 14;
-        public ObservableCollection<Player> Players { get => players; set => players = value; }
+        public ObservableCollection<Player> Players
+        {
+            get => players;
+            set
+            {
+                players = value;
+                
+            }
+        }
         public Dictionary<BetSide, int> desk_amount;
         public static Desk Instance
         {
@@ -27,6 +34,7 @@ namespace Bacc_front
 
         private Desk()
         {
+            Players = new ObservableCollection<Player>();
             if (Setting.Instance.GetJsonPlayersScore() == null) //如果是第一次启动游戏
             {
                 Players = new ObservableCollection<Player>();
@@ -57,7 +65,6 @@ namespace Bacc_front
                 Players = players;
             }
             //ControlBoard.Instance.dgScore.ItemsSource = Players;
-
             desk_amount = new Dictionary<BetSide, int>()
             {
                 {BetSide.banker,0 },
@@ -65,6 +72,7 @@ namespace Bacc_front
                 {BetSide.tie,0 },
             };
         }
+
         public ObservableCollection<AddSubScoreRecord> CreateNewScoreRecord()
         {
             var accounts = new ObservableCollection<AddSubScoreRecord>();
@@ -190,16 +198,16 @@ namespace Bacc_front
                     break;
                 case BetSide.tie:
                     desk_red = add_score + t_amount;
-                    if(desk_red >= _setting._tie_limit_red)
+                    if (desk_red >= _setting._tie_limit_red)
                     {
                         return _setting._tie_limit_red - t_amount;
                     }
                     break;
                 case BetSide.player:
-                    desk_red = Math.Abs(add_score+ p_amount - b_amount);
-                    if(desk_red >= total_limit)
+                    desk_red = Math.Abs(add_score + p_amount - b_amount);
+                    if (desk_red >= total_limit)
                     {
-                        return total_limit - (b_amount - p_amount);
+                        return total_limit - (p_amount - b_amount);
                     }
                     break;
                 default:
@@ -286,7 +294,7 @@ namespace Bacc_front
 
             var res = new int[3];
             res[0] = _setting._total_limit_red;
-            res[1] =  _setting._total_limit_red;
+            res[1] = _setting._total_limit_red;
             if (can_cancle_bet == 0)    //根据限红自动调整
             {
                 var banker = desk_amount[BetSide.banker];
@@ -429,40 +437,42 @@ namespace Bacc_front
                     playerDrawStatus = false;
 
                 //Determine Banker Hand
-                //if (playerDrawStatus == false)
-                //{
-                //    if (handValues[1] < 6)
-                //        bankerDrawStatus = true;
-                //}
-                //else
-                //{
-                if (handValues[1] < 3)
-                    bankerDrawStatus = true;
-                else
+                if (playerDrawStatus == false)
                 {
-                    switch (handValues[1])
+                    if (handValues[1] < 6)
                     {
-                        case 3:
-                            if (playerThirdCard != 8)
-                                bankerDrawStatus = true;
-                            break;
-                        case 4:
-                            if (playerThirdCard > 1 && playerThirdCard < 8)
-                                bankerDrawStatus = true;
-                            break;
-                        case 5:
-                            if (playerThirdCard > 3 && playerThirdCard < 8)
-                                bankerDrawStatus = true;
-                            break;
-                        case 6:
-                            if (playerThirdCard > 5 && playerThirdCard < 8)
-                                bankerDrawStatus = true;
-                            break;
-                        default:
-                            break;
+                        bankerDrawStatus = true;
                     }
                 }
-                //}
+                else
+                {
+                    if (handValues[1] < 3)
+                        bankerDrawStatus = true;
+                    else
+                    {
+                        switch (handValues[1])
+                        {
+                            case 3:
+                                if (playerThirdCard != 8)
+                                    bankerDrawStatus = true;
+                                break;
+                            case 4:
+                                if (playerThirdCard > 1 && playerThirdCard < 8)
+                                    bankerDrawStatus = true;
+                                break;
+                            case 5:
+                                if (playerThirdCard > 3 && playerThirdCard < 8)
+                                    bankerDrawStatus = true;
+                                break;
+                            case 6:
+                                if (playerThirdCard > 5 && playerThirdCard < 8)
+                                    bankerDrawStatus = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
 
             //deal banker third card
@@ -501,8 +511,23 @@ namespace Bacc_front
                 return winner;
             }
         }
-        #endregion
 
+        public static int GetProfit(int winner, int banker, int player, int tie)
+        {
+            var side = (WinnerEnum)winner;
+            switch (side)
+            {
+                case WinnerEnum.banker:
+                    return (player + tie - (int)Math.Ceiling(BANKER_ODDS * banker));
+                case WinnerEnum.tie:
+                    return player + banker - (int)Math.Ceiling(TIE_ODDS* tie);
+                case WinnerEnum.player:
+                    return banker + tie - (int)Math.Ceiling(PLAYER_ODDS * player);
+                default:
+                    return 0;
+            }
+        }
+        #endregion
         #region 私有变量
         private const float BANKER_ODDS = 0.95f;
         private const float PLAYER_ODDS = 1;

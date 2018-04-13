@@ -15,6 +15,15 @@ using Bacc_front.Properties;
 
 namespace Bacc_front
 {
+    public class SumLine
+    {
+        public string Title { get; set; }
+        public int Add_score { get; set; }
+        public int Last_add { get; set; }
+        public int Balance { get; set; }
+        public int Sub_score { get; set; }
+        public int Last_sub { get; set; }
+    }
     /// <summary>
     /// ControlBoard.xaml 的交互逻辑
     /// </summary>
@@ -31,15 +40,22 @@ namespace Bacc_front
         public int ServerCountdown { get; set; }
         public ObservableCollection<Player> Players { get; set; }
         public static ControlBoard Instance { get; set; }
+
+        public ObservableCollection<SumLine> ScoreSum { get; set; }
         private Dictionary<string, SettingItem> TempSettings = new Dictionary<string, SettingItem>();
+        //private SumLine scoreSum;
+        
         public ControlBoard()
         {
             InitializeComponent();
             Instance = this;
+            ScoreSum = new ObservableCollection<SumLine>();
             ServerCountdown = 0;
             player = new MediaPlayer();
 
-            dgScore.ItemsSource = Desk.Instance.Players;
+            //dgScore.ItemsSource = Desk.Instance.Players;
+            dgScore.DataContext = Desk.Instance;
+            //dgSum.DataContext = Desk.Instance;
             lstButton.ItemsSource = Setting.Instance.game_setting;
 
             KeyDown += Game.Instance.KeyListener.Window_KeyDown;
@@ -48,6 +64,72 @@ namespace Bacc_front
             //WindowState = WindowState.Minimized;
             //Activated += ControlBoard_Activated;
             //WindowStyle = WindowStyle.None;
+        }
+        private void OnConfig(object sender, RoutedEventArgs e)
+        {
+            if (grdConfig.Visibility == Visibility.Hidden)
+            {
+                //打开配置页面
+                //btnStartGame.IsEnabled = false;
+                gdAddBtns.IsEnabled = false;
+
+                txtActiveSessionIndex.Text = Game.Instance._sessionStrIndex;
+                grdConfig.Visibility = Visibility.Visible;
+                btnConfig.Content = "退出";
+                btnConfig.Background = new SolidColorBrush(Colors.OrangeRed);
+            }
+            else
+            {
+                //保存参数
+                if (int.TryParse(txtActiveSessionIndex.Text, out int session_str_index) && 1 <= session_str_index && session_str_index <= Setting.max_session_num)
+                {
+                    SaveSetting(session_str_index );
+                    spConfigLst.Visibility = Visibility.Hidden;
+                    lstButton.Visibility = Visibility.Hidden;
+                    btnAnalyzeWaybill.Visibility = Visibility.Hidden;
+                    btnClearAccount.Visibility = Visibility.Hidden;
+                    spAccount.Visibility = Visibility.Hidden;
+                    btnShudown.Visibility = Visibility.Visible;
+
+                    grdConfig.Visibility = Visibility.Hidden;
+
+                    btnConfig.Content = "配置";
+                    btnConfig.Background = new SolidColorBrush(Colors.MediumSeaGreen);
+                    gdAddBtns.IsEnabled = true;
+                    //btnStartGame.IsEnabled = true;
+                }
+                else
+                {
+                    MessageBox.Show("请输入1-" + Setting.max_session_num + "的数字");
+                    return;
+                }
+            }
+        }
+        public void SaveSetting(int session_index)
+        {
+            Settings.Default.GameSetting = JsonConvert.SerializeObject(Setting.Instance.game_setting);
+            Settings.Default.CurrentSessionIndex = session_index - 2;// setting.default里始终保存上一局局数
+            Settings.Default.Save();
+
+            Setting.Instance.ResetGameSetting();
+        }
+
+        public void Players_CollectionChanged()
+        {
+            var ps = Desk.Instance.Players;
+            var sl = new SumLine
+            {
+                Title = "总计",
+                Add_score = ps.Sum(p => p.Add_score),
+                Last_add = ps.Sum(p => p.Last_add),
+                Balance = ps.Sum(p => p.Balance),
+                Last_sub = ps.Sum(p => p.Last_sub),
+                Sub_score = ps.Sum(p => p.Sub_score)
+            };
+            ScoreSum = new ObservableCollection<SumLine>
+                {
+                    sl
+                };
         }
 
         private void ControlBoard_Activated(object sender, EventArgs e)
@@ -59,33 +141,32 @@ namespace Bacc_front
 
         private void OnStartGame(object sender, RoutedEventArgs e)
         {
-            
-            if( Game.Instance._isGameStarting == false)
+            if (Game.Instance._isShulffling)
             {
-                //Game.Instance.GamePrinter.TestPrinter();
+                Game.Instance.BreakShuffle();
             }
-            if (Setting.Instance._bgm_on)
+            else
             {
-                string location = System.Environment.CurrentDirectory + "\\Wav\\BGM\\";
-                var wavs = System.IO.Directory.GetFiles(location);
-                var rdm = new Random().Next(wavs.Length);
-                var bgm = wavs[rdm];
-                try
+                btnStartGame.IsEnabled = false;
+                if (Setting.Instance._bgm_on)
                 {
-                    player.Open(new Uri(bgm, UriKind.Absolute));
-                    player.MediaEnded += LoopPlay;
-                    player.Play();
+                    string location = System.Environment.CurrentDirectory + "\\Wav\\BGM\\";
+                    var wavs = System.IO.Directory.GetFiles(location);
+                    var rdm = new Random().Next(wavs.Length);
+                    var bgm = wavs[rdm];
+                    try
+                    {
+                        player.Open(new Uri(bgm, UriKind.Absolute));
+                        player.MediaEnded += LoopPlay;
+                        player.Play();
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("打开背景音乐失败");
+                    }
                 }
-                catch (Exception)
-                {
-                    MessageBox.Show("打开背景音乐失败");
-                }
+                Game.Instance.Start();
             }
-
-            btnStartGame.IsEnabled = false;
-            var game = Game.Instance;
-            game.Start();
-            //Keyboard.Press(Key.Tab);
         }
         private void LoopPlay(object sender, EventArgs e)
         {
@@ -189,57 +270,7 @@ namespace Bacc_front
                 MessageBox.Show("未选中玩家");
             }
         }
-        private void OnConfig(object sender, RoutedEventArgs e)
-        {
-            if (grdConfig.Visibility == Visibility.Hidden)
-            {
-                //打开配置页面
-                btnStartGame.IsEnabled = false;
-                gdAddBtns.IsEnabled = false;
-
-                txtActiveSessionIndex.Text = (Game.Instance.SessionIndex + 2).ToString();
-                grdConfig.Visibility = Visibility.Visible;
-                btnConfig.Content = "退出";
-                btnConfig.Background = new SolidColorBrush(Colors.OrangeRed);
-            }
-            else
-            {
-                //保存参数
-                if (int.TryParse(txtActiveSessionIndex.Text, out int session_index) && 1 <= session_index && session_index <= Setting.max_session_num)
-                {
-                    SaveSetting(session_index - 1);
-
-                    spConfigLst.Visibility = Visibility.Hidden;
-                    lstButton.Visibility = Visibility.Hidden;
-                    btnAnalyzeWaybill.Visibility = Visibility.Hidden;
-                    btnClearAccount.Visibility = Visibility.Hidden;
-                    spAccount.Visibility = Visibility.Hidden;
-                    btnShudown.Visibility = Visibility.Visible;
-
-                    grdConfig.Visibility = Visibility.Hidden;
-
-                    btnConfig.Content = "配置";
-                    btnConfig.Background = new SolidColorBrush(Colors.MediumSeaGreen);
-                    gdAddBtns.IsEnabled = true;
-                    btnStartGame.IsEnabled = true;
-                }
-                else
-                {
-                    MessageBox.Show("请输入1-" + Setting.max_session_num + "的数字");
-                    return;
-                }
-            }
-        }
-        public void SaveSetting(int session_index)
-        {
-            Settings.Default.GameSetting = JsonConvert.SerializeObject(Setting.Instance.game_setting);
-            Settings.Default.CurrentSessionIndex = session_index;
-            Settings.Default.Save();
-
-            Setting.Instance.ResetGameSetting();
-        }
-
-
+     
         private void OnBackupScore(object sender, RoutedEventArgs e)
         {
 
@@ -302,8 +333,8 @@ namespace Bacc_front
             }
             if (Game.Instance._isGameStarting)
             {
-                string[] _close_acc_keys = new string[] {"middle_check_waybill_pwd", "audit_account_pwd", "clear_account_pwd", "audit_bet_record_pwd", "quit_front_pwd", "shutdown_pwd" };
-                if(!_close_acc_keys.Contains(key))
+                string[] _close_acc_keys = new string[] { "middle_check_waybill_pwd", "audit_account_pwd", "clear_account_pwd", "audit_bet_record_pwd", "quit_front_pwd", "shutdown_pwd" };
+                if (!_close_acc_keys.Contains(key))
                 {
                     txtPwd.Password = "";
                     return;
@@ -373,7 +404,8 @@ namespace Bacc_front
                     btnClearAccount.Visibility = Visibility.Visible;
                     break;
                 case "audit_bet_record_pwd":
-                    spAccount.Visibility = Visibility.Visible;
+                    var win_records = new BetRecord();
+                    win_records.Show();
                     break;
                 case "quit_front_pwd":
                     SaveSetting(Game.Instance.SessionIndex);
@@ -399,7 +431,6 @@ namespace Bacc_front
                 MessageBox.Show("尚未开局");
                 return;
             }
-            Game.Instance.DisplayAllWaybill();
             Game.Instance.CoreTimer.StopTimer();
         }
 
@@ -477,11 +508,32 @@ namespace Bacc_front
 
         private void btnPreActiveSession_Click(object sender, RoutedEventArgs e)
         {
-
+            if (int.TryParse(txtActiveSessionIndex.Text, out int session_index))
+            {
+                if (session_index <= 1)
+                {
+                    txtActiveSessionIndex.Text = 1000.ToString();
+                }
+                else
+                {
+                    txtActiveSessionIndex.Text = (session_index - 1).ToString();
+                }
+            }
         }
 
         private void btnNextActiveSession_Click(object sender, RoutedEventArgs e)
         {
+            if (int.TryParse(txtActiveSessionIndex.Text, out int session_index))
+            {
+                if (session_index >= 1000)
+                {
+                    txtActiveSessionIndex.Text = 1.ToString();
+                }
+                else
+                {
+                    txtActiveSessionIndex.Text = (session_index + 1).ToString();
+                }
+            }
 
         }
 

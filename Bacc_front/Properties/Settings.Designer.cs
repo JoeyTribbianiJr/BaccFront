@@ -49,7 +49,7 @@ namespace Bacc_front.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public int CurrentSessionIndex {
             get {
                 return ((int)(this["CurrentSessionIndex"]));
@@ -73,7 +73,7 @@ namespace Bacc_front.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("HLM8PJ4hL7RE6db2B6TJ2g==")]
+        [global::System.Configuration.DefaultSettingValueAttribute("P9GYoDWQyQCWMX61e9tVNQ==")]
         public string ServerUrl {
             get {
                 return ((string)(this["ServerUrl"]));

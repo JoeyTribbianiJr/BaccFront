@@ -12,10 +12,9 @@ using WsUtils;
 
 namespace Bacc_front
 {
-    
+
     public class SuperServer : AppServer
     {
-        
         public static AppSession appSession;
         private ImageUtils imageSender;
         private HttpClient httpClient;
@@ -23,6 +22,7 @@ namespace Bacc_front
         public bool Login = false;
         public SuperServer()
         {
+            System.Net.ServicePointManager.DefaultConnectionLimit = 512;
             imageSender = new ImageUtils();
             httpClient = new HttpClient();
 
@@ -35,9 +35,9 @@ namespace Bacc_front
             var config = new ServerConfig()
             {
                 Port = port,
-                MaxRequestLength = 2048 *2048,
-                ReceiveBufferSize = 2048 *2048,
-                SendBufferSize = 2048*2048
+                MaxRequestLength = 2048 * 2048,
+                ReceiveBufferSize = 2048 * 2048,
+                SendBufferSize = 2048 * 2048
             };
             if (!Setup(config))
             {
@@ -90,14 +90,18 @@ namespace Bacc_front
                 case RemoteCommand.ImportBackNextSession:
                     OnImportBackNextSession(session, requestInfo);
                     break;
+                case RemoteCommand.SendFrontBetRecordIdList:
+                    SendBetRecordIdsToBack();
+                    break;
                 case RemoteCommand.SendFrontBetRecord:
-                    SendBetRecordToBack();
+                    SendBetRecordToBack(session,requestInfo);
                     break;
                 default:
                     //session.Send("Unknow ");
                     break;
             }
         }
+
 
         private void OnImportBackNextSession(AppSession session, StringRequestInfo requestInfo)
         {
@@ -128,7 +132,7 @@ namespace Bacc_front
         {
             var data = requestInfo.Parameters[0];
             var pass = JsonConvert.DeserializeObject<string>(data);
-            if(Setting.connect_pass != pass)
+            if (Setting.connect_pass != pass)
             {
                 SendData(RemoteCommand.Login, "False", appSession);
             }
@@ -136,7 +140,10 @@ namespace Bacc_front
             {
                 Login = true;
                 SendData(RemoteCommand.Login, "OK", appSession);
+                SendFrontPasswordToBack();
                 SendFrontSettingToBack();
+                SendCurSessionToBack();
+                SendLiveDataToBack();
             }
         }
         public void SendFrontPasswordToBack()
@@ -166,24 +173,35 @@ namespace Bacc_front
             if (appSession.Connected && Login)
             {
                 Game.Instance.Manager.SetSummationBackBetRecordData();
-                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.BetRecordSummationJsonDataToBack, appSession);
+                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.Manager.BetRecordSummationDataToBack, appSession);
             }
         }
-        public void SendBetRecordToBack()
+
+        private void SendBetRecordIdsToBack()
         {
             if (appSession.Connected && Login)
             {
-                Game.Instance.Manager.SetBackBetRecordData();
+                var list = Game.Instance.Manager.GetBetRecordIds();
+                SendData(RemoteCommand.SendFrontBetRecordIdList, list,appSession);
+            }
+        }
+        public void SendBetRecordToBack(AppSession session, StringRequestInfo requestInfo)
+        {
+            var data = requestInfo.Parameters[0];
+            var id = JsonConvert.DeserializeObject<int>(data);
+            if (appSession.Connected && Login)
+            {
+                Game.Instance.Manager.SetBackBetRecordData(id);
                 SendData(RemoteCommand.SendFrontBetRecord, Game.Instance.BetRecordJsonDataToBack, appSession);
             }
         }
-        public void SendWaybillToBack()
-        {
-            if (appSession.Connected && Login)
-            {
-                SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
-            }
-        }
+        //public void SendWaybillToBack()
+        //{
+        //    if (appSession.Connected && Login)
+        //    {
+        //        SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
+        //    }
+        //}
         public void SendCurSessionToBack()
         {
             if (appSession.Connected && Login)
@@ -191,7 +209,6 @@ namespace Bacc_front
                 SendData(RemoteCommand.SendFrontCurSession, Game.Instance.CurrentSession, appSession);
             }
         }
-
 
         //public void OnReplaceWaybill(AppSession session, StringRequestInfo requestInfo)
         //{
@@ -255,8 +272,6 @@ namespace Bacc_front
             }
             session.Send(data, 0, data.Length);
         }
-
-
         public void SendToHttpServer()
         {
             if (Game.Instance._isSendingToServer)
@@ -276,19 +291,21 @@ namespace Bacc_front
                         SessionIndex = Game.Instance.SessionIndex,
                         Countdown = Game.Instance.CountDown,
                         State = (int)Game.Instance.CurrentState,
-                        Winner = (int)Game.Instance.CurrentRound.Winner.Item1,
+                        Winner = -1
                     };
 
                     var ip = Setting.Instance.ServerUrl;
                     var url = "http://" + ip + ":98/getmsg";
-                    var str = JsonConvert.SerializeObject(msg);
 
                     string Cards = "";
-                    if (Game.Instance.CountDown <= 5)
+                    if (Game.Instance.CurrentState == GameState.Dealing)
                     {
-                        Cards = JsonConvert.SerializeObject(Game.Instance.ConvertHandCardForServerSB());
+                        msg.Winner = (int)Game.Instance.CurrentRound.Winner.Item1;
+                        Cards = JsonConvert.SerializeObject(Game.Instance.CardsForDeal);
                     }
-                    url += ("?" + "msg=" + str + "&cards=" + Cards + "&room=" + Settings.Default.Room);
+                    var str = JsonConvert.SerializeObject(msg);
+                    var waybill = JsonConvert.SerializeObject(Game.Instance.HistoryWaybill);
+                    url += ("?" + "msg=" + str + "&waybill=" + waybill + "&cards=" + Cards + "&room=" + Settings.Default.Room);
 
                     try
                     {
@@ -300,7 +317,70 @@ namespace Bacc_front
                 }
             }
         }
-        public void SendDealCommandToHttpServer()
+        /// <summary>
+        /// 在押分的前一秒发送
+        /// </summary>
+        public void SendBetStartToHttpServer()
+        {
+            //如果本场是最后一场
+            if (Game.Instance.RoundIndex + 1 == Setting.Instance._round_num_per_session)
+            {
+                return;
+            }
+            var msg = new ParamToServer()
+            {
+                RoundIndex = Game.Instance.RoundIndex + 1, //这里是下一场的场数
+                SessionIndex = Game.Instance.SessionIndex,
+                Countdown = Setting.Instance._betTime,
+                State = (int)GameState.Betting,
+                Winner = -1
+            };
+
+            var ip = Setting.Instance.ServerUrl;
+            var url = "http://" + ip + ":98/getmsg";
+
+            string Cards = "";
+            var str = JsonConvert.SerializeObject(msg);
+            var waybill = JsonConvert.SerializeObject(Game.Instance.HistoryWaybill);
+            url += ("?" + "msg=" + str + "&waybill=" + waybill + "&cards=" + Cards + "&room=" + Settings.Default.Room);
+
+            try
+            {
+                httpClient.GetAsync(url);
+            }
+            catch (Exception)
+            {
+            }
+        }
+        public void SendDealStartToHttpServer()
+        {
+            var msg = new ParamToServer()
+            {
+                RoundIndex = Game.Instance.RoundIndex,
+                SessionIndex = Game.Instance.SessionIndex,
+                Countdown = 0,
+                State = (int)GameState.Dealing,
+                Winner = (int)Game.Instance.CurrentRound.Winner.Item1,
+            };
+
+            var ip = Setting.Instance.ServerUrl;
+            var url = "http://" + ip + ":98/getmsg";
+            var str = JsonConvert.SerializeObject(msg);
+
+            string Cards = "";
+            var waybill = JsonConvert.SerializeObject(Game.Instance.HistoryWaybill);
+            Cards = JsonConvert.SerializeObject(Game.Instance.CardsForDeal);
+            url += ("?" + "msg=" + str + "&waybill=" + waybill + "&cards=" + Cards + "&room=" + Settings.Default.Room);
+
+            try
+            {
+                httpClient.GetAsync(url);
+            }
+            catch (Exception)
+            {
+            }
+        }
+        public void SendDealEndToHttpServer()
         {
             var msg = new ParamToServer()
             {
@@ -315,13 +395,26 @@ namespace Bacc_front
             var url = "http://" + ip + ":98/getmsg";
             var str = JsonConvert.SerializeObject(msg);
 
-            var waybill = JsonConvert.SerializeObject(Game.Instance.ConvertWaybillForServerSB());
-            url += ("?" + "msg=" + str + "&waybill=" + waybill +"&room=" + Settings.Default.Room);
+            var waybill = JsonConvert.SerializeObject(Game.Instance.HistoryWaybill);
+            url += ("?" + "msg=" + str + "&waybill=" + waybill + "&room=" + Settings.Default.Room);
 
             try
             {
                 //httpClient.SendAsync()
-                httpClient.GetAsync(url);
+                httpClient.GetAsync(url).ContinueWith((task) =>
+                {
+                    HttpResponseMessage rslt = task.Result;
+                    if (rslt.IsSuccessStatusCode)
+                    {
+                        rslt.Content.ReadAsStringAsync().ContinueWith((rTask) =>
+                        {
+                            if (rTask.Result == "baoji")
+                            {
+                                Game.Instance._isServerBoom = true;
+                            }
+                        });
+                    }
+                });
             }
             catch (Exception)
             {
