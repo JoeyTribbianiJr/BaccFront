@@ -382,4 +382,20 @@ namespace Bacc_front
             throw new NotImplementedException();
         }
     }
+    public class TotalSumConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var users = value as IEnumerable<Player>;
+            if (users == null)
+                return 0;
+
+            return users.Sum(u => u.Balance);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Media;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Media;
 using System.Windows.Threading;
+using WsUtils;
 
 namespace Bacc_front
 {
@@ -25,6 +20,7 @@ namespace Bacc_front
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
                 //System.Windows.MessageBox.Show(args.Exception.Message);
+                LogHelper.WriteLog(typeof(Object), "UnobservedTaskException:" + sender.ToString() + args.Exception.Message + args.Exception.StackTrace);
                 args.SetObserved();
             };
         }

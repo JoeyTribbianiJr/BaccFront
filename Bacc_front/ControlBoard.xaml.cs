@@ -12,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using WsUtils.SqliteEFUtils;
 using Bacc_front.Properties;
+using WsUtils;
+using System.Windows.Media.Imaging;
 
 namespace Bacc_front
 {
@@ -24,6 +26,7 @@ namespace Bacc_front
         public int Sub_score { get; set; }
         public int Last_sub { get; set; }
     }
+    public delegate void delegateStartGameClick();
     /// <summary>
     /// ControlBoard.xaml 的交互逻辑
     /// </summary>
@@ -41,10 +44,10 @@ namespace Bacc_front
         public ObservableCollection<Player> Players { get; set; }
         public static ControlBoard Instance { get; set; }
 
+        public int AccountPageIndex = 0;
         public ObservableCollection<SumLine> ScoreSum { get; set; }
         private Dictionary<string, SettingItem> TempSettings = new Dictionary<string, SettingItem>();
-        //private SumLine scoreSum;
-        
+
         public ControlBoard()
         {
             InitializeComponent();
@@ -52,11 +55,12 @@ namespace Bacc_front
             ScoreSum = new ObservableCollection<SumLine>();
             ServerCountdown = 0;
             player = new MediaPlayer();
-
-            //dgScore.ItemsSource = Desk.Instance.Players;
+            //StartClick += ControlBoard_StartClick;
             dgScore.DataContext = Desk.Instance;
-            //dgSum.DataContext = Desk.Instance;
             lstButton.ItemsSource = Setting.Instance.game_setting;
+
+            dgSum.ItemsSource = ScoreSum;
+            SumPlayerScore();
 
             KeyDown += Game.Instance.KeyListener.Window_KeyDown;
             KeyUp += Game.Instance.KeyListener.Window_KeyUp;
@@ -65,6 +69,7 @@ namespace Bacc_front
             //Activated += ControlBoard_Activated;
             //WindowStyle = WindowStyle.None;
         }
+
         private void OnConfig(object sender, RoutedEventArgs e)
         {
             if (grdConfig.Visibility == Visibility.Hidden)
@@ -83,7 +88,7 @@ namespace Bacc_front
                 //保存参数
                 if (int.TryParse(txtActiveSessionIndex.Text, out int session_str_index) && 1 <= session_str_index && session_str_index <= Setting.max_session_num)
                 {
-                    SaveSetting(session_str_index );
+                    SaveSetting(session_str_index - 1);
                     spConfigLst.Visibility = Visibility.Hidden;
                     lstButton.Visibility = Visibility.Hidden;
                     btnAnalyzeWaybill.Visibility = Visibility.Hidden;
@@ -107,15 +112,24 @@ namespace Bacc_front
         }
         public void SaveSetting(int session_index)
         {
+            if (Game.Instance.CurrentState != GameState.Preparing)
+            {
+                return;
+            }
             Settings.Default.GameSetting = JsonConvert.SerializeObject(Setting.Instance.game_setting);
-            Settings.Default.CurrentSessionIndex = session_index - 2;// setting.default里始终保存上一局局数
+            Settings.Default.CurrentSessionIndex = session_index;// setting.default里始终保存上一局局数
             Settings.Default.Save();
 
             Setting.Instance.ResetGameSetting();
         }
 
-        public void Players_CollectionChanged()
+        public void Players_CollectionChanged(object sender, EventArgs e)
         {
+            SumPlayerScore();
+        }
+        public void SumPlayerScore()
+        {
+
             var ps = Desk.Instance.Players;
             var sl = new SumLine
             {
@@ -130,6 +144,7 @@ namespace Bacc_front
                 {
                     sl
                 };
+            dgSum.ItemsSource = ScoreSum;
         }
 
         private void ControlBoard_Activated(object sender, EventArgs e)
@@ -147,7 +162,11 @@ namespace Bacc_front
             }
             else
             {
-                btnStartGame.IsEnabled = false;
+                Dispatcher.Invoke(new Action(() =>
+               {
+                   btnStartGame.IsEnabled = false;
+               }), System.Windows.Threading.DispatcherPriority.Send, null);
+                //StartClick();
                 if (Setting.Instance._bgm_on)
                 {
                     string location = System.Environment.CurrentDirectory + "\\Wav\\BGM\\";
@@ -270,7 +289,7 @@ namespace Bacc_front
                 MessageBox.Show("未选中玩家");
             }
         }
-     
+
         private void OnBackupScore(object sender, RoutedEventArgs e)
         {
 
@@ -370,35 +389,14 @@ namespace Bacc_front
                     lstButton.ItemsSource = Setting.Instance.game_setting;
                     break;
                 case "audit_account_pwd":
+                    var table = Game.Instance.Manager.SetAccountDataTable(AccountPageIndex);
+                    if (table == null)
+                    {
+                        MessageBox.Show("目前尚无记录");
+                        return;
+                    }
+                    dgAccount.ItemsSource = table.DefaultView;
                     spAccount.Visibility = Visibility.Visible;
-                    try
-                    {
-                        using (var db = new SQLiteDB())
-                        {
-                            var account = db.FrontAccounts.First(acc => acc.IsClear == false);
-                            if (account == null)
-                            {
-                                MessageBox.Show("目前尚无记录");
-                                return;
-                            }
-                            var cur_acc = JsonConvert.DeserializeObject<ObservableCollection<AddSubScoreRecord>>(account.JsonScoreRecord);
-                            DataTable table = WsUtils.DataTableExtensions.ToDataTable(cur_acc);
-                            var dr = table.NewRow();
-                            dr["PlayerId"] = "总 计";
-                            dr["TotalAddScore"] = table.Compute("SUM(TotalAddScore)", null);
-                            dr["TotalSubScore"] = table.Compute("SUM(TotalSubScore)", null);
-                            dr["TotalAccount"] = table.Compute("SUM(TotalAccount)", null);
-                            table.Rows.Add(dr);
-                            dgAccount.ItemsSource = table.DefaultView;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-#if DEBUG
-                        MessageBox.Show(ex.Message);
-#endif
-                        MessageBox.Show("读取账本失败");
-                    }
                     break;
                 case "clear_account_pwd":
                     btnClearAccount.Visibility = Visibility.Visible;
@@ -423,7 +421,6 @@ namespace Bacc_front
             }
             txtPwd.Password = "";
         }
-
         private void MiddleCheck()
         {
             if (!Game.Instance._isGameStarting)
@@ -433,7 +430,6 @@ namespace Bacc_front
             }
             Game.Instance.CoreTimer.StopTimer();
         }
-
         private void btnDeletePwd(object sender, RoutedEventArgs e)
         {
             var pwd = txtPwd.Password;
@@ -442,7 +438,6 @@ namespace Bacc_front
                 txtPwd.Password = pwd.Substring(0, pwd.Length - 1);
             }
         }
-
         private void btnClearAccount_Click(object sender, RoutedEventArgs e)
         {
             if (Desk.Instance.Players.Sum(p => p.Balance) > 0)
@@ -461,29 +456,71 @@ namespace Bacc_front
                         return;
                     }
 
-                    var records = JsonConvert.DeserializeObject<ObservableCollection<AddSubScoreRecord>>(account.JsonScoreRecord);
-                    foreach (var a in records)
-                    {
-                        a.TotalAccount = 0;
-                        a.TotalAddScore = 0;
-                        a.TotalSubScore = 0;
-                    }
-
-                    account.JsonScoreRecord = JsonConvert.SerializeObject(records);
                     account.IsClear = true;
                     account.ClearTime = DateTime.Now;
                     db.SaveChanges();
 
-                    DataTable table = WsUtils.DataTableExtensions.ToDataTable(records);
-                    var dr = table.NewRow();
-                    dr["PlayerId"] = "总 计";
-                    dr["TotalAddScore"] = table.Compute("SUM(TotalAddScore)", null);
-                    dr["TotalSubScore"] = table.Compute("SUM(TotalSubScore)", null);
-                    dr["TotalAccount"] = table.Compute("SUM(TotalAccount)", null);
-                    table.Rows.Add(dr);
+                    var table = Game.Instance.Manager.SetAccountDataTable(0);
                     dgAccount.ItemsSource = table.DefaultView;
                 }
             }
+        }
+        private void btnPreAccount_Click(object sender, RoutedEventArgs e)
+        {
+            if (AccountPageIndex >= 1)
+            {
+                return;
+            }
+            var table = Game.Instance.Manager.SetAccountDataTable(++AccountPageIndex);
+            if (table == null)
+            {
+                AccountPageIndex--;
+            }
+            dgAccount.ItemsSource = table.DefaultView;
+        }
+        private void btnNextAccount_Click(object sender, RoutedEventArgs e)
+        {
+            if (--AccountPageIndex < 0)
+            {
+                AccountPageIndex = 0;
+            }
+            var table = Game.Instance.Manager.SetAccountDataTable(AccountPageIndex);
+            if (table == null)
+            {
+                AccountPageIndex = 0;
+            }
+            dgAccount.ItemsSource = table.DefaultView;
+        }
+        public void BreakdownGame()
+        {
+            try
+            {
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    ControlBoard.Instance.btnStartGame.IsEnabled = false;
+                    player.Stop();
+//                    var img = new ImageUtils().GetScreen();
+//                    BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+//                        img.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+//BitmapSizeOptions.FromEmptyOptions());
+//                    imgMask.Source = bitmapSource;
+//                    imgMask.Visibility = Visibility.Visible;
+                    
+
+                    Game.Instance.Animator.StopAllAnimation();
+                    Game.Instance.CoreTimer.StopTimer();
+                    App.Current.Dispatcher.Thread.Abort();
+                    //Thread.CurrentThread.Abort();
+                }));
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private void ControlBoard_MouseDown(object sender, MouseButtonEventArgs e)
+        {
         }
 
         public void ShutdownComputer()
@@ -545,5 +582,6 @@ namespace Bacc_front
                 p.Sub_score = 0;
             }
         }
+
     }
 }

@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Bacc_front">
-
     <!--按钮资源样式-->
     <Style x:Key="GreenButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="MediumSeaGreen"></Setter>
@@ -247,9 +246,6 @@
     <Style x:Key="SmallWaybillButton" TargetType="Button">
         <Setter Property="Width" Value="8.5"></Setter>
         <Setter Property="Height" Value="8.5"></Setter>
-        <!--<Setter Property="Margin" Value="1"></Setter>-->
-        <!--<Setter Property="FontFamily" Value="宋体"></Setter>-->
-        <!--<Setter Property="FontSize" Value="17"></Setter>-->
         <Setter Property="VerticalAlignment" Value="Center"></Setter>
         <Setter Property="HorizontalAlignment" Value="Center"></Setter>
         <Setter Property="Foreground" Value="White"></Setter>
@@ -262,7 +258,6 @@
                         <Border Background="{TemplateBinding Background}" CornerRadius="0" 
                                 BorderThickness="0" 
                                 >
-
                             <ContentPresenter Name="BtnContent"
 											  HorizontalAlignment="Center"
 											  Content="{TemplateBinding Content}"/>
@@ -283,8 +278,6 @@
         </Setter>
     </Style>
     <Style x:Key="CardButton" TargetType="Button">
-        <!--<Setter Property="Width" Value="88"/>
-        <Setter Property="Height" Value="121"/>-->
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontStretch" Value="Medium" />
         <Setter Property="FontWeight" Value="Heavy" />

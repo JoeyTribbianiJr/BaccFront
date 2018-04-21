@@ -16,5 +16,6 @@
         <local:ChipForegroundConverter x:Key="ChipForegroundConverter"></local:ChipForegroundConverter>
         <local:ConfigButtonBackgroundConverter x:Key="ConfigButtonBackgroundConverter"></local:ConfigButtonBackgroundConverter>
         <local:PlayerScoreSumConverter x:Key="PlayerScoreSumConverter"></local:PlayerScoreSumConverter>
+        <local:TotalSumConverter x:Key="TotalSumConverter" />
 	</Application.Resources>
 </Application>

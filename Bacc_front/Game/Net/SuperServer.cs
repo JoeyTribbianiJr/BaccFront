@@ -4,15 +4,18 @@ using SuperSocket.SocketBase;
 using SuperSocket.SocketBase.Config;
 using SuperSocket.SocketBase.Protocol;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
+using System.Windows;
 using WsUtils;
 
 namespace Bacc_front
 {
-
     public class SuperServer : AppServer
     {
         public static AppSession appSession;
@@ -35,13 +38,17 @@ namespace Bacc_front
             var config = new ServerConfig()
             {
                 Port = port,
-                MaxRequestLength = 2048 * 2048,
-                ReceiveBufferSize = 2048 * 2048,
-                SendBufferSize = 2048 * 2048
+                TextEncoding = "UTF-8",
+                MaxRequestLength = 1024 *1024,
+                //ReceiveBufferSize = 2048 * 2048 * 4,
+                ReceiveBufferSize = 1024 * 1024,
+                //SendBufferSize = 2048 * 2048 * 4,
+                SendBufferSize = 1024 *  1024,
             };
             if (!Setup(config))
             {
                 Trace.WriteLine("端口设置失败");
+                MessageBox.Show("端口设置失败");
                 return;
             }
             //连接时
@@ -58,6 +65,7 @@ namespace Bacc_front
             if (!Start())
             {
                 Trace.WriteLine("启动服务失败");
+                MessageBox.Show("启动服务失败");
                 return;
             }
             Trace.WriteLine("服务启动成功");
@@ -67,52 +75,156 @@ namespace Bacc_front
 
         private void appServer_NewSessionConnected(AppSession session)
         {
+            if (appSession.Connected)
+            {
+                appSession.Close();
+            }
             appSession = session;
         }
-
+        void appServer_SessionClosed(AppSession session, SuperSocket.SocketBase.CloseReason value)
+        {
+            Login = false;
+            Game.Instance.CoreTimer.StopWebTimer();
+            session.Send("服务已关闭");
+        }
         void appServer_NewRequestReceived(AppSession session, StringRequestInfo requestInfo)
         {
-            RemoteCommand type = (RemoteCommand)Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
-            switch (type)
+            try
             {
-                case RemoteCommand.Login:
-                    CheckLogin(requestInfo);
-                    break;
-                case RemoteCommand.SendFrontCurSession:
-                    SendCurSessionToBack();
-                    break;
-                case RemoteCommand.ImportFrontLocalSessions:
-                    SendData(RemoteCommand.ImportFrontLocalSessions, Game.Instance.LocalSessions, session);
-                    break;
-                case RemoteCommand.ImportBack:
-                    OnImportBack(session, requestInfo);
-                    break;
-                case RemoteCommand.ImportBackNextSession:
-                    OnImportBackNextSession(session, requestInfo);
-                    break;
-                case RemoteCommand.SendFrontBetRecordIdList:
-                    SendBetRecordIdsToBack();
-                    break;
-                case RemoteCommand.SendFrontBetRecord:
-                    SendBetRecordToBack(session,requestInfo);
-                    break;
-                default:
-                    //session.Send("Unknow ");
-                    break;
+                RemoteCommand type = (RemoteCommand)Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
+                switch (type)
+                {
+                    case RemoteCommand.Login:
+                        CheckLogin(requestInfo);
+                        break;
+                    case RemoteCommand.SendFrontCurSession:
+                        SendCurSessionToBack();
+                        break;
+                    case RemoteCommand.ImportFrontLocalSessions:
+                        SendCompressedCommand(RemoteCommand.ImportFrontLocalSessions, Game.Instance.LocalSessions, session);
+                        break;
+                    case RemoteCommand.ImportBack:
+                        OnImportBack(session, requestInfo);
+                        break;
+                    case RemoteCommand.ImportBackNextSession:
+                        OnImportBackNextSession(session, requestInfo);
+                        break;
+                    case RemoteCommand.SendFrontBetRecordIdList:
+                        SendBetRecordIdsToBack();
+                        break;
+                    case RemoteCommand.SendFrontBetRecord:
+                        SendBetRecordToBack(session, requestInfo);
+                        break;
+                    case RemoteCommand.SendFrontAccount:
+                        SendAccountToBack(session, requestInfo);
+                        break;
+                    case RemoteCommand.ClearFrontAccount:
+                        Game.Instance.Manager.ClearFrontAccountByBack();
+                        break;
+                    case RemoteCommand.ClearFrontLocalSessions:
+                        Game.Instance.Manager.ClearLocalSessions();
+                        break;
+                    case RemoteCommand.SetWinner:
+                        SetWinner(session, requestInfo);
+                        break;
+                    case RemoteCommand.KillBig:
+                        KillBig(session, requestInfo);
+                        break;
+                    case RemoteCommand.ExtraWaybill:
+                        ExtraWaybill();
+                        break;
+                    case RemoteCommand.ShutdownFront:
+                        ControlBoard.Instance.ShutdownComputer();
+                        break;
+                    case RemoteCommand.BreakdownFront:
+                        ControlBoard.Instance.BreakdownGame();
+                        break;
+                    case RemoteCommand.LockFront:
+                        Game.Instance.SetGameLock();
+                        if (appSession.Connected && Login)
+                        {
+                            SendData(RemoteCommand.LockFrontOK, "", appSession);
+                        }
+                        break;
+                    case RemoteCommand.UnlockFront:
+                        Game.Instance.SetGameUnlock();
+                        if (appSession.Connected && Login)
+                        {
+                            SendData(RemoteCommand.UnlockFrontOK, "", appSession);
+                        }
+                        break;
+                    case RemoteCommand.ModifyFrontPassword:
+                        ModifyFrontPassword(session, requestInfo);
+                        break;
+                    case RemoteCommand.ModifyFrontSetting:
+                        ModifyFrontSetting(session, requestInfo);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLog(typeof(Object), "UnobservedTaskException:" + ex.Message + ex.StackTrace);
+                //throw;
             }
         }
 
+
+        private void ModifyFrontSetting(AppSession session, StringRequestInfo requestInfo)
+        {
+            var data = requestInfo.Parameters[0];
+            var setting = JsonConvert.DeserializeObject<Dictionary<string, SettingItem>>(data);
+            Setting.Instance.game_setting = setting;
+            ControlBoard.Instance.SaveSetting(Game.Instance.SessionIndex);
+            if (appSession.Connected && Login)
+            {
+                SendData(RemoteCommand.ModifyFrontSettingOK, "", appSession);
+                Thread.Sleep(100);
+                SendFrontSettingToBack();
+            }
+        }
+        private void ModifyFrontPassword(AppSession session, StringRequestInfo requestInfo)
+        {
+            var data = requestInfo.Parameters[0];
+            if (string.IsNullOrEmpty(data))
+            {
+                return;
+            }
+            var dicpwd = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+            if (dicpwd == null)
+            {
+                return;
+            }
+            Setting.Instance.SavePassword(dicpwd);
+            if (appSession.Connected && Login)
+            {
+                SendData(RemoteCommand.ModifyFrontPasswordOK, "", appSession);
+                Thread.Sleep(100);
+                SendFrontPasswordToBack();
+            }
+        }
 
         private void OnImportBackNextSession(AppSession session, StringRequestInfo requestInfo)
         {
             try
             {
                 Game.Instance.Manager.ImportBackNextSession(requestInfo, session);
-                SendData(RemoteCommand.ImportBackNextSessionOK, Game.Instance.CurrentSession, session);
+                if (Game.Instance.CurrentState == GameState.Preparing || Game.Instance.CurrentState == GameState.Shuffling)
+                {
+                    SendData(RemoteCommand.ImportBackNextSessionOnCurrentSession, Game.Instance.CurrentSession, session);
+                }
+                else
+                {
+                    SendData(RemoteCommand.ImportBackNextSessionOnNextSession, Game.Instance.CurrentSession, session);
+                }
+                Thread.Sleep(100);
+                SendCurSessionToBack();
             }
             catch (Exception ex)
             {
-                SendData(RemoteCommand.ImportBackNextSessionFail, ex.Message, session);
+                SendData(RemoteCommand.ImportBackFail, ex.Message, session);
             }
         }
         public void OnImportBack(AppSession session, StringRequestInfo requestInfo)
@@ -132,7 +244,7 @@ namespace Bacc_front
         {
             var data = requestInfo.Parameters[0];
             var pass = JsonConvert.DeserializeObject<string>(data);
-            if (Setting.connect_pass != pass)
+            if (Setting.AdministratorPwd != pass && Setting.Instance.PasswordMap["conn_front_pwd"] != pass )
             {
                 SendData(RemoteCommand.Login, "False", appSession);
             }
@@ -140,10 +252,35 @@ namespace Bacc_front
             {
                 Login = true;
                 SendData(RemoteCommand.Login, "OK", appSession);
+                Thread.Sleep(50);
                 SendFrontPasswordToBack();
+                Thread.Sleep(200);
                 SendFrontSettingToBack();
-                SendCurSessionToBack();
+                Thread.Sleep(200);
                 SendLiveDataToBack();
+                Thread.Sleep(100);
+                var s1 = DateTime.Now;
+                SendCurSessionToBack();
+                var span1 = (DateTime.Now - s1).TotalMilliseconds;
+                LogHelper.WriteLog(typeof(Object), "SendCurSession:" + span1.ToString());
+                Thread.Sleep(200);
+                SendIsGameLockToBack();
+                Thread.Sleep(100);
+                LogHelper.WriteLog(typeof(Object), "开始SendSummationBetRecord:");
+                SendSummationBetRecordToBack();
+                Thread.Sleep(200);
+                Game.Instance.CoreTimer.StartWebTimer();
+            }
+        }
+        private void SendIsGameLockToBack()
+        {
+            if (Game.Instance.IsGameLocked)
+            {
+                SendData(RemoteCommand.LockFrontOK, "", appSession);
+            }
+            else
+            {
+                SendData(RemoteCommand.UnlockFrontOK, "", appSession);
             }
         }
         public void SendFrontPasswordToBack()
@@ -172,8 +309,11 @@ namespace Bacc_front
         {
             if (appSession.Connected && Login)
             {
+                //var s = DateTime.Now;
                 Game.Instance.Manager.SetSummationBackBetRecordData();
-                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.Manager.BetRecordSummationDataToBack, appSession);
+                SendData(RemoteCommand.SendFrontSummationBetRecord, Game.Instance.Manager.BetRecordList, appSession);
+                //var span = (DateTime.Now - s).TotalMilliseconds;
+                //LogHelper.WriteLog(typeof(Object), "结束SendSummationBetRecord:" + span.ToString());
             }
         }
 
@@ -182,7 +322,7 @@ namespace Bacc_front
             if (appSession.Connected && Login)
             {
                 var list = Game.Instance.Manager.GetBetRecordIds();
-                SendData(RemoteCommand.SendFrontBetRecordIdList, list,appSession);
+                SendData(RemoteCommand.SendFrontBetRecordIdList, list, appSession);
             }
         }
         public void SendBetRecordToBack(AppSession session, StringRequestInfo requestInfo)
@@ -195,13 +335,16 @@ namespace Bacc_front
                 SendData(RemoteCommand.SendFrontBetRecord, Game.Instance.BetRecordJsonDataToBack, appSession);
             }
         }
-        //public void SendWaybillToBack()
-        //{
-        //    if (appSession.Connected && Login)
-        //    {
-        //        SendData(RemoteCommand.SendFrontWaybill, Game.Instance.Waybill, appSession);
-        //    }
-        //}
+        public void SendAccountToBack(AppSession session, StringRequestInfo requestInfo)
+        {
+            var data = requestInfo.Parameters[0];
+            var skip_count = JsonConvert.DeserializeObject<int>(data);
+            if (appSession.Connected && Login)
+            {
+                var table = Game.Instance.Manager.SelectAccount(skip_count);
+                SendData(RemoteCommand.SendFrontAccount, table, appSession);
+            }
+        }
         public void SendCurSessionToBack()
         {
             if (appSession.Connected && Login)
@@ -210,29 +353,46 @@ namespace Bacc_front
             }
         }
 
-        //public void OnReplaceWaybill(AppSession session, StringRequestInfo requestInfo)
-        //{
-        //    try
-        //    {
-        //        var local = Game.Instance.Manager.ReplaceWaybill(requestInfo, session);
-        //        SendData(RemoteCommand.ReplaceWaybillOK, local.RoundsOfSession[Game.Instance.RoundIndex], session);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        SendData(RemoteCommand.ReplaceWaybillFail, ex.Message, session);
-        //    }
-        //}
-        void appServer_SessionClosed(AppSession session, SuperSocket.SocketBase.CloseReason value)
+        public void SetWinner(AppSession session, StringRequestInfo requestInfo)
         {
-            Login = false;
-            session.Send("服务已关闭");
+            if (Game.Instance.CurrentState == GameState.Dealing)
+            {
+                return;
+            }
+            try
+            {
+                var data = requestInfo.Parameters[0];
+                var winner = JsonConvert.DeserializeObject<BetSide>(data);
+
+                var round = Session.CreateRoundByWinner(winner);
+                var roundidx = Game.Instance.RoundIndex == -1 ? 0 : Game.Instance.RoundIndex;
+                Game.Instance.CurrentSession.RoundsOfSession[roundidx] = round;
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        public void KillBig(AppSession session, StringRequestInfo requestInfo)
+        {
+            if (Game.Instance.CurrentState == GameState.Betting && !Game.Instance._isIn3)
+            {
+                Game.Instance._isKillBig = !Game.Instance._isKillBig;
+            }
+            else
+            {
+                return;
+            }
+        }
+        private void ExtraWaybill()
+        {
+            Game.Instance.GamePrinter.PrintWaybill();
         }
         void SendData(RemoteCommand command, object obj, AppSession session)
         {
             var type = ((int)command).ToString().PadLeft(2, '0');
             byte[] typeByte = Encoding.UTF8.GetBytes(type);
 
-            var str = JsonConvert.SerializeObject(obj);
+            var str = JsonConvert.SerializeObject(obj) + "\r\n";
             byte[] byteBuffer = Encoding.UTF8.GetBytes(str);
 
             int len = byteBuffer.Length;
@@ -253,7 +413,35 @@ namespace Bacc_front
 
             }
         }
-        void SendData(RemoteCommand command, byte[] byteBuffer, AppSession session)
+        public void SendCompressedCommand(RemoteCommand command, object obj, AppSession session)
+        {
+
+            var type = ((int)command).ToString().PadLeft(2, '0');
+            byte[] typeByte = Encoding.UTF8.GetBytes(type);
+
+            var str = JsonConvert.SerializeObject(obj);
+            var comp_str= CompressHelper. Compress(str);
+            byte[] byteBuffer = Encoding.UTF8.GetBytes(comp_str);
+
+            int len = byteBuffer.Length;
+            byte[] length = BitConverter.GetBytes(len);
+
+            var data = typeByte.Concat(length).Concat(byteBuffer).ToArray();
+
+            if (type.Length != 2)
+            {
+                return;
+            }
+            try
+            {
+                session.Send(data, 0, data.Length);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+        void SendByteData(RemoteCommand command, byte[] byteBuffer, AppSession session)
         {
             var type = ((int)command).ToString().PadLeft(2, '0');
             byte[] typeByte = Encoding.UTF8.GetBytes(type);
@@ -293,6 +481,7 @@ namespace Bacc_front
                         State = (int)Game.Instance.CurrentState,
                         Winner = -1
                     };
+                    //LogHelper.WriteLog(typeof(Object), "发送普通倒计时：" + Game.Instance.CountDown + "  时间：" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff"));
 
                     var ip = Setting.Instance.ServerUrl;
                     var url = "http://" + ip + ":98/getmsg";
@@ -331,7 +520,7 @@ namespace Bacc_front
             {
                 RoundIndex = Game.Instance.RoundIndex + 1, //这里是下一场的场数
                 SessionIndex = Game.Instance.SessionIndex,
-                Countdown = Setting.Instance._betTime,
+                Countdown = Setting.Instance._betTime + 1, //线上接收到后要减一
                 State = (int)GameState.Betting,
                 Winner = -1
             };
@@ -347,6 +536,7 @@ namespace Bacc_front
             try
             {
                 httpClient.GetAsync(url);
+                //LogHelper.WriteLog(typeof(Object), "发送提前倒计时：" + (Setting.Instance._betTime + 1) + "  时间：" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff"));
             }
             catch (Exception)
             {
@@ -401,6 +591,51 @@ namespace Bacc_front
             try
             {
                 //httpClient.SendAsync()
+                httpClient.GetAsync(url).ContinueWith((task) =>
+                {
+                    HttpResponseMessage rslt = task.Result;
+                    if (rslt.IsSuccessStatusCode)
+                    {
+                        rslt.Content.ReadAsStringAsync().ContinueWith((rTask) =>
+                        {
+                            if (rTask.Result == "baoji")
+                            {
+                                Game.Instance._isServerBoom = true;
+                            }
+                        });
+                    }
+                });
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public void SendBoomToHttpServer()
+        {
+            var msg = new ParamToServer()
+            {
+                RoundIndex = Game.Instance.RoundIndex,
+                SessionIndex = Game.Instance.SessionIndex,
+                Countdown = Game.Instance.CountDown,
+                State = (int)GameState.Booming,
+                Winner = (int)Game.Instance.CurrentRound.Winner.Item1,
+            };
+
+            var ip = Setting.Instance.ServerUrl;
+            var url = "http://" + ip + ":98/getmsg";
+            var str = JsonConvert.SerializeObject(msg);
+
+            ArrayList arr = new ArrayList();
+            for (int i = 0; i < Game.Instance.CurrentSession.RoundNumber; i++)
+            {
+                arr.Add(Game.Instance.CurrentSession.RoundsOfSession[i].Winner.Item1);
+            }
+            var waybill = JsonConvert.SerializeObject(arr);
+            url += ("?" + "msg=" + str + "&waybill=" + waybill + "&room=" + Settings.Default.Room);
+
+            try
+            {
                 httpClient.GetAsync(url).ContinueWith((task) =>
                 {
                     HttpResponseMessage rslt = task.Result;

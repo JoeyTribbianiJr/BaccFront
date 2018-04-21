@@ -61,6 +61,7 @@ namespace Bacc_front
                     var cancle_score = p.BetScore.Values.Sum();
                     p.Balance += cancle_score;
                     p.ClearBet();
+                    p.Choose_denomination = BetDenomination.mini;
                 }
                 Players = players;
             }
@@ -108,37 +109,6 @@ namespace Bacc_front
         {
             return p.Balance != 0;
         }
-        public bool CanHeBetIn3Sec(Player p, BetSide side)
-        {
-            var bet_amount = 1;
-            //待加入其他限制规则
-            bool can_he = p.Balance > 0;
-            var winner = Game.Instance.CurrentRound.Winner.Item1;
-            if (!_setting._limit_red_on_3sec)    //超限红不可试分
-            {
-                if (winner != side)
-                {
-                    can_he = TotalLimitRed(bet_amount, side) && can_he;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            if (_setting._limit_red_on_3sec)    //超限红可试分
-            {
-                if (winner != side)
-                {
-                    can_he = true;
-                }
-                else
-                {
-                    can_he = false;
-                }
-            }
-
-            return can_he;
-        }
         public bool CanHeCancleBet(Player p)
         {
             if (Game.Instance._isIn3)
@@ -161,15 +131,6 @@ namespace Bacc_front
                 return (can_cancle_bet - p.BetScore.Values.Sum() >= 0) && limit_red_can;
             }
         }
-        public bool CanHeBet(Player p, BetSide side)
-        {
-            var bet_amount = p.Balance >= p.denomination ? p.denomination : p.Balance;
-
-            //待加入其他限制规则
-            var can_he = p.Balance > 0 && TotalLimitRed(bet_amount, side) && MinLimitBet(p) && DeskLimitRed(bet_amount, side);
-
-            return can_he;
-        }
         public bool MinLimitBet(Player p)   //例如现在最小限注50，小筹码10，押的第一下就是50，第二次起每次10递增
         {
             //if (p.BetScore.Values.Sum() == 0)
@@ -185,27 +146,27 @@ namespace Bacc_front
             var p_amount = desk_amount[BetSide.player];
 
             var total_limit = _setting._total_limit_red;
-            int desk_red;
+            int total_red;
 
             switch (side)
             {
                 case BetSide.banker:
-                    desk_red = Math.Abs(add_score + b_amount - p_amount);
-                    if (desk_red >= total_limit)
+                    total_red = Math.Abs(add_score + b_amount - p_amount);
+                    if (total_red >= total_limit)
                     {
                         return total_limit - (b_amount - p_amount);
                     }
                     break;
                 case BetSide.tie:
-                    desk_red = add_score + t_amount;
-                    if (desk_red >= _setting._tie_limit_red)
+                    total_red = add_score + t_amount;
+                    if (total_red >= _setting._tie_limit_red)
                     {
                         return _setting._tie_limit_red - t_amount;
                     }
                     break;
                 case BetSide.player:
-                    desk_red = Math.Abs(add_score + p_amount - b_amount);
-                    if (desk_red >= total_limit)
+                    total_red = Math.Abs(add_score + p_amount - b_amount);
+                    if (total_red >= total_limit)
                     {
                         return total_limit - (p_amount - b_amount);
                     }
@@ -215,61 +176,27 @@ namespace Bacc_front
             }
             return add_score;
         }
-        private bool TotalLimitRed(int bet_amount, BetSide side)
+        public int SetDeskLimitRedDenomination(Player p, int add_score,BetSide side)
         {
-            var b_amount = desk_amount[BetSide.banker];
-            var t_amount = desk_amount[BetSide.tie];
-            var p_amount = desk_amount[BetSide.player];
-
-            var total_limit = _setting._total_limit_red;
-            var cur = Math.Abs(bet_amount - p_amount);
-
-            if (side == BetSide.banker)
-            {
-                if (cur == total_limit)
-                {
-                    return false;
-                }
-                //var desk_red = Math.Abs(bet_amount + b_amount - p_amount);
-                //if (desk_red > total_limit)
-                //{
-                //    return false;
-                //}
-            }
-            if (side == BetSide.player)
-            {
-                if (cur == total_limit)
-                {
-                    return false;
-                }
-                //var desk_red = Math.Abs(bet_amount + p_amount - b_amount);
-                //if (desk_red > total_limit)
-                //{
-                //    return false;
-                //}
-            }
-            if (side == BetSide.tie)
-            {
-                var tie_limit = _setting._tie_limit_red;
-                var desk_tie_red = Math.Abs(bet_amount + t_amount);
-                if (desk_tie_red > tie_limit)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        private bool DeskLimitRed(int bet_amount, BetSide side)
-        {
-            var desk_score = desk_amount.Values.Sum();
+            var p_total_score= p.BetScore.Values.Sum();
             var desk_limit_red = _setting._desk_limit_red;
 
-            return bet_amount + desk_score <= desk_limit_red;
+            if(add_score + p_total_score >= desk_limit_red)
+            {
+                add_score = desk_limit_red - p_total_score;
+            }
+            return add_score;
+        }
+        private bool DeskLimitRed(Player p, int bet_amount, BetSide side)
+        {
+            var p_total_score= p.BetScore.Values.Sum();
+            var desk_limit_red = _setting._desk_limit_red;
+
+            return bet_amount + p_total_score <= desk_limit_red;
         }
         public int GetCardValue(Card card)
         {
-            var weight = (int)card.GetCardWeight;
+            var weight = (int)card.Weight;
             var singleDouble = _setting._single_double;
             if (singleDouble == "单张牌")
             {
@@ -277,7 +204,7 @@ namespace Bacc_front
                 {
                     weight = 14;
                 }
-                weight = (int)card.GetCardSuit * 14 + weight;
+                weight = (int)card.Color * 14 + weight;
             }
             else
             {
@@ -379,7 +306,12 @@ namespace Bacc_front
                 native_odds = odds_map[(int)winner];
             }
 
-            var earning = cost + cost * native_odds;
+            float earning = 0;
+            earning = cost + cost * native_odds;
+            if(winner == BetSide.tie )
+            {
+                earning += p_bets[BetSide.banker] + p_bets[BetSide.player];
+            }
 
             return (int)Math.Floor(earning);
         }
@@ -520,7 +452,7 @@ namespace Bacc_front
                 case WinnerEnum.banker:
                     return (player + tie - (int)Math.Ceiling(BANKER_ODDS * banker));
                 case WinnerEnum.tie:
-                    return player + banker - (int)Math.Ceiling(TIE_ODDS* tie);
+                    return -(int)Math.Ceiling(TIE_ODDS* tie);
                 case WinnerEnum.player:
                     return banker + tie - (int)Math.Ceiling(PLAYER_ODDS * player);
                 default:

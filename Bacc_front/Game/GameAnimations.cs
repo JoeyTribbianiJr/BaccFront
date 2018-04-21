@@ -114,8 +114,18 @@ namespace Bacc_front
             return pin;
         }
 
+        public void StopAllAnimation()
+        {
+            moveSB?.Stop();
+            reversalSB?.Stop();
+            armSB?.Stop();
+            wavSB?.Stop();
+        }
         public void StartDealAnimation()
         {
+            try
+            {
+
             int b = 0;
             _hasCard5 = true;
             moveSB = new Storyboard();
@@ -158,6 +168,11 @@ namespace Bacc_front
                 moveSB.Begin(_window);
                 reversalSB.Begin(_window);
             }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
         public void CreateAnimation(int idx, Card card)
         {
@@ -180,7 +195,7 @@ namespace Bacc_front
             #endregion
 
             #region 初始化变量
-            var bmpIdx = card.GetPngName;
+            var bmpIdx = card.PngName;
             var cardBmp = new BitmapImage(new Uri("Img/card/" + bmpIdx + ".png", UriKind.Relative));
             double startTime = start_time[idx];
             if (!_hasCard5 && idx == 5)

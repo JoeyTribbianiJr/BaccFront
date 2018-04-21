@@ -146,6 +146,7 @@
     <Compile Include="Game\Net\MyServerConfig.cs" />
     <Compile Include="Game\Net\WaybillManager.cs" />
     <Compile Include="Game\Utils\AESEncrypt.cs" />
+    <Compile Include="Game\Utils\CompressHelper.cs" />
     <Compile Include="Game\Utils\DataTableExtensions.cs" />
     <Compile Include="Game\Utils\FileUtils.cs" />
     <Compile Include="Game\Game.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="Game\Keys\KeyDownModel.cs" />
     <Compile Include="Game\Keys\KeyHandler.cs" />
     <Compile Include="Game\Utils\ImageUtils.cs" />
+    <Compile Include="Game\Utils\LogHelper.cs" />
     <Compile Include="Game\Utils\MoniAction.cs" />
     <Compile Include="Game\Net\NetServer.cs" />
     <Compile Include="Game\Utils\ObservableDictionary.cs" />

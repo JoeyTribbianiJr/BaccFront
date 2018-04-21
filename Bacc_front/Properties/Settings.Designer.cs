@@ -214,5 +214,29 @@ namespace Bacc_front.Properties {
                 this["Room"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LGroup {
+            get {
+                return ((int)(this["LGroup"]));
+            }
+            set {
+                this["LGroup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2efdreEspxWUX5WM5y9mFg==")]
+        public string conn_front_pwd {
+            get {
+                return ((string)(this["conn_front_pwd"]));
+            }
+            set {
+                this["conn_front_pwd"] = value;
+            }
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace WsUtils
         /// </summary>  
         /// <param name="coderType">编码类型</param>  
         /// <returns>ImageCodecInfo</returns>  
-        private ImageCodecInfo GetImageCoderInfo(string coderType)
+        public ImageCodecInfo GetImageCoderInfo(string coderType)
         {
             ImageCodecInfo[] iciS = ImageCodecInfo.GetImageEncoders();
 
@@ -67,7 +67,7 @@ namespace WsUtils
             }
             return retIci;
         }
-        private Bitmap GetScreen()
+        public Bitmap GetScreen()
         {
             Bitmap bitmap = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             Graphics g = Graphics.FromImage(bitmap);
@@ -80,7 +80,7 @@ namespace WsUtils
             //threadAccept.IsBackground = true;
             //threadAccept.Start(session);
         }
-        //private void SendImage(Object obj)
+        //public void SendImage(Object obj)
         //{
         //    while (true)
         //    {

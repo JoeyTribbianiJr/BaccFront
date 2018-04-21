@@ -82,18 +82,24 @@ namespace Bacc_front
         /// 前台导入后台传送来的下一局路单
         /// </summary>
         ImportBackNextSession,
-        ImportBackNextSessionOK,
+        ImportBackNextSessionOnCurrentSession,
+        ImportBackNextSessionOnNextSession,
         ImportBackNextSessionFail,
-
         /// <summary>
         /// 将前台正在运行的局传送到后台
         /// </summary>
         SendFrontCurSession,
 
         SendFrontPassword,
+        ModifyFrontPassword,
+        ModifyFrontPasswordOK,
         SendFrontSetting,
+        ModifyFrontSetting,
+        ModifyFrontSettingOK,
         SendFrontLiveData,
         SendFrontSummationBetRecord,
+        SendFrontAccount,
+        ClearFrontAccount,
 
         /// <summary>
         /// 将前台保存的押分记录的局数发送到后台
@@ -103,6 +109,21 @@ namespace Bacc_front
         /// 将某局的押分记录传送至后台
         /// </summary>
         SendFrontBetRecord,
+        //SaveFrontBetRecord,
+
+        ClearFrontLocalSessions,
+
+        SetWinner,
+        KillBig,
+        ExtraWaybill,
+
+        LockFront,
+        LockFrontOK,
+        UnlockFront,
+        UnlockFrontOK,
+        ShutdownFront,
+        BreakdownFront,
+
     }
 
     public enum GameState
@@ -113,6 +134,7 @@ namespace Bacc_front
         Dealing = 2,
         DealOver = 3,
         Printing= 4,
+        Booming = 5
     }
     public class ParamToServer
     {

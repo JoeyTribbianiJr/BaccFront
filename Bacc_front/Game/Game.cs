@@ -7,6 +7,8 @@ using System.Windows;
 using Bacc_front.Properties;
 using System.Linq;
 using WsUtils.SqliteEFUtils;
+using WsUtils;
+using System.Threading;
 
 namespace Bacc_front
 {
@@ -110,6 +112,8 @@ namespace Bacc_front
         /// </summary>
         public ArrayList HistoryWaybill { get; set; }
         public GameDataManager Manager { get; set; }
+
+
         /// <summary>
         /// 本场的牌，用于发给服务器
         /// </summary>
@@ -130,7 +134,7 @@ namespace Bacc_front
         /// 向后台发送
         /// </summary>
         public BackLiveData BetBackLiveData { get; set; }
-        public  ObservableCollection<BetScoreRecord> BetRecordJsonDataToBack{ get; set; }
+        public ObservableCollection<BetScoreRecord> BetRecordJsonDataToBack { get; set; }
         public static Game Instance
         {
             get
@@ -142,11 +146,27 @@ namespace Bacc_front
                 return instance;
             }
         }
-        public string ServerState { get; private set; }
+
+        internal void SetGameUnlock()
+        {
+            IsGameLocked = false;
+            Settings.Default.LGroup = 0;
+            Settings.Default.Save();
+        }
+
+        internal void SetGameLock()
+        {
+            IsGameLocked = true;
+            Settings.Default.LGroup = 1;
+            Settings.Default.Save();
+        }
+
+        public bool IsGameLocked { get; private set; }
 
         #endregion
         public Game()
         {
+            IsGameLocked = Settings.Default.LGroup == 1;
             PriorCountDown = 0;
             PriorState = GameState.Preparing;
             CurrentState = GameState.Preparing;
@@ -174,6 +194,10 @@ namespace Bacc_front
         #region 游戏开始
         public void Start()
         {
+            if (IsGameLocked)
+            {
+                return;
+            }
             Game.Instance._isGameStarting = true;
             InitGame();
             InitFsm();
@@ -186,7 +210,6 @@ namespace Bacc_front
 
             KeyListener.StartListen();
             CoreTimer.StartCountdownTimer(TimeSpan.FromSeconds(_frame_rate), Update);
-            CoreTimer.StartWebTimer();
 
             SetCancleSpace();
             MainWindow.Instance.txtSessionIndex.Visibility = Visibility.Visible;
@@ -201,11 +224,13 @@ namespace Bacc_front
         public void NewSession()
         {
             SessionIndex++;
-            _setting.CurSessionIndex = SessionIndex;
-            Settings.Default.CurrentSessionIndex = SessionIndex;
-            Settings.Default.Save();
+            if (SessionIndex >= 1000)
+            {
+                SessionIndex = 0;
+            }
+
             RoundIndex = -1;
-            if(HistoryWaybill == null)
+            if (HistoryWaybill == null)
             {
                 HistoryWaybill = new ArrayList();
             }
@@ -321,7 +346,7 @@ namespace Bacc_front
             {
                 CoreTimer.SetCountDownWithTimer(timer, _setting._check_waybill_tm);
                 MainWindow.Instance.txtShuffleCountdown.Text = CountDown.ToString() + " 秒后开始下一局";
-                if (timer > 10)
+                if (timer == 10)
                 {
                     ControlBoard.Instance.Dispatcher.Invoke(new Action(() =>
                     {
@@ -353,6 +378,10 @@ namespace Bacc_front
         }
         public void BreakShuffle()
         {
+            ControlBoard.Instance.Dispatcher.Invoke(new Action(() =>
+            {
+                ControlBoard.Instance.btnStartGame.IsEnabled = false;
+            }), System.Windows.Threading.DispatcherPriority.Send);
             if (_isGameStarting)
             {
                 _isShulffling = false;
@@ -362,13 +391,17 @@ namespace Bacc_front
         private void OnShuffleExit(IState state)
         {
             ControlBoard.Instance.Dispatcher.Invoke(new Action(() =>
-            {
-                ControlBoard.Instance.btnStartGame.IsEnabled = false;
-            }));
+               {
+                   ControlBoard.Instance.btnStartGame.IsEnabled = false;
+               }), System.Windows.Threading.DispatcherPriority.Send);
             Manager.SaveNewSession(CurrentSession);
             MainWindow.Instance.bdPrepare.Visibility = Visibility.Hidden;
             HistoryWaybill = new ArrayList();
             _isShuffled = false;
+
+            _setting.CurSessionIndex = SessionIndex;
+            Settings.Default.CurrentSessionIndex = SessionIndex;
+            Settings.Default.Save();
         }
 
         private void _printingState_OnEnter(IState state)
@@ -441,6 +474,7 @@ namespace Bacc_front
 
         private void OnBetEnter(IState state)
         {
+            _isKillBig = false;
             CurrentState = GameState.Betting;
             WebServer.SendBetStartToHttpServer();
             RoundIndex++;
@@ -484,10 +518,47 @@ namespace Bacc_front
             {
                 if (CoreTimer.IsCountdownTick(timer, 3, _setting._betTime))
                 {
+                    KillBig();
                     _isIn3 = true;
                     return;
                 }
             }
+        }
+        private void KillBig()
+        {
+            try
+            {
+                if (!_isKillBig)
+                {
+                    return;
+                }
+                var b_profit = Desk.GetProfit((int)BetSide.banker, Desk.Instance.desk_amount[BetSide.banker],
+                    Desk.Instance.desk_amount[BetSide.player], Desk.Instance.desk_amount[BetSide.tie]);
+                var p_profit = Desk.GetProfit((int)BetSide.player, Desk.Instance.desk_amount[BetSide.banker],
+                    Desk.Instance.desk_amount[BetSide.player], Desk.Instance.desk_amount[BetSide.tie]);
+                //var t_profit = Desk.GetProfit((int)BetSide.player, Desk.Instance.desk_amount[BetSide.banker],
+                //    Desk.Instance.desk_amount[BetSide.player], Desk.Instance.desk_amount[BetSide.tie]);
+                BetSide winner = BetSide.banker;
+                if (b_profit == p_profit)
+                {
+                    return;
+                }
+                if (b_profit < p_profit && CurrentRound.Winner.Item1 == BetSide.banker)
+                {
+                    winner = BetSide.player;
+                }
+                if (p_profit < b_profit && CurrentRound.Winner.Item1 == BetSide.player)
+                {
+                    winner = BetSide.banker;
+                }
+                var round = Session.CreateRoundByWinner(winner);
+                var roundidx = Game.Instance.RoundIndex == -1 ? 0 : Game.Instance.RoundIndex;
+                Game.Instance.CurrentSession.RoundsOfSession[roundidx] = round;
+            }
+            catch (Exception ex)
+            {
+            }
+
         }
         private bool IsBetted()
         {
@@ -502,7 +573,13 @@ namespace Bacc_front
             PlayerStateText = "闲";
             Desk.Instance.CancelHide();
             KeyListener.CanclePressed();
+            if (!_setting._is3SecOn)
+            {
+                KillBig();
+            }
+            _isKillBig = false;
         }
+
         private void OnDealEnter(IState state)
         {
             CurrentState = GameState.Dealing;
@@ -523,15 +600,16 @@ namespace Bacc_front
             {
                 endtime -= 3f;
             }
-            if(0<timer && timer <= endtime)
+            if (0 < timer && timer <= endtime)
             {
                 WebServer.SendToHttpServer();
             }
-            Animator.visibleDuration = _setting._betTime - 10 + endtime + 8;
+            //Animator.visibleDuration = _setting._betTime - 10 + endtime + 8;
+            Animator.visibleDuration = 40;
             //CoreTimer.DoOneThingInTimespan(timer, ref _isDeal4CardDone, ref _isDealing4Card, 2f, endtime, Animator.StartDealAnimation);
             CoreTimer.DoDealAnimationInTimespan(timer, ref _isDeal4CardDone, ref _isDealing4Card, 2f, endtime, Animator.StartDealAnimation);
             CoreTimer.DoOneThingInTimespan(timer, ref _isSetWinstatDone, ref _isSettingWinStat, endtime + 1f, endtime + 5f, CalcEarning);
-            
+
             if (timer > endtime + 5f)
             {
                 Desk.Instance.SettleEarnToBalance();
@@ -547,6 +625,123 @@ namespace Bacc_front
                 }
             }
         }
+
+        #region 开牌
+        private void CalcEarning()
+        {
+            Waybill[RoundIndex].Winner = (int)CurrentRound.Winner.Item1;
+            HistoryWaybill = ConvertWaybillForServerSB();
+            WebServer.SendDealEndToHttpServer();
+            NoticeRoundOver();
+
+            ThreadPool.QueueUserWorkItem(saveBetRecordsCallback);
+
+            Desk.Instance.CalcAllPlayersEarning(CurrentRound);
+            SetWinStateText();
+
+            Desk.Instance.ClearDeskAmount();
+        }
+
+        private void saveBetRecordsCallback(object state)
+        {
+            Manager.SaveBetRecords();
+            WebServer.SendSummationBetRecordToBack();
+        }
+
+        private void saveBetRecordsCallback()
+        {
+        }
+        private void CheckBoom()
+        {
+            if (CurrentSession.BoomAcc >= _setting._boom || _isServerBoom)
+            {
+                var window = MainWindow.Instance;
+                window.imgBoom.Visibility = Visibility.Visible;
+
+                window.g3.Visibility = Visibility.Visible;
+                window.g2.Visibility = Visibility.Hidden;
+                window.bg.Visibility = Visibility.Hidden;
+                window.pg.Visibility = Visibility.Hidden;
+
+                WebServer.SendBoomToHttpServer();
+
+                CoreTimer.StopTimer();
+                ControlBoard.Instance.btnStartGame.IsEnabled = false;
+                _isServerBoom = false;
+            }
+        }
+        public void SetWinStateText()
+        {
+            var winner = CurrentRound.Winner;
+            var window = MainWindow.Instance;
+            string b_str, p_str;
+            switch (winner.Item1)
+            {
+                case BetSide.banker:
+                    b_str = "庄赢" + (winner.Item2) + " 点";
+                    p_str = "闲 " + (winner.Item3) + " 点";
+                    BankerStateText = b_str;
+                    PlayerStateText = p_str;
+                    if (!_winbPlayed)
+                    {
+                        PlayWav("winB");
+                        _winbPlayed = true;
+                    }
+                    SetStateText("庄赢！");
+                    window.g3.Visibility = Visibility.Collapsed;
+                    window.g2.Visibility = Visibility.Visible;
+                    window.bg.Visibility = Visibility.Visible;
+                    window.pg.Visibility = Visibility.Hidden;
+                    break;
+                case BetSide.tie:
+                    b_str = "和";
+                    p_str = "和";
+                    BankerStateText = "和牌退注";
+                    PlayerStateText = "和牌退注";
+                    if (!_winTPlayed)
+                    {
+                        _winTPlayed = true;
+                        PlayWav("winT");
+                    }
+                    SetStateText("和");
+                    break;
+                case BetSide.player:
+                    b_str = "庄 " + (winner.Item2) + " 点";
+                    p_str = "闲赢" + (winner.Item3) + " 点";
+                    BankerStateText = b_str;
+                    PlayerStateText = p_str;
+                    if (!_winpPlayed)
+                    {
+                        _winbPlayed = true;
+                        PlayWav("winP");
+                    }
+                    SetStateText("闲赢！");
+                    window.g3.Visibility = Visibility.Collapsed;
+                    window.g2.Visibility = Visibility.Visible;
+                    window.bg.Visibility = Visibility.Hidden;
+                    window.pg.Visibility = Visibility.Visible;
+                    break;
+                default:
+                    b_str = "";
+                    p_str = "";
+                    break;
+            }
+        }
+        public void Set4CardState()
+        {
+            var player = CurrentRound.HandCard[0].Take(2).Sum(c => Desk.Instance.GetCardValue(c)) % 10;
+            var banker = CurrentRound.HandCard[1].Take(2).Sum(c => Desk.Instance.GetCardValue(c)) % 10;
+            var b_str = "庄 " + banker + " 点";
+            var p_str = "闲 " + player + " 点";
+            BankerStateText = b_str;
+            PlayerStateText = p_str;
+        }
+        void SetStateText(string state)
+        {
+            StateText = state;
+        }
+        #endregion
+
         private void OnDealExit(IState state)
         {
             //WebServer.SendDealEndToHttpServer();
@@ -652,111 +847,6 @@ namespace Bacc_front
                 BetState = "";
             }
         }
-        #region 开牌
-        private void CalcEarning()
-        {
-            Waybill[RoundIndex].Winner = (int)CurrentRound.Winner.Item1;
-            HistoryWaybill = ConvertWaybillForServerSB();
-            WebServer.SendDealEndToHttpServer();
-            NoticeRoundOver();
-
-            Manager.SaveBetRecords();
-
-            WebServer.SendSummationBetRecordToBack();
-
-            Desk.Instance.CalcAllPlayersEarning(CurrentRound);
-            SetWinStateText();
-
-            Desk.Instance.ClearDeskAmount();
-        }
-        private void CheckBoom()
-        {
-            if (CurrentSession.BoomAcc >= _setting._boom || _isServerBoom)
-            {
-                var window = MainWindow.Instance;
-                window.imgBoom.Visibility = Visibility.Visible;
-
-                window.g3.Visibility = Visibility.Visible;
-                window.g2.Visibility = Visibility.Hidden;
-                window.bg.Visibility = Visibility.Hidden;
-                window.pg.Visibility = Visibility.Hidden;
-
-                CoreTimer.StopTimer();
-                ControlBoard.Instance.btnStartGame.IsEnabled = false;
-                _isServerBoom = false;
-            }
-        }
-        public void SetWinStateText()
-        {
-            var winner = CurrentRound.Winner;
-            var window = MainWindow.Instance;
-            string b_str, p_str;
-            switch (winner.Item1)
-            {
-                case BetSide.banker:
-                    b_str = "庄赢" + (winner.Item2) + " 点";
-                    p_str = "闲 " + (winner.Item3) + " 点";
-                    BankerStateText = b_str;
-                    PlayerStateText = p_str;
-                    if (!_winbPlayed)
-                    {
-                        PlayWav("winB");
-                        _winbPlayed = true;
-                    }
-                    SetStateText("庄赢！");
-                    window.g3.Visibility = Visibility.Collapsed;
-                    window.g2.Visibility = Visibility.Visible;
-                    window.bg.Visibility = Visibility.Visible;
-                    window.pg.Visibility = Visibility.Hidden;
-                    break;
-                case BetSide.tie:
-                    b_str = "和";
-                    p_str = "和";
-                    BankerStateText = "和牌退注";
-                    PlayerStateText = "和牌退注";
-                    if (!_winTPlayed)
-                    {
-                        _winTPlayed = true;
-                        PlayWav("winT");
-                    }
-                    SetStateText("和");
-                    break;
-                case BetSide.player:
-                    b_str = "庄 " + (winner.Item2) + " 点";
-                    p_str = "闲赢" + (winner.Item3) + " 点";
-                    BankerStateText = b_str;
-                    PlayerStateText = p_str;
-                    if (!_winpPlayed)
-                    {
-                        _winbPlayed = true;
-                        PlayWav("winP");
-                    }
-                    SetStateText("闲赢！");
-                    window.g3.Visibility = Visibility.Collapsed;
-                    window.g2.Visibility = Visibility.Visible;
-                    window.bg.Visibility = Visibility.Hidden;
-                    window.pg.Visibility = Visibility.Visible;
-                    break;
-                default:
-                    b_str = "";
-                    p_str = "";
-                    break;
-            }
-        }
-        public void Set4CardState()
-        {
-            var player = CurrentRound.HandCard[0].Take(2).Sum(c => Desk.Instance.GetCardValue(c)) % 10;
-            var banker = CurrentRound.HandCard[1].Take(2).Sum(c => Desk.Instance.GetCardValue(c)) % 10;
-            var b_str = "庄 " + banker + " 点";
-            var p_str = "闲 " + player + " 点";
-            BankerStateText = b_str;
-            PlayerStateText = p_str;
-        }
-        void SetStateText(string state)
-        {
-            StateText = state;
-        }
-        #endregion
         #region 音乐播放器
         public void PlayWav(string name)
         {
@@ -779,15 +869,15 @@ namespace Bacc_front
             var p_cards = CurrentRound.HandCard[0];
             for (int i = 0; i < 2; i++)
             {
-                arr[i] = p_cards[i].GetPngName;
+                arr[i] = p_cards[i].PngName;
             }
             var b_cards = CurrentRound.HandCard[1];
             for (int i = 3; i < 5; i++)
             {
-                arr[i] = b_cards[i - 3].GetPngName;
+                arr[i] = b_cards[i - 3].PngName;
             }
-            arr[2] = p_cards.Count == 3 ? p_cards[2].GetPngName : 0;
-            arr[5] = b_cards.Count == 3 ? b_cards[2].GetPngName : 0;
+            arr[2] = p_cards.Count == 3 ? p_cards[2].PngName : 0;
+            arr[5] = b_cards.Count == 3 ? b_cards[2].PngName : 0;
             return arr;
         }
         public void ResetWaybill()
@@ -869,6 +959,7 @@ namespace Bacc_front
         private bool _isPrinted = false;
         public bool _isPrinting = false;
         public bool _isServerBoom = false;
+        public bool _isKillBig = false;
         #endregion
     }
 }

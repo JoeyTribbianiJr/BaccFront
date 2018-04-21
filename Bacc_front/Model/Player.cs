@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using Bacc_front.Properties;
-using Newtonsoft.Json;
+﻿using System.Linq;
 using PropertyChanged;
 using WsUtils;
-using WsUtils.SqliteEFUtils;
 
 namespace Bacc_front
 {
@@ -37,7 +29,7 @@ namespace Bacc_front
         public int BetScoreOnTie { get; set; }
 
         public int Id { get => id; set => id = value; }
-        public int Balance { get => balance; set => balance = value;}
+        public int Balance { get => balance; set => balance = value; }
         public int Last_add { get => last_add; set => last_add = value; }
         public int Add_score { get => add_score; set => add_score = value; }
         public int Last_sub { get => last_sub; set => last_sub = value; }
@@ -51,9 +43,9 @@ namespace Bacc_front
 
         public event NativeCountRule count_rule;
 
-
         public Player(int id, NativeCountRule count_rule)
         {
+            
             this.Id = id;
             Balance = 0;        //总积分;
             Last_add = 0;       //最后上分
@@ -90,41 +82,51 @@ namespace Bacc_front
         {
             if (Game.Instance._isIn3)
             {
-                if (Desk.Instance.CanHeBetIn3Sec(this, side))
+                var winner = Game.Instance.CurrentRound.Winner.Item1;
+                if (winner == side)
                 {
-                    var add_score = 1;
-                    Balance -= add_score;
-                    bet_score[side] += add_score;
+                    return;
+                }
 
-                    Desk.Instance.UpdateDeskAmount(side, add_score);
-                    switch (side)
-                    {
-                        case BetSide.banker:
-                            BetScoreOnBank += add_score;
-                            break;
-                        case BetSide.player:
-                            BetScoreOnPlayer += add_score;
-                            break;
-                        case BetSide.tie:
-                            BetScoreOnTie += add_score;
-                            break;
-                    }
+                var add_score = Balance >= 1 ? 1 : 0;
+                if (!Setting.Instance._limit_red_on_3sec)    //超限红不可试分
+                {
+                    add_score = Desk.Instance.SetTotalLimitRedDenomination(add_score, side);
+                    add_score = Desk.Instance.SetDeskLimitRedDenomination(this, add_score, side);
+                }
+
+                Balance -= add_score;
+                bet_score[side] += add_score;
+
+                Desk.Instance.UpdateDeskAmount(side, add_score);
+                switch (side)
+                {
+                    case BetSide.banker:
+                        BetScoreOnBank += add_score;
+                        break;
+                    case BetSide.player:
+                        BetScoreOnPlayer += add_score;
+                        break;
+                    case BetSide.tie:
+                        BetScoreOnTie += add_score;
+                        break;
                 }
             }
-            else if (Desk.Instance.CanHeBet(this, side))
+            else 
             {
                 var add_score = Balance >= denomination ? denomination : Balance;
 
                 //第一手计算最小限注
-                if (BetScore.Values.Sum() == 0 )
+                if (BetScore.Values.Sum() == 0)
                 {
-                    if(denomination < Setting.Instance._min_limit_bet && Balance  >= Setting.Instance._min_limit_bet)
+                    if (denomination < Setting.Instance._min_limit_bet && Balance >= Setting.Instance._min_limit_bet)
                     {
                         add_score = Setting.Instance._min_limit_bet;
                     }
                 }
 
-                add_score= Desk.Instance.SetTotalLimitRedDenomination(add_score,side);
+                add_score = Desk.Instance.SetTotalLimitRedDenomination(add_score, side);
+                add_score = Desk.Instance.SetDeskLimitRedDenomination(this, add_score, side);
 
                 Balance -= add_score;
                 bet_score[side] += add_score;
@@ -238,7 +240,7 @@ namespace Bacc_front
         public void ConfirmAdd()
         {
             Game.Instance.Manager.SaveAddScoreAccount(Add_score, Id);
-            if(Balance == 0)
+            if (Balance == 0)
             {
                 SetDenomination(BetDenomination.mini);
             }
@@ -265,7 +267,7 @@ namespace Bacc_front
         {
             Game.Instance.Manager.SaveSubScoreAccount(Sub_score, Id);
             Balance -= Sub_score;
-            if(Balance == 0)
+            if (Balance == 0)
             {
                 SetDenomination(BetDenomination.mini);
             }

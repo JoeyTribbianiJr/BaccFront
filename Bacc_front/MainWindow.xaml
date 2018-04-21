@@ -201,7 +201,9 @@
                     </Grid>
                 </Border>
                 <Label FontSize="22" Foreground="LightYellow" Canvas.Left="444" Canvas.Top="592" Content="第" />
-                <TextBlock x:Name="txtSessionIndex" Visibility="Hidden" FontSize="26" FontWeight="ExtraBold" Foreground="Red" Text="{Binding _sessionStrIndex}" TextAlignment="Center" Width="60" Canvas.Left="487" Canvas.Top="597" />
+                <TextBlock x:Name="txtSessionIndex" Visibility="Hidden"
+                           FontSize="26" FontWeight="ExtraBold" Foreground="Red" Text="{Binding _sessionStrIndex}" TextAlignment="Center" 
+                           Width="80" Canvas.Left="475" Canvas.Top="597" />
                 <Label FontSize="22" Foreground="LightYellow" Canvas.Left="555" Canvas.Top="591" Content="局"/>
                 <!--<Label FontSize="18" Foreground="Red" Canvas.Left="469" Canvas.Top="645" Content="第"/>-->
                 <TextBlock x:Name="txtBetState" FontSize="22" Visibility="Visible" Foreground="Red" Text="{Binding BetState}" 

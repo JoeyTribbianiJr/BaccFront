@@ -14,6 +14,7 @@ namespace WsUtils.SqliteEFUtils
     {
         [Key]
         public int Id { get; set; }
+        public int SessionIndex{ get; set; }
         public string JsonSession { get; set; }
     }
     /// <summary>

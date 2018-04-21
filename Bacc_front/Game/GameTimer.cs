@@ -17,9 +17,17 @@ namespace Bacc_front
 
         public void StartWebTimer()
         {
+            if(WebTimer != null)
+            {
+                StopWebTimer();
+            }
             WebTimer =  new System.Timers.Timer(_web_frame);
             WebTimer.Elapsed += WebTimer_Elapsed;
             WebTimer.Start();
+        }
+        public void StopWebTimer()
+        {
+            WebTimer.Stop();
         }
 
         private void WebTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -29,6 +37,10 @@ namespace Bacc_front
 
         public void StartCountdownTimer(TimeSpan interval, EventHandler handler)
         {
+            if(CountdownTimer != null)
+            {
+                CountdownTimer.Stop();
+            }
             CountdownTimer = new DispatcherTimer { Interval = interval };
             CountdownTimer.Tick += handler;
             CountdownTimer.Start();
@@ -44,6 +56,10 @@ namespace Bacc_front
         }
         public void StartKeyListenTimer(TimeSpan interval,Action handler)
         {
+            if (KeyListener != null)
+            {
+                KeyListener.Abort();
+            }
             KeyListener =  new Thread(new ThreadStart(() => {
                 while (!cts.Token.IsCancellationRequested)
                 {
@@ -75,6 +91,10 @@ namespace Bacc_front
             Game.Instance.CountDown = Convert.ToInt32(count_down);
             MainWindow.Instance.txtCountDown.Text =Game.Instance. CountDown.ToString();
         }
+        //public void PauseCountdownText()
+        //{
+        //    MainWindow.Instance.txtCountDown.Text =Game.Instance. CountDown.ToString();
+        //}
         public bool DoOneThingInTimespan(float timer, ref bool isActionDone, ref bool hasStartAction, float start, float end, Action action)
         {
             if (isActionDone)

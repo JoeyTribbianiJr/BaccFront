@@ -180,7 +180,7 @@ namespace Bacc_front
             #endregion
 
             #region 初始化变量
-            var bmpIdx = card.GetPngName;
+            var bmpIdx = card.PngName;
             var cardBmp = new BitmapImage(new Uri("Img/card/" + bmpIdx + ".png", UriKind.Relative));
             double startTime = start_time[idx];
             if (!_hasCard5 && idx == 5)

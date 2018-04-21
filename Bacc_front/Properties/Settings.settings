@@ -50,5 +50,11 @@
     <Setting Name="Room" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
+    <Setting Name="LGroup" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="conn_front_pwd" Type="System.String" Scope="User">
+      <Value Profile="(Default)">2efdreEspxWUX5WM5y9mFg==</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

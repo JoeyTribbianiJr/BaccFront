@@ -3,56 +3,24 @@ using System.Collections;
 
 namespace Bacc_front
 {
-	/// <summary>
-	/// 牌类
-	/// </summary>
-	public class Card
-	{
-		private readonly string cardName;
-		private readonly Weight weight;
-		private readonly Suits color;
-		private bool makedSprite;
+    /// <summary>
+    /// 牌类
+    /// </summary>
+    public class Card
+    {
+        private Weight weight;
+        private Suits color;
+        private int pngName;
 
-		public Card(string name, Weight weight, Suits color)
-		{
-			makedSprite = false;
-			cardName = name;
-			this.weight = weight;
-			this.color = color;
-		}
-        public int GetPngName
+        public Card(string name, Weight weight, Suits color)
         {
-            get
-            {
-                return (int)color * 13 + (int)weight;
-            }
+            this.Weight = weight;
+            this.Color = color;
+            PngName = (int)Color * 13 + (int)Weight;
         }
 
-		/// <summary>
-		/// 返回牌名
-		/// </summary>
-		public string GetCardName
-		{
-			get { return cardName; }
-		}
-		/// <summary>
-		/// 返回权值
-		/// </summary>
-		public Weight GetCardWeight
-		{
-			get
-			{
-				return weight;
-			}
-		}
-
-		/// <summary>
-		/// 返回花色
-		/// </summary>
-		public Suits GetCardSuit
-		{
-			get { return color; }
-		}
-
-	}
+        public int PngName { get => pngName; set => pngName = value; }
+        public Suits Color { get => color; set => color = value; }
+        public Weight Weight { get => weight; set => weight = value; }
+    }
 }

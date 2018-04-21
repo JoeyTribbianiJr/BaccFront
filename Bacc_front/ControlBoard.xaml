@@ -66,6 +66,36 @@
                     <DataGridTextColumn Header="最后退分" FontStyle="Oblique"  Binding="{Binding Last_sub}" />
                 </DataGrid.Columns>
             </DataGrid>
+            <DataGrid Name="dgSum" SelectionUnit="FullRow"
+                  ColumnWidth="*" 
+                  SelectionChanged="dgScore_SelectionChanged"
+                  KeyboardNavigation.TabNavigation="None"
+                  ItemsSource="{Binding ScoreSum}"
+                  SelectedIndex="0"
+                  AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="28"
+                  CanUserSortColumns="False"   Margin="10" IsReadOnly="True"
+                  CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
+                  CanUserReorderColumns="False" HeadersVisibility="None" AlternationCount="2"  RowHeaderWidth="0" CanUserAddRows="False" >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="总计" Width="150" Binding="{Binding Title}" />
+                    <DataGridTextColumn Header="上分"  FontStyle="Oblique" Binding="{Binding Add_score}" />
+                    <DataGridTextColumn Header="最后上分" FontStyle="Oblique"  Binding="{Binding Last_add}" />
+                    <DataGridTextColumn Header="当前分数" FontStyle="Normal"  Binding="{Binding Balance}" >
+                        <DataGridTextColumn.ElementStyle>
+                            <Style>
+                                <Setter Property="TextBlock.Background"  Value="skyblue"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="退分" FontStyle="Oblique"  Binding="{Binding Sub_score}" />
+                    <DataGridTextColumn Header="最后退分" FontStyle="Oblique"  Binding="{Binding Last_sub}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <Button Style="{StaticResource ColorButton}"
+                    Width="100" Height="30" FontSize="16"
+                    Name="btnRefreshSum" 
+                    Click="Players_CollectionChanged"
+                    Background="Green">刷新总计</Button>
         </StackPanel>
 
         <Grid Grid.Row="1" Margin="5,0,5,10">
@@ -157,8 +187,11 @@
                     <StackPanel Name="spAccount" Grid.Column="1" Visibility="Hidden" Grid.RowSpan="2">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Margin="10,0,0,0" FontSize="13" HorizontalAlignment="Center">当前账簿</TextBlock>
-                            <Button Margin="20,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnClearAccount"  Style="{StaticResource ColorButton}" Click="btnClearAccount_Click" >清零</Button>
-                            <Button Margin="20,0,5,0" FontSize="13"  Background="MediumSeaGreen" Width="80"  Name="btnPrintAccount"  Style="{StaticResource ColorButton}" Click="btnPrintAccount_Click" >打印账簿</Button>
+                            <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnPreAccount"  Style="{StaticResource ColorButton}" Click="btnPreAccount_Click" >上一本</Button>
+                            <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnClearAccount"  Style="{StaticResource ColorButton}" Click="btnClearAccount_Click" >清零</Button>
+                            <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnNextAccount"  Style="{StaticResource ColorButton}" Click="btnNextAccount_Click" >下一本</Button>
+                            <TextBlock Name="txtAccountState" Foreground="Red"></TextBlock>
+                            <Button Margin="10,0,5,0" FontSize="13"  Background="MediumSeaGreen" Width="80"  Name="btnPrintAccount"  Style="{StaticResource ColorButton}" Click="btnPrintAccount_Click" Visibility="Collapsed">打印账簿</Button>
                         </StackPanel>
                         <DataGrid  SelectionUnit="FullRow" Name="dgAccount"
                   ColumnWidth="*" 
@@ -177,6 +210,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
+
                     <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,0,0,3">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="25"/>
@@ -212,5 +246,6 @@
                 </Grid>
             </GroupBox>
         </Grid>
+        <Image Name="imgMask" Visibility="Hidden"></Image>
     </Grid>
 </Window>

@@ -12,7 +12,6 @@ namespace Bacc_front
     public class Setting
     {
         public const string secret_key = "0109010901090109";
-        public const string connect_pass = "11111111";
         public const int max_session_num = 1000;
         /// <summary>
         /// 游戏参数
@@ -41,7 +40,7 @@ namespace Bacc_front
         public string _is_print_bill;
         public int _betSpeed;    //10,20,30,40,50,60,70,80,90,100。0是不连续押分
 
-        public const string AdministratorPwd = "17692135195";
+        public const string AdministratorPwd = "28750833";
         public Dictionary<string, string> PasswordMap;
         public string waiter_pwd;
         public string manager_pwd;
@@ -110,8 +109,8 @@ namespace Bacc_front
             {
                 ServerUrl = AESEncrypt.Decrypt(Settings.Default.ServerUrl, secret_key);
             }
-            //保存的是上一局的局数
-            CurSessionIndex = Settings.Default.CurrentSessionIndex ;
+            //保存的是当前运行的局数
+            CurSessionIndex = Settings.Default.CurrentSessionIndex;
             _is_print_bill = GetStrSetting("is_print_bill");
             _betSpeed = GetIntSetting("bet_speed");
             _round_num_per_session = GetIntSetting("round_num_per_session");
@@ -141,8 +140,11 @@ namespace Bacc_front
                 player.Denominations[0] = _big_chip_facevalue;
                 player.Denominations[1] = _mini_chip_facevalue;
             }
-            Game.Instance.SessionIndex = CurSessionIndex;   //读取的是上一局数
-            Game.Instance.NewSession(); //局数加1
+            if (Game.Instance.CurrentState == GameState.Preparing)
+            {
+                Game.Instance.SessionIndex = CurSessionIndex;   //读取的之前运行时保存的局数
+                Game.Instance.CurrentSession.SessionId = CurSessionIndex;
+            }
         }
         private void InitGameSetting()
         {
@@ -191,25 +193,25 @@ namespace Bacc_front
             });
             game_setting.Add("check_waybill_tm", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 2,
                 Type = SettingItemType.integer,
                 Values = new string[] { "对单时间:0", "对单时间:3", "对单时间:30", "对单时间:60", "对单时间:90", "对单时间:120", "对单时间:150", "对单时间:180" }
             });
             game_setting.Add("bet_tm", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 4,
                 Type = SettingItemType.integer,
                 Values = new string[] { "押分时间:10", "押分时间:15", "押分时间:20", "押分时间:25", "押分时间:30", "押分时间:35", "押分时间:40", "押分时间:45", "押分时间:50", "押分时间:55", "押分时间:60", "押分时间:65", "押分时间:70", "押分时间:75", "押分时间:80", "押分时间:90", }
             });
             game_setting.Add("big_chip_facevalue", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 4,
                 Type = SettingItemType.integer,
                 Values = new string[] { "大筹码:10", "大筹码:20", "大筹码:30", "大筹码:50", "大筹码:100", "大筹码:150", "大筹码:200", "大筹码:500", "大筹码:1000" }
             });
             game_setting.Add("mini_chip_facevalue", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 3,
                 Type = SettingItemType.integer,
                 Values = new string[] { "小筹码:1", "小筹码:2", "小筹码:5", "小筹码:10", "小筹码:20", "小筹码:30", "小筹码:40", "小筹码:50", "小筹码:100" }
             });
@@ -233,13 +235,13 @@ namespace Bacc_front
             });
             game_setting.Add("desk_limit_red", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 9,
                 Type = SettingItemType.integer,
                 Values = new string[] { "单台限红:100", "单台限红:200", "单台限红:300", "单台限红:500", "单台限红:1000", "单台限红:2000", "单台限红:3000", "单台限红:5000", "单台限红:10000", "单台限红:20000", "单台限红:30000", "单台限红:50000", "单台限红:100000" }
             });
             game_setting.Add("tie_limit_red", new SettingItem()
             {
-                SelectedIndex = 0,
+                SelectedIndex = 2,
                 Type = SettingItemType.integer,
                 Values = new string[] { "和限红:100", "和限红:200", "和限红:300", "和限红:500", "和限红:1000" }
             });
@@ -269,7 +271,7 @@ namespace Bacc_front
             });
             game_setting.Add("boom", new SettingItem()
             {
-                SelectedIndex = 1,
+                SelectedIndex = 3,
                 Type = SettingItemType.strings,
                 Values = new string[] { "爆机:0", "爆机:5000", "爆机:10000", "爆机:20000", "爆机:30000", "爆机:50000", "爆机:100000", "爆机:200000", "爆机:300000", "爆机:500000", }
             });
@@ -310,9 +312,26 @@ namespace Bacc_front
             PasswordMap.Add("audit_account_pwd", AESEncrypt.Decrypt(set.audit_account_pwd, secret_key));
             PasswordMap.Add("audit_bet_record_pwd", AESEncrypt.Decrypt(set.audit_bet_record_pwd, secret_key));
             PasswordMap.Add("quit_front_pwd", AESEncrypt.Decrypt(set.quit_front_pwd, secret_key));
+            PasswordMap.Add("conn_front_pwd", AESEncrypt.Decrypt(set.conn_front_pwd, secret_key));
             PasswordMap.Add("shutdown_pwd", AESEncrypt.Decrypt(set.shutdown_pwd, secret_key));
             PasswordMap.Add("clear_account_pwd", AESEncrypt.Decrypt(set.clear_account_pwd, secret_key));
             PasswordMap.Add("middle_check_waybill_pwd", AESEncrypt.Decrypt(set.middle_check_waybill_pwd, secret_key));
+        }
+        public void SavePassword(Dictionary<string, string> dic)
+        {
+            var set = Settings.Default;
+            set.waiter_pwd = AESEncrypt.Encrypt(dic["waiter_pwd"], secret_key);
+            set.manager_pwd = AESEncrypt.Encrypt(dic["manager_pwd"], secret_key);
+            set.boss_pwd = AESEncrypt.Encrypt(dic["boss_pwd"], secret_key);
+            set.audit_account_pwd = AESEncrypt.Encrypt(dic["audit_account_pwd"], secret_key);
+            set.audit_bet_record_pwd = AESEncrypt.Encrypt(dic["audit_bet_record_pwd"], secret_key);
+            set.quit_front_pwd = AESEncrypt.Encrypt(dic["quit_front_pwd"], secret_key);
+            set.conn_front_pwd = AESEncrypt.Encrypt(dic["conn_front_pwd"], secret_key);
+            set.shutdown_pwd = AESEncrypt.Encrypt(dic["shutdown_pwd"], secret_key);
+            set.clear_account_pwd = AESEncrypt.Encrypt(dic["clear_account_pwd"], secret_key);
+            set.middle_check_waybill_pwd = AESEncrypt.Encrypt(dic["middle_check_waybill_pwd"], secret_key);
+            set.Save();
+            InitPassward();
         }
     }
 }
