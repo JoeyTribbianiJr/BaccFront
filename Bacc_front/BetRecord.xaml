@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bacc_front"
         mc:Ignorable="d"
-        Title="BetRecord" Height="740" Width="1110">
+        Title="押分记录" Height="740" Width="1110">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

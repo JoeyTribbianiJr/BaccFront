@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="768" Width="1024">
+        Title="百乐2号" Height="768" Width="1024">
     <!--WindowState="Maximized"-->
     <!--WindowStyle="None"
 		AllowsTransparency="True"

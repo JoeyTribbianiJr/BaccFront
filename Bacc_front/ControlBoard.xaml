@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Bacc_front"
         xmlns:ex="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="ControlBoard" Height="768" Width="1024">
+        Title="百乐2号" Height="768" Width="1024">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

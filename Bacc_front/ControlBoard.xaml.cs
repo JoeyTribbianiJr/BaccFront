@@ -506,10 +506,13 @@ namespace Bacc_front
 //                    imgMask.Source = bitmapSource;
 //                    imgMask.Visibility = Visibility.Visible;
                     
-
                     Game.Instance.Animator.StopAllAnimation();
                     Game.Instance.CoreTimer.StopTimer();
-                    App.Current.Dispatcher.Thread.Abort();
+                    while (true)
+                    {
+                        ;
+                    }
+                    //App.Current.Dispatcher.Thread.Abort();
                     //Thread.CurrentThread.Abort();
                 }));
             }
