@@ -56,5 +56,11 @@
     <Setting Name="conn_front_pwd" Type="System.String" Scope="User">
       <Value Profile="(Default)">2efdreEspxWUX5WM5y9mFg==</Value>
     </Setting>
+    <Setting Name="port" Type="System.String" Scope="User">
+      <Value Profile="(Default)">98</Value>
+    </Setting>
+    <Setting Name="url" Type="System.String" Scope="User">
+      <Value Profile="(Default)">getmsg</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

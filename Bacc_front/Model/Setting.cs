@@ -165,7 +165,7 @@ namespace Bacc_front
             {
                 SelectedIndex = 1,
                 Type = SettingItemType.strings,
-                Values = new string[2] { "打印路单", "不打印路单" }
+                Values = new string[3] { "打印路单", "不打印路单","打印不监控" }
             });
             game_setting.Add("deal_style", new SettingItem()
             {

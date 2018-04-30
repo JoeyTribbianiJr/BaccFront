@@ -238,14 +238,14 @@ namespace Bacc_front
         {
             byte[] testbt = { 0x10, 0x04, 0x04 };
             serialPort.Write(testbt, 0, testbt.Length);
-            //System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(100);
         }
         //测试打印机是否开门
         public static void DoorTest()
         {
             byte[] testbt = { 0x10, 0x04, 0x02 };
             serialPort.Write(testbt, 0, testbt.Length);
-            //System.Threading.Thread.Sleep(100);
+            System.Threading.Thread.Sleep(100);
         }
         private void SerialPort_PinChanged(object sender, SerialPinChangedEventArgs e)
         {
@@ -265,7 +265,9 @@ namespace Bacc_front
                         break;
                     case System.IO.Ports.SerialPinChange.DsrChanged:
                         b = serialPort.DsrHolding;
-                        if (!b && Setting.Instance._is_print_bill == "打印路单" && !Game.Instance._isShulffling)
+                        if (!b && Setting.Instance._is_print_bill == "打印路单" 
+                            && Game.Instance.CurrentState != GameState.Shuffling 
+                            && Game.Instance.CurrentState != GameState.Printing)
                         {
                             Game.Instance.CoreTimer.StopTimer();
                             //ControlBoard.Instance.btnStartGame.IsEnabled = true;
@@ -307,7 +309,10 @@ namespace Bacc_front
                 {
                     IsDoorClosed = false;
                 }
-                if (Setting.Instance._is_print_bill == "打印路单" && Game.Instance._isGameStarting && !Game.Instance._isShulffling)
+                if (Setting.Instance._is_print_bill == "打印路单" 
+                    && Game.Instance._isGameStarting
+                    && Game.Instance.CurrentState != GameState.Shuffling
+                    && Game.Instance.CurrentState != GameState.Printing)
                 {
                     if (door[0] == 0x88)
                     {

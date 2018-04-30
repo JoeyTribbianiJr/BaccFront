@@ -52,6 +52,24 @@
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net40\EntityFramework.dll</HintPath>
@@ -167,6 +185,7 @@
     <Compile Include="Game\Net\MyServerConfig.cs" />
     <Compile Include="Game\Net\WaybillManager.cs" />
     <Compile Include="Game\Utils\AESEncrypt.cs" />
+    <Compile Include="Game\Utils\ClipCurseHelper.cs" />
     <Compile Include="Game\Utils\CompressHelper.cs" />
     <Compile Include="Game\Utils\DataTableExtensions.cs" />
     <Compile Include="Game\Utils\FileUtils.cs" />
@@ -181,6 +200,7 @@
     <Compile Include="Game\Utils\ObservableDictionary.cs" />
     <Compile Include="Game\Printer\Printer.cs" />
     <Compile Include="Game\Net\SuperServer.cs" />
+    <Compile Include="Game\Utils\RegisterEncrypt.cs" />
     <Compile Include="Game\Utils\SqliteEFUtils\Entity.cs" />
     <Compile Include="Game\Utils\SqliteEFUtils\SqliteDb.cs" />
     <Compile Include="Game\Utils\WaitingBox.xaml.cs">
@@ -196,6 +216,9 @@
     <Compile Include="Model\Types.cs" />
     <Compile Include="pathButtonLeft.xaml.cs">
       <DependentUpon>pathButtonLeft.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RegisterWindow.xaml.cs">
+      <DependentUpon>RegisterWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Unused.cs" />
@@ -229,6 +252,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="pathButtonLeft.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RegisterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

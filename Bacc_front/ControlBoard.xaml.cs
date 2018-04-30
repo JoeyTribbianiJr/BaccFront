@@ -14,6 +14,7 @@ using WsUtils.SqliteEFUtils;
 using Bacc_front.Properties;
 using WsUtils;
 using System.Windows.Media.Imaging;
+using Utils;
 
 namespace Bacc_front
 {
@@ -65,9 +66,14 @@ namespace Bacc_front
             KeyDown += Game.Instance.KeyListener.Window_KeyDown;
             KeyUp += Game.Instance.KeyListener.Window_KeyUp;
 
-            //WindowState = WindowState.Minimized;
+            MouseLeave += ControlBoard_MouseLeave;
+            WindowState = WindowState.Maximized;
             //Activated += ControlBoard_Activated;
-            //WindowStyle = WindowStyle.None;
+            WindowStyle = WindowStyle.None;
+        }
+
+        private void ControlBoard_MouseLeave(object sender, MouseEventArgs e)
+        {
         }
 
         private void OnConfig(object sender, RoutedEventArgs e)
@@ -122,7 +128,7 @@ namespace Bacc_front
 
             Setting.Instance.ResetGameSetting();
         }
-
+        
         public void Players_CollectionChanged(object sender, EventArgs e)
         {
             SumPlayerScore();
@@ -317,17 +323,6 @@ namespace Bacc_front
             Printer.OpenEPSONCashBox(2);
         }
 
-        private void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            //Game.Instance.SessionIndex = -1;
-            //Game.Instance.NewSession();
-            //Game.Instance.RoundIndex++;
-            //Game.Instance.GamePrinter.PrintWaybill();
-            //var p = new Printer();
-            //p.Write("庄闲闲闲闲闲");
-            //Printer.PrintString(1,"庄闲闲闲闲闲");
-        }
-
         private void btnTestThread_Click(object sender, RoutedEventArgs e)
         {
             Game.Instance.KeyListener.StartListen();
@@ -363,7 +358,6 @@ namespace Bacc_front
             {
                 case "waiter_pwd":
                     spConfigLst.Visibility = Visibility.Visible;
-
                     lstButton.Visibility = Visibility.Hidden;
                     btnOpenCashBox.Visibility = Visibility.Hidden;
                     btnAnalyzeWaybill.Visibility = Visibility.Hidden;

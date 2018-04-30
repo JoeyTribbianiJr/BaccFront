@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using HslCommunication.BasicFramework;
 
 namespace Bacc_front
 {
@@ -25,6 +26,7 @@ namespace Bacc_front
         public MainWindow()
         {
             InitializeComponent();
+            //Register();
             Instance = this;
             cvsHidebar.Visibility = Visibility.Visible;
 
@@ -45,14 +47,48 @@ namespace Bacc_front
             KeyUp += Game.Instance.KeyListener.Window_KeyUp;
 
             Game.Instance.NoticeWindowBind += BindWaybills;
-            //Game.Instance.NoticeDealCard += StartAnimation;
             Game.Instance.NoticeRoundOver += ResetSmWaybill;
-            //WindowState = WindowState.Maximized;
-            //WindowState = WindowState.Minimized;
-            //Activated += MainWindow_Activated;
-            //WindowStyle = WindowStyle.None;
+            WindowState = WindowState.Maximized;
+            WindowStyle = WindowStyle.None;
+        }
+        SoftAuthorize softAuthorize;
+        private void Register()
+        {
+            InitializeComponent();
+            softAuthorize = new HslCommunication.BasicFramework.SoftAuthorize();
+            softAuthorize.FileSavePath = Environment.CurrentDirectory + @"\Authorize.txt"; // 设置存储激活码的文件，该存储是加密的
+            softAuthorize.LoadByFile();
+
+            // 检测激活码是否正确，没有文件，或激活码错误都算作激活失败
+            if (!softAuthorize.IsAuthorizeSuccess(AuthorizeEncrypted))
+            {
+                // 显示注册窗口
+                using (HslCommunication.BasicFramework.FormAuthorize form =
+                    new HslCommunication.BasicFramework.FormAuthorize(
+                        softAuthorize,
+                        "请联系管理员获取激活码",
+                        AuthorizeEncrypted))
+                {
+                    if (form.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                    {
+                        // 授权失败，退出
+                        Close();
+                        App.Current.Shutdown();
+                    }
+                }
+            }
         }
 
+        /// <summary>
+        /// 一个自定义的加密方法，传入一个原始数据，返回一个加密结果
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <returns></returns>
+        private string AuthorizeEncrypted(string origin)
+        {
+            // 此处使用了组件支持的DES对称加密技术
+            return HslCommunication.BasicFramework.SoftSecurity.MD5Encrypt(origin, "12345678");
+        }
         private void MainWindow_Activated(object sender, EventArgs e)
         {
         }

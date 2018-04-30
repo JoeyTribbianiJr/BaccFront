@@ -484,7 +484,8 @@ namespace Bacc_front
                     //LogHelper.WriteLog(typeof(Object), "发送普通倒计时：" + Game.Instance.CountDown + "  时间：" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff"));
 
                     var ip = Setting.Instance.ServerUrl;
-                    var url = "http://" + ip + ":98/getmsg";
+                    //var url = "http://" + ip + ":98/getmsg";
+                    var url = "http://" + ip + ":" + Settings.Default.port + "/" +Settings.Default.url;
 
                     string Cards = "";
                     if (Game.Instance.CurrentState == GameState.Dealing)
@@ -526,7 +527,8 @@ namespace Bacc_front
             };
 
             var ip = Setting.Instance.ServerUrl;
-            var url = "http://" + ip + ":98/getmsg";
+            //var url = "http://" + ip + ":98/getmsg";
+                    var url = "http://" + ip + ":" + Settings.Default.port + "/" +Settings.Default.url;
 
             string Cards = "";
             var str = JsonConvert.SerializeObject(msg);
@@ -554,7 +556,8 @@ namespace Bacc_front
             };
 
             var ip = Setting.Instance.ServerUrl;
-            var url = "http://" + ip + ":98/getmsg";
+            //var url = "http://" + ip + ":98/getmsg";
+            var url = "http://" + ip + ":" + Settings.Default.port + "/" +Settings.Default.url;
             var str = JsonConvert.SerializeObject(msg);
 
             string Cards = "";
@@ -582,7 +585,8 @@ namespace Bacc_front
             };
 
             var ip = Setting.Instance.ServerUrl;
-            var url = "http://" + ip + ":98/getmsg";
+            //var url = "http://" + ip + ":98/getmsg";
+                    var url = "http://" + ip + ":" + Settings.Default.port + "/" +Settings.Default.url;
             var str = JsonConvert.SerializeObject(msg);
 
             var waybill = JsonConvert.SerializeObject(Game.Instance.HistoryWaybill);

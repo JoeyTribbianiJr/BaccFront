@@ -350,29 +350,38 @@ namespace Bacc_front
             {
                 return;
             }
-            using (var db = new SQLiteDB())
+            try
             {
-                foreach (var round in session.RoundsOfSession)
+
+                using (var db = new SQLiteDB())
                 {
-                    var record = new BetScoreRecord()
+                    foreach (var round in session.RoundsOfSession)
                     {
-                        CreateTime = DateTime.Now,
-                        SessionIndex = session.SessionId,
-                        RoundIndex = session.RoundsOfSession.IndexOf(round),
-                        DeskBanker = 0,
-                        DeskPlayer = 0,
-                        DeskTie = 0,
-                        Winner = (int)round.Winner.Item1,
-                        JsonPlayerScores = ""
-                    };
-                    var history = db.BetScoreRecords.FirstOrDefault(b => b.SessionIndex == record.SessionIndex && b.RoundIndex == record.RoundIndex);
-                    if (history != null)
-                    {
-                        db.BetScoreRecords.Remove(history);
+                        var record = new BetScoreRecord()
+                        {
+                            CreateTime = DateTime.Now,
+                            SessionIndex = session.SessionId,
+                            RoundIndex = session.RoundsOfSession.IndexOf(round),
+                            DeskBanker = 0,
+                            DeskPlayer = 0,
+                            DeskTie = 0,
+                            Winner = (int)round.Winner.Item1,
+                            JsonPlayerScores = ""
+                        };
+                        var history = db.BetScoreRecords.FirstOrDefault(b => b.SessionIndex == record.SessionIndex && b.RoundIndex == record.RoundIndex);
+                        if (history != null)
+                        {
+                            db.BetScoreRecords.Remove(history);
+                        }
+                        db.BetScoreRecords.Add(record);
                     }
-                    db.BetScoreRecords.Add(record);
+                    db.SaveChanges();
                 }
-                db.SaveChanges();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + ex.StackTrace + ex.InnerException.Message);
             }
         }
         /// <summary>
@@ -393,7 +402,7 @@ namespace Bacc_front
                         var time = last_acc.CreateTime;
                         if (max >= 29)
                         {
-                            var range = db.BetScoreRecords.Where(b => (max - b.SessionIndex) > 0 
+                            var range = db.BetScoreRecords.Where(b => (max - b.SessionIndex) > 0
                             && b.CreateTime < time);
 
                             if (range != null)
@@ -437,9 +446,10 @@ namespace Bacc_front
         }
         public void InitLocalSessions()
         {
-            try
-            {
-                WaitingBox.Show(() =>
+
+            WaitingBox.Show(() =>
+           {
+               try
                {
                    using (var db = new SQLiteDB())
                    {
@@ -458,15 +468,17 @@ namespace Bacc_front
                            }
                        }
                    }
-               }, "初始化数据库...");
-            }
-            catch (Exception ex)
-            {
+               }
+               catch (Exception ex)
+               {
 #if DEBUG
-                MessageBox.Show(ex.Message + ex.StackTrace);
+                   MessageBox.Show(ex.Message + ex.StackTrace);
 #endif
-                MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
-            }
+                   MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
+               }
+           }, "初始化数据库...");
+
+
         }
 
         internal void ClearLocalSessions()

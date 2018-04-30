@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Threading;
+using Utils;
 using WsUtils;
 
 namespace Bacc_front
@@ -19,7 +20,7 @@ namespace Bacc_front
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
-                //System.Windows.MessageBox.Show(args.Exception.Message);
+                System.Windows.MessageBox.Show(args.Exception.Message);
                 LogHelper.WriteLog(typeof(Object), "UnobservedTaskException:" + sender.ToString() + args.Exception.Message + args.Exception.StackTrace);
                 args.SetObserved();
             };
@@ -79,13 +80,8 @@ namespace Bacc_front
         private void Setup()
         {
             
-
             MainWindow w1 = new MainWindow();
             ControlBoard w2 = new ControlBoard();
-
-            //var win_records = new BetRecord();
-            //win_records.Show();
-            //return;
 
             Screen s2 = Screen.AllScreens[0];
             Screen s1;
@@ -98,10 +94,11 @@ namespace Bacc_front
             w1.Top = r1.Top;
             w1.Left = r1.Left;
             w2.Top = r2.Top;
-            w2.Left= r2.Left + r2.Width - w2.Width;
+            w2.Left = r2.Left;
             w1.Show();
             w2.Show();
-            w1.Owner = w2;
+            //w1.Owner = w2;
+            ClipCurseHelper.SetCursorInScreen(s2);
         }
     }
 }
