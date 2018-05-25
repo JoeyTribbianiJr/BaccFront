@@ -62,19 +62,15 @@ namespace Bacc_front
 
             dgSum.ItemsSource = ScoreSum;
             SumPlayerScore();
+            PreviewKeyDown += Game.Instance.KeyListener.Window_KeyDown;
+            PreviewKeyUp += Game.Instance.KeyListener.Window_KeyUp;
+           
+            //dgScore. PreviewKeyDown += Game.Instance.KeyListener.Window_KeyDown;
+            //dgScore. PreviewKeyUp += Game.Instance.KeyListener.Window_KeyUp;
 
-            KeyDown += Game.Instance.KeyListener.Window_KeyDown;
-            KeyUp += Game.Instance.KeyListener.Window_KeyUp;
-
-            MouseLeave += ControlBoard_MouseLeave;
-            WindowState = WindowState.Maximized;
-            //Activated += ControlBoard_Activated;
             WindowStyle = WindowStyle.None;
         }
 
-        private void ControlBoard_MouseLeave(object sender, MouseEventArgs e)
-        {
-        }
 
         private void OnConfig(object sender, RoutedEventArgs e)
         {
@@ -94,6 +90,10 @@ namespace Bacc_front
                 //保存参数
                 if (int.TryParse(txtActiveSessionIndex.Text, out int session_str_index) && 1 <= session_str_index && session_str_index <= Setting.max_session_num)
                 {
+                    if((session_str_index -1) < Game.Instance.SessionIndex)
+                    {
+                        Game.Instance.LocalSessions.Clear();
+                    }
                     SaveSetting(session_str_index - 1);
                     spConfigLst.Visibility = Visibility.Hidden;
                     lstButton.Visibility = Visibility.Hidden;
@@ -369,7 +369,7 @@ namespace Bacc_front
                     lstButton.Visibility = Visibility.Visible;
                     btnOpenCashBox.Visibility = Visibility.Visible;
                     btnAnalyzeWaybill.Visibility = Visibility.Visible;
-                    btnClearAccount.Visibility = Visibility.Visible;
+                    //btnClearAccount.Visibility = Visibility.Visible;
                     btnShudown.Visibility = Visibility.Visible;
                     lstButton.ItemsSource = Setting.Instance.game_setting.Where(kv => Setting.Instance.manager_menu_items.Contains(kv.Key));
                     break;
@@ -378,7 +378,7 @@ namespace Bacc_front
                     lstButton.Visibility = Visibility.Visible;
                     btnOpenCashBox.Visibility = Visibility.Visible;
                     btnAnalyzeWaybill.Visibility = Visibility.Visible;
-                    btnClearAccount.Visibility = Visibility.Visible;
+                    //btnClearAccount.Visibility = Visibility.Visible;
                     btnShudown.Visibility = Visibility.Visible;
                     lstButton.ItemsSource = Setting.Instance.game_setting;
                     break;
@@ -522,7 +522,7 @@ namespace Bacc_front
 
         public void ShutdownComputer()
         {
-            Process.Start("shutdown", " -r -t 0");
+            Process.Start("shutdown", " -s -t 0");
         }
         private void OnShutdown(object sender, RoutedEventArgs e)
         {
@@ -580,5 +580,10 @@ namespace Bacc_front
             }
         }
 
+        private void dgScore_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            btnAdd1.Focusable = true;
+            btnAdd1.Focus();
+        }
     }
 }

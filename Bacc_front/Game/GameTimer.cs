@@ -49,7 +49,7 @@ namespace Bacc_front
         public void StopTimer()
         {
             Game.Instance.DisplayAllWaybill();
-            ControlBoard.Instance.btnStartGame.IsEnabled = true;
+            ControlBoard.Instance.btnStartGame.IsEnabled = false;
             Game.Instance._isGameStarting = false;
             CountdownTimer.Stop();
             cts.Cancel();
@@ -122,9 +122,13 @@ namespace Bacc_front
             {
                 return true;
             }
-            if (timer<end && timer >= start + 12)
+            if (timer<end && timer >= start + 9)
             {
-                Game.Instance.Set4CardState();
+                Game.Instance.Set4CardPState();
+            }
+            if (timer<end && timer >= start + 10)
+            {
+                Game.Instance.Set4CardBState();
             }
             if (start <= timer)
             {

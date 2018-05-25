@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Threading;
 
 namespace Bacc_front
 {
@@ -51,7 +52,7 @@ namespace Bacc_front
         }
         private void InitImages()
         {
-            _window.RegisterName(_window.Casino.Name, _window.Casino);
+            _window.RegisterName(_window.Beauty.Name, _window.Beauty);
             _window.RegisterName(_window.Audio0.Name, _window.Audio0);
             _window.RegisterName(_window.Audio1.Name, _window.Audio1);
             _window.RegisterName(_window.Audio2.Name, _window.Audio2);
@@ -59,12 +60,13 @@ namespace Bacc_front
             _window.RegisterName(_window.Audio4.Name, _window.Audio4);
             _window.RegisterName(_window.Audio5.Name, _window.Audio5);
             images = new List<BitmapSource>();
-            images.Add(GetImage("Img/desk2.bmp"));
-            images.Add(GetImage("Img/deal1.bmp"));
-            images.Add(GetImage("Img/throw1.bmp"));
-            images.Add(GetImage("Img/throw2.bmp"));
-            images.Add(GetImage("Img/deal2.bmp"));
-            images.Add(GetImage("Img/downhead.bmp"));
+            images.Add(GetImage("Img/desk.png"));
+            //images.Add(GetImage("Img/desk2.png"));
+            images.Add(GetImage("Img/deal1.png"));
+            images.Add(GetImage("Img/throw1.png"));
+            images.Add(GetImage("Img/throw2.png"));
+            images.Add(GetImage("Img/deal2.png"));
+            images.Add(GetImage("Img/downhead.png"));
         }
         private BitmapSource GetPartImage(string ImgUri, int XCoordinate, int YCoordinate, int Width, int Height)
         {
@@ -80,7 +82,7 @@ namespace Bacc_front
             var wavsb = (Storyboard)MainWindow.Instance.Resources["sbPinCard"];
             wavsb.Begin(MainWindow.Instance.Audio0);
             var sb = CreatePinCard(0);
-            sb.Begin(MainWindow.Instance.Casino);
+            sb.Begin(MainWindow.Instance.Beauty);
         }
         public Storyboard CreatePinCard(double startTime = 0)
         {
@@ -101,7 +103,7 @@ namespace Bacc_front
             chgBg.KeyFrames.Add(dk0);
             chgBg.KeyFrames.Add(dk1);
             chgBg.KeyFrames.Add(dk2);
-            Storyboard.SetTargetName(chgBg, _window.Casino.Name);
+            Storyboard.SetTargetName(chgBg, _window.Beauty.Name);
             DependencyProperty[] propertyChain2 = new DependencyProperty[]
             {
                 Control.BackgroundProperty,
@@ -123,57 +125,117 @@ namespace Bacc_front
         }
         public void StartDealAnimation()
         {
+            //ThreadPool.QueueUserWorkItem(DoDealAnimation);
+            DoDealAnimation("j");
+        }
+
+        private void DoDealAnimation(object state)
+        {
             try
             {
+                int b = 0;
+                _hasCard5 = true;
+                moveSB = new Storyboard();
+                reversalSB = new Storyboard();
+                armSB = new Storyboard();
+                wavSB = new Storyboard();
 
-            int b = 0;
-            _hasCard5 = true;
-            moveSB = new Storyboard();
-            reversalSB = new Storyboard();
-            armSB = new Storyboard();
-            wavSB = new Storyboard();
-
-            if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
-            {
-                for (int i = 0; i < 1; i++)
+                if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
                 {
-                    for (int j = 0; j < 2; j++)
+                    for (int i = 0; i < 1; i++)
                     {
-                        var card = Game.Instance.CurrentRound.HandCard[j][i];
-                        CreateAnimation(b, card);
-                        b++;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 2; j++)
-                    {
-                        try
+                        for (int j = 0; j < 2; j++)
                         {
                             var card = Game.Instance.CurrentRound.HandCard[j][i];
                             CreateAnimation(b, card);
+                            b++;
                         }
-                        catch (ArgumentOutOfRangeException e)
-                        {
-                            _hasCard5 = false;
-                        }
-                        b++;
                     }
                 }
-                armSB.Begin(_window.Casino);
-                wavSB.Begin(_window);
-                moveSB.Begin(_window);
-                reversalSB.Begin(_window);
-            }
+                else
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 2; j++)
+                        {
+                            try
+                            {
+                                var card = Game.Instance.CurrentRound.HandCard[j][i];
+                                CreateAnimation(b, card);
+                            }
+                            catch (ArgumentOutOfRangeException e)
+                            {
+                                _hasCard5 = false;
+                            }
+                            b++;
+                        }
+                    }
+                    armSB.Begin(_window.Beauty);
+                    wavSB.Begin(_window);
+                    moveSB.Begin(_window);
+                    reversalSB.Begin(_window);
+                }
             }
             catch (Exception ex)
             {
                 throw;
             }
         }
+
+        //public void StartDealAnimation()
+        //{
+        //    try
+        //    {
+
+        //        int b = 0;
+        //        _hasCard5 = true;
+        //        moveSB = new Storyboard();
+        //        reversalSB = new Storyboard();
+        //        armSB = new Storyboard();
+        //        wavSB = new Storyboard();
+
+        //        if (Setting.Instance.GetStrSetting("single_double") == "单张牌")
+        //        {
+        //            for (int i = 0; i < 1; i++)
+        //            {
+        //                for (int j = 0; j < 2; j++)
+        //                {
+        //                    var card = Game.Instance.CurrentRound.HandCard[j][i];
+        //                    CreateAnimation(b, card);
+        //                    b++;
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            for (int i = 0; i < 3; i++)
+        //            {
+        //                for (int j = 0; j < 2; j++)
+        //                {
+        //                    try
+        //                    {
+        //                        var card = Game.Instance.CurrentRound.HandCard[j][i];
+        //                        CreateAnimation(b, card);
+        //                    }
+        //                    catch (ArgumentOutOfRangeException e)
+        //                    {
+        //                        _hasCard5 = false;
+        //                    }
+        //                    b++;
+        //                }
+        //            }
+        //            armSB.Begin(_window.Casino);
+        //            wavSB.Begin(_window);
+        //            moveSB.Begin(_window);
+        //            reversalSB.Begin(_window);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public void CreateAnimation(int idx, Card card)
         {
             #region 拿到牌的容器button
@@ -280,7 +342,7 @@ namespace Bacc_front
                 armChgBg.KeyFrames.Add(back);
 
             }
-            Storyboard.SetTargetName(armChgBg, _window.Casino.Name);
+            Storyboard.SetTargetName(armChgBg, _window.Beauty.Name);
             DependencyProperty[] propertyChain2 = new DependencyProperty[]
             {
                 Canvas.BackgroundProperty,
@@ -292,7 +354,7 @@ namespace Bacc_front
         public MediaTimeline CreateWavAnimation(double startTime, Button btn, int idx)
         {
             Uri uri;
-            if (idx % 2 == 0)
+            if (idx  == 0 || idx == 2 || idx ==4)
             {
                 uri = new Uri("Wav/sendP.wav", UriKind.Relative);
             }
@@ -301,14 +363,14 @@ namespace Bacc_front
                 uri = new Uri("Wav/sendB.wav", UriKind.Relative);
             }
             startTime += 0.3f;
-            MediaElement audio = (MediaElement)_window.FindName("Audio" + idx);
-            MediaTimeline timeline = new MediaTimeline(TimeSpan.FromSeconds(startTime), new Duration(TimeSpan.FromSeconds(1.5)));
+            MediaElement audio = (MediaElement)_window.FindName(("Audio" + idx.ToString()));
+            MediaTimeline timeline = new MediaTimeline(TimeSpan.FromSeconds(startTime), new Duration(TimeSpan.FromSeconds(0.8)));
             timeline.Source = uri;
             Storyboard.SetTargetName(timeline, audio.Name);
             return timeline;
         }
 
-        
+
         public void CreateWav(double startTime, Button btn, int idx)
         {
             var timeline = CreateWavAnimation(startTime, btn, idx);
@@ -360,7 +422,7 @@ namespace Bacc_front
             LinearDoubleKeyFrame widthk2 = new LinearDoubleKeyFrame()
             {
                 KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + 0.2)),
-                Value = 99 
+                Value = 99
             };
             //LinearDoubleKeyFrame widthk3 = new LinearDoubleKeyFrame()
             //{
@@ -452,7 +514,7 @@ namespace Bacc_front
         {
             var chgBg = new ObjectAnimationUsingKeyFrames();
             DiscreteObjectKeyFrame dk = new DiscreteObjectKeyFrame(background);
-            dk.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + reverse_time/2));
+            dk.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(startTime + reverse_time / 2));
             dk.Value = background;
             chgBg.KeyFrames.Add(dk);
             Storyboard.SetTargetName(chgBg, btn.Name);

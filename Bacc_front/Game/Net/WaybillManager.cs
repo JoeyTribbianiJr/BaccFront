@@ -9,6 +9,7 @@ using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using WsUtils;
 using WsUtils.SqliteEFUtils;
@@ -61,7 +62,15 @@ namespace Bacc_front
         {
             var data = requestInfo.Parameters[0];
             var decompress_data = CompressHelper.Decompress(data);
-            var back_sessions = JsonConvert.DeserializeObject<List<LocalSession>>(decompress_data);
+
+            ThreadPool.QueueUserWorkItem(SetBackSessions, decompress_data);
+        }
+
+        private void SetBackSessions(object state)
+        {
+            var data = state.ToString();
+            var back_sessions = JsonConvert.DeserializeObject<List<LocalSession>>(data);
+
             //Game.Instance.LocalSessions = back_sessions ?? throw new NullReferenceException();
             var cur_session = Game.Instance.CurrentSession;
             try
@@ -85,12 +94,52 @@ namespace Bacc_front
                         }
                     }
                     db.SaveChanges();
+                    Game.Instance.WebServer.SendData(
+                        RemoteCommand.ImportBackOK, 
+                        Game.Instance.CurrentSession, 
+                        SuperServer.appSession);
                 }
             }
             catch (Exception ex)
             {
             }
         }
+
+        //public void ImportBack(StringRequestInfo requestInfo, AppSession app_session)
+        //{
+        //    var data = requestInfo.Parameters[0];
+        //    var decompress_data = CompressHelper.Decompress(data);
+
+        //    var back_sessions = JsonConvert.DeserializeObject<List<LocalSession>>(decompress_data);
+        //    //Game.Instance.LocalSessions = back_sessions ?? throw new NullReferenceException();
+        //    var cur_session = Game.Instance.CurrentSession;
+        //    try
+        //    {
+        //        using (var db = new SQLiteDB())
+        //        {
+        //            db.LocalSessions.RemoveRange(db.LocalSessions);
+        //            db.LocalSessions.AddRange(back_sessions);
+
+        //            Game.Instance.LocalSessions.Clear();
+        //            foreach (var s in back_sessions)
+        //            {
+        //                var newsession = JsonConvert.DeserializeObject<Session>(s.JsonSession);
+        //                Game.Instance.LocalSessions.Add(newsession);
+        //                if (s.SessionIndex == cur_session.SessionId)
+        //                {
+        //                    if (Game.Instance.CurrentState == GameState.Shuffling || Game.Instance.CurrentState == GameState.Preparing)
+        //                    {
+        //                        Game.Instance.CurrentSession = newsession;
+        //                    }
+        //                }
+        //            }
+        //            db.SaveChanges();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //    }
+        //}
 
         public Session ReplaceWaybill(StringRequestInfo requestInfo, AppSession app_session)
         {
@@ -236,6 +285,8 @@ namespace Bacc_front
                 }
                 account.IsClear = true;
                 account.ClearTime = DateTime.Now;
+
+                db.BetScoreRecords.RemoveRange(db.BetScoreRecords);
                 db.SaveChanges();
             }
         }
@@ -391,26 +442,25 @@ namespace Bacc_front
         {
             try
             {
-                SetBackLiveData();
                 using (var db = new SQLiteDB())
                 {
-                    var max = db.BetScoreRecords.Max(b => b.SessionIndex);
+                    //var max = db.BetScoreRecords.Max(b => b.SessionIndex);
 
-                    var last_acc = db.FrontAccounts.FirstOrDefault(a => a.IsClear == false);
-                    if (last_acc != null)
-                    {
-                        var time = last_acc.CreateTime;
-                        if (max >= 29)
-                        {
-                            var range = db.BetScoreRecords.Where(b => (max - b.SessionIndex) > 0
-                            && b.CreateTime < time);
+                    //var last_acc = db.FrontAccounts.FirstOrDefault(a => a.IsClear == false);
+                    //if (last_acc != null)
+                    //{
+                    //    var time = last_acc.CreateTime;
+                    //    if (max >= 29)
+                    //    {
+                    //        var range = db.BetScoreRecords.Where(b => (max - b.SessionIndex) > 0
+                    //        && b.CreateTime < time);
 
-                            if (range != null)
-                            {
-                                db.BetScoreRecords.RemoveRange(range);
-                            }
-                        }
-                    }
+                    //        if (range != null)
+                    //        {
+                    //            db.BetScoreRecords.RemoveRange(range);
+                    //        }
+                    //    }
+                    //}
 
                     var live_data = Game.Instance.BetBackLiveData;
 
@@ -446,39 +496,47 @@ namespace Bacc_front
         }
         public void InitLocalSessions()
         {
+            ThreadPool.QueueUserWorkItem(InitDataAndLocal);
+        }
+        private void InitDataAndLocal(object state)
+        {
+            try
+            {
+                using (var db = new SQLiteDB())
+                {
+                    var objectContext = ((IObjectContextAdapter)db).ObjectContext;
+                    var mappingCollection = (StorageMappingItemCollection)objectContext.MetadataWorkspace.GetItemCollection(DataSpace.CSSpace);
+                    mappingCollection.GenerateViews(new List<EdmSchemaError>());
 
-            WaitingBox.Show(() =>
-           {
-               try
-               {
-                   using (var db = new SQLiteDB())
-                   {
-                       var objectContext = ((IObjectContextAdapter)db).ObjectContext;
-                       var mappingCollection = (StorageMappingItemCollection)objectContext.MetadataWorkspace.GetItemCollection(DataSpace.CSSpace);
-                       mappingCollection.GenerateViews(new List<EdmSchemaError>());
-
-                       var sessions = db.LocalSessions;
-                       if (sessions != null && sessions.Count() != 0)
-                       {
-                           LocalSessions.Clear();
-                           foreach (var sess in sessions)
-                           {
-                               var mod = JsonConvert.DeserializeObject<Session>(sess.JsonSession);
-                               LocalSessions.Add(mod);
-                           }
-                       }
-                   }
-               }
-               catch (Exception ex)
-               {
+                    var sessions = db.LocalSessions;
+                    if (sessions != null && sessions.Count() != 0)
+                    {
+                        LocalSessions.Clear();
+                        foreach (var sess in sessions)
+                        {
+                            var mod = JsonConvert.DeserializeObject<Session>(sess.JsonSession);
+                            LocalSessions.Add(mod);
+                        }
+                    }
+                    Game.Instance.LocalSessions = LocalSessions;
+                    //生成新一局路单，可以在点开始按钮之前传送到后台
+                    Game.Instance.NewSession();   //此函数在每局结束时调用，不在洗牌时调用，因此可以在洗牌时将新一局路单传送到后台
+                }
+            }
+            catch (Exception ex)
+            {
 #if DEBUG
-                   MessageBox.Show(ex.Message + ex.StackTrace);
+                MessageBox.Show(ex.Message + ex.StackTrace);
 #endif
-                   MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
-               }
-           }, "初始化数据库...");
-
-
+                MessageBox.Show("程序数据库故障，重启游戏或联系工程师");
+            }
+            finally
+            {
+                ControlBoard.Instance.Dispatcher.Invoke(new Action(() =>
+                {
+                    ControlBoard.Instance.btnStartGame.IsEnabled = true;
+                }));
+            }
         }
 
         internal void ClearLocalSessions()

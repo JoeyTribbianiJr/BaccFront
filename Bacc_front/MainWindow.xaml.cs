@@ -43,12 +43,11 @@ namespace Bacc_front
             bdBankerState.DataContext = Game.Instance;
             bdPlayerState.DataContext = Game.Instance;
 
-            KeyDown += Game.Instance.KeyListener.Window_KeyDown;
-            KeyUp += Game.Instance.KeyListener.Window_KeyUp;
+            PreviewKeyDown += Game.Instance.KeyListener.Window_KeyDown;
+            PreviewKeyUp += Game.Instance.KeyListener.Window_KeyUp;
 
             Game.Instance.NoticeWindowBind += BindWaybills;
             Game.Instance.NoticeRoundOver += ResetSmWaybill;
-            WindowState = WindowState.Maximized;
             WindowStyle = WindowStyle.None;
         }
         SoftAuthorize softAuthorize;
@@ -150,6 +149,9 @@ namespace Bacc_front
         }
         private void ResetSmWaybill()
         {
+            try
+            {
+
             var Waybill = Game.Instance.Waybill;
             int pre_row = 0, pre_col = 0, pre = 0;
             int cur_side = Waybill[0].Winner;
@@ -216,6 +218,13 @@ namespace Bacc_front
                 sm_waybill_btns[i].SetValue(Grid.ColumnProperty, pre_col);
                 sm_waybill_btns[i].SetValue(Grid.RowProperty, pre_row);
                 pre++;
+            }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                //MessageBox.Show(ex.Message + ex.StackTrace);
+#endif
             }
         }
 

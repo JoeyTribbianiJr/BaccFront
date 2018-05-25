@@ -25,14 +25,23 @@ namespace Bacc_front
             {
                 try
                 {
-                    RecordsInSession = db.BetScoreRecords.Where(
-                            r => r.SessionIndex == db.BetScoreRecords.Max(mr => mr.SessionIndex))
-                            .ToList();
-                    if (RecordsInSession == null)
+                    //不显示当前局
+                    var last_session_idx = db.BetScoreRecords.Max(mr => mr.SessionIndex);
+                    if(last_session_idx == Game.Instance.SessionIndex)
                     {
+                        last_session_idx = db.BetScoreRecords.Select(t => t.SessionIndex).Distinct().OrderByDescending(t => t).ElementAt(1);
+                    }
+                    RecordsInSession = db.BetScoreRecords.Where(
+                            r => r.SessionIndex == last_session_idx)
+                            .OrderBy(t => t.RoundIndex).ToList();
+                    if (RecordsInSession == null || RecordsInSession.Count == 0)
+                    {
+                        MessageBox.Show("无记录");
+                        Close();
                         return;
                     }
-                    SessionIds = db.BetScoreRecords.Select(b => b.SessionIndex + 1).Distinct().OrderBy(t=>t).ToList();
+                    SessionIds = db.BetScoreRecords.Select(b => b.SessionIndex + 1).Distinct().OrderBy(t => t).ToList();
+                    SessionIds.Remove(Game.Instance.SessionIndex + 1);
                     cmbSessionStrIndex.ItemsSource = SessionIds;
                     cmbSessionStrIndex.SelectedItem = RecordsInSession[0].SessionIndex + 1;
                 }
@@ -41,7 +50,7 @@ namespace Bacc_front
                     return;
                 }
             }
-            CurrentRecords = new ObservableCollection<BetScoreRecord>(RecordsInSession.OrderBy(r=>r.RoundIndex).ToList());
+            CurrentRecords = new ObservableCollection<BetScoreRecord>(RecordsInSession.OrderBy(r => r.RoundIndex).ToList());
             ShowWaybillAndDetail();
             BindCbEvent();
             cmbSessionStrIndex.SelectionChanged += cbRoundStrIndex_SelectionChanged;
@@ -112,7 +121,7 @@ namespace Bacc_front
             }
             finally
             {
-            ResetSmWaybill();
+                ResetSmWaybill();
             }
         }
         private void BindCbEvent()
@@ -148,7 +157,7 @@ namespace Bacc_front
             }
             for (int i = 0; i < 66; i++)
             {
-                var record = RecordsInSession[i];
+                var record = RecordsInSession.FirstOrDefault(r => r.RoundIndex == i);
                 int banker, tie, player;
                 if (record == null || string.IsNullOrEmpty(record.JsonPlayerScores))
                 {
@@ -277,7 +286,7 @@ namespace Bacc_front
             var id = (int)((ComboBox)sender).SelectedItem - 1;
             using (var db = new SQLiteDB())
             {
-                RecordsInSession = db.BetScoreRecords.Where(b => b.SessionIndex == id).OrderBy(r=>r.RoundIndex).ToList();
+                RecordsInSession = db.BetScoreRecords.Where(b => b.SessionIndex == id).OrderBy(r => r.RoundIndex).ToList();
                 if (RecordsInSession == null)
                 {
                     return;

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bacc_front"
         xmlns:ex="http://schemas.xceed.com/wpf/xaml/toolkit"
-        mc:Ignorable="d"
+        mc:Ignorable="d" Focusable="False"
         Title="百乐2号" Height="768" Width="1024">
     <Window.Resources>
         <ResourceDictionary>
@@ -42,8 +42,8 @@
                   ColumnWidth="*" 
                   SelectionChanged="dgScore_SelectionChanged"
                   KeyboardNavigation.TabNavigation="None"
-                  ItemsSource="{Binding Players}"
-                  SelectedIndex="0"
+                  ItemsSource="{Binding Players}" GotKeyboardFocus="dgScore_GotKeyboardFocus"
+                  SelectedIndex="0" 
                   AutoGenerateColumns="False"  VerticalAlignment="Top" FontSize="28"
                   CanUserSortColumns="False"   Margin="10" IsReadOnly="True"
                   CanUserResizeColumns="False" CanUserResizeRows="False"  SelectionMode="Single"
@@ -105,7 +105,7 @@
                 <ColumnDefinition Width="0.9*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid Name="gdStartGameBtn">
-                <Button Name="btnStartGame" Margin="0,4,0,3" Width="70" Style="{StaticResource GreenButton}" Click="OnStartGame" >开始</Button>
+                <Button Name="btnStartGame" IsEnabled="False" Margin="0,4,0,3" Width="70" Style="{StaticResource GreenButton}" Click="OnStartGame" >开始</Button>
             </Grid>
             <Grid Grid.Column="1" Name="gdAddBtns">
                 <Grid.RowDefinitions>
@@ -115,7 +115,7 @@
                 <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                               ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <StackPanel Orientation="Horizontal" Grid.Row="0" >
-                        <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1">上1</Button>
+                        <Button Name="btnAdd1" Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1">上1</Button>
                         <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少"  Tag="10">上10</Button>
                         <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="100">上100</Button>
                         <Button Mouse.PreviewMouseDown="OnAddScore"   ToolTip="右键单击减少" Tag="1000">上1000</Button>
@@ -188,10 +188,10 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Margin="10,0,0,0" FontSize="13" HorizontalAlignment="Center">当前账簿</TextBlock>
                             <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnPreAccount"  Style="{StaticResource ColorButton}" Click="btnPreAccount_Click" >上一本</Button>
-                            <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnClearAccount"  Style="{StaticResource ColorButton}" Click="btnClearAccount_Click" >清零</Button>
+                            <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnClearAccount" Visibility="Hidden" Style="{StaticResource ColorButton}" Click="btnClearAccount_Click" >清零</Button>
                             <Button Margin="10,0,5,0" FontSize="13"  Background="Red" Width="80"  Name="btnNextAccount"  Style="{StaticResource ColorButton}" Click="btnNextAccount_Click" >下一本</Button>
                             <TextBlock Name="txtAccountState" Foreground="Red"></TextBlock>
-                            <Button Margin="10,0,5,0" FontSize="13"  Background="MediumSeaGreen" Width="80"  Name="btnPrintAccount"  Style="{StaticResource ColorButton}" Click="btnPrintAccount_Click" Visibility="Collapsed">打印账簿</Button>
+                            <Button Margin="10,0,5,0" FontSize="13"  Background="MediumSeaGreen" Width="80"  Name="btnPrintAccount"  Style="{StaticResource ColorButton}" Click="btnPrintAccount_Click" Visibility="Visible">打印账簿</Button>
                         </StackPanel>
                         <DataGrid  SelectionUnit="FullRow" Name="dgAccount"
                   ColumnWidth="*" 

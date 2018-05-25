@@ -5,11 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="百乐2号" Height="768" Width="1024">
-    <!--WindowState="Maximized"-->
-    <!--WindowStyle="None"
-		AllowsTransparency="True"
-		Background="Green"
-		ResizeMode="NoResize"-->
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -48,13 +43,19 @@
                 <!--<Button Style="{StaticResource CardButton}" Canvas.Left="843" Canvas.Top="636" ></Button>
                 <Button Style="{StaticResource CardButton}" Canvas.Left="883" Canvas.Top="636" ></Button>
                 <Button Style="{StaticResource CardButton}" Canvas.Left="922" Canvas.Top="636" ></Button>-->
-                <!--<Image x:Name="beautyBmp"  Canvas.Left="41" Canvas.Top="10" />-->
+                <Canvas x:Name="Beauty" 
+                       Width="266" 
+                       Height="319"  Canvas.Left="393" >
+                    <Canvas.Background>
+                        <ImageBrush ImageSource="Img/desk.png"></ImageBrush>
+                    </Canvas.Background>
+                </Canvas>
                 <!--<Canvas Height="344" Name="imgBeauty" Width="301" Canvas.Top="0" Canvas.Left="360">
                     <Canvas.Background>
                         <ImageBrush ImageSource="img/back.bmp" />
                     </Canvas.Background>
                 </Canvas>-->
-                <MediaElement x:Name="g3" MediaEnded="gif_MediaEnded" Canvas.Left="450" Canvas.Top="702" UnloadedBehavior="Manual"  Source="Gif/b_3.gif" LoadedBehavior="Play" Stretch="None"/>
+                <MediaElement x:Name="g3" Visibility="Collapsed" MediaEnded="gif_MediaEnded" Canvas.Left="450" Canvas.Top="702" UnloadedBehavior="Manual"  Source="Gif/b_3.gif" LoadedBehavior="Play" Stretch="None"/>
                 <MediaElement x:Name="g2" MediaEnded="gif_MediaEnded" Visibility="Hidden" Canvas.Left="450" Canvas.Top="702" UnloadedBehavior="Manual"  Source="Gif/g2.gif" LoadedBehavior="Play" Stretch="None"/>
                 <MediaElement x:Name="fire" MediaEnded="gif_MediaEnded" Canvas.Left="115" UnloadedBehavior="Manual"  Source="Gif/fire.gif" LoadedBehavior="Play" Stretch="None" Canvas.Top="-1">
                     <MediaElement.OpacityMask>
@@ -241,54 +242,54 @@
                     <Button  DataContext="{Binding Players[12].CurEarn}" Canvas.Left="791" Canvas.Top="564" Style="{StaticResource EarnChipButton}" />
                     <Button  DataContext="{Binding Players[13].CurEarn}" Canvas.Left="693" Canvas.Top="575" Style="{StaticResource EarnChipButton}" />
 
-                    <Button DataContext="{Binding Players[7].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[7].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[7].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[7].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="313" Style="{StaticResource BetChipButton}" />
-                    <Button DataContext="{Binding Players[8].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="350" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[8].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="350" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[8].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="350" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[8].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="350" Style="{StaticResource BetChipButton}" />
-                    <Button DataContext="{Binding Players[9].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="387" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[9].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="387" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[9].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="387" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[9].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="387" Style="{StaticResource BetChipButton}" />
-                    <Button DataContext="{Binding Players[10].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="424" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[10].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="424" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[10].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="424" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[10].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="424" Style="{StaticResource BetChipButton}" />
-                    <Button DataContext="{Binding Players[11].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="461" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[11].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="461" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[11].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="461" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[11].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="461" Style="{StaticResource BetChipButton}" />
-                    <Button DataContext="{Binding Players[12].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="499" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[12].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="499" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[12].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="499" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[12].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="499" Style="{StaticResource BetChipButton}" />
-                    <Button DataContext="{Binding Players[13].BetScoreOnTie}" Canvas.Left="655" Canvas.Top="537" Style="{StaticResource BetChipButton}" />
+                    <Button DataContext="{Binding Players[13].BetScoreOnTie}" Canvas.Left="647" Canvas.Top="537" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[13].BetScoreOnBank}" Canvas.Left="704" Canvas.Top="537" Style="{StaticResource BetChipButton}" />
                     <Button DataContext="{Binding Players[13].BetScoreOnPlayer}" Canvas.Left="758" Canvas.Top="537" Style="{StaticResource BetChipButton}" />
 
 
 
-                    <Button DataContext="{Binding Players[0].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="540" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[0].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="540" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[0].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="540" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[1].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="504" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[1].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="504" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[1].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="504" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[2].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="470" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[2].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="470" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[2].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="470" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[3].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="431" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[3].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="431" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[3].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="431" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[4].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="393" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[4].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="393" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[4].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="393" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[5].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="355" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[5].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="355" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[5].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="355" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[6].BetScoreOnPlayer}" Canvas.Left="226" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[6].BetScoreOnBank}" Canvas.Left="278" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
-                    <Button DataContext="{Binding Players[6].BetScoreOnTie}" Canvas.Left="329" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[0].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="540" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[0].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="540" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[0].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="540" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[1].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="504" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[1].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="504" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[1].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="504" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[2].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="470" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[2].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="470" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[2].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="470" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[3].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="431" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[3].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="431" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[3].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="431" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[4].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="393" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[4].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="393" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[4].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="393" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[5].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="355" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[5].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="355" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[5].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="355" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[6].BetScoreOnPlayer}" Canvas.Left="203" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[6].BetScoreOnBank}" Canvas.Left="263" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
+                    <Button DataContext="{Binding Players[6].BetScoreOnTie}" Canvas.Left="316" Canvas.Top="316" Style="{StaticResource BetChipButton}" Width="38" />
                 </Canvas>
                 <Grid  x:Name="grdBigWaybill" 
-								   Width="242" Height="132" Canvas.Left="390" Canvas.Top="449">
+								   Width="242" Height="132" Canvas.Left="388" Canvas.Top="449">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
@@ -360,21 +361,21 @@
                         />
                 </Border>
                 <Canvas x:Name="cvsHidebar" Visibility="Hidden">
-                    <Image Visibility="{Binding Players[0].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="539" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[1].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="501" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[2].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="463" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[3].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="425" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[4].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="387" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[5].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="349" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[6].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="189" Canvas.Top="311" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[0].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="181" Canvas.Top="539" Width="200" Height="40" />
+                    <Image Visibility="{Binding Players[1].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="184" Canvas.Top="501" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[2].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="184" Canvas.Top="465" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[3].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="184" Canvas.Top="426" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[4].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="184" Canvas.Top="389" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[5].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="184" Canvas.Top="351" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[6].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="184" Canvas.Top="312" Width="196" Height="40" />
 
-                    <Image Visibility="{Binding Players[13].Bet_hide, Converter={StaticResource ChipVisibleConverter}}"  Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="539" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[12].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="501" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[11].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="463" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[10].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="425" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[9].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="387" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[8].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="349" Width="196" Height="38" />
-                    <Image Visibility="{Binding Players[7].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="636" Canvas.Top="311" Width="196" Height="38" />
+                    <Image Visibility="{Binding Players[13].Bet_hide, Converter={StaticResource ChipVisibleConverter}}"  Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="536" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[12].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="498" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[11].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="460" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[10].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="422" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[9].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="384" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[8].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="346" Width="196" Height="40" />
+                    <Image Visibility="{Binding Players[7].Bet_hide, Converter={StaticResource ChipVisibleConverter}}" Source="Img/hidebar.bmp" Canvas.Left="632" Canvas.Top="308" Width="196" Height="40" />
                 </Canvas>
 
                 <Image Name="imgBoom" Source="img/boom.bmp" Visibility="Hidden" Canvas.Left="375" Canvas.Top="285" ></Image>

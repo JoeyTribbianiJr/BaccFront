@@ -101,13 +101,17 @@
     <Style x:Key="ChipButton" TargetType="Button">
         <Setter Property="Width" Value="90"/>
         <Setter Property="Height" Value="75"/>
-        <Setter Property="FontSize" Value="19" />
+        <Setter Property="FontSize" >
+            <Setter.Value>
+                <Binding Path="Balance" Converter="{StaticResource ChipFontSizeConverter}"></Binding>
+            </Setter.Value>
+        </Setter>
         <Setter Property="FontStretch" Value="Medium" />
         <Setter Property="FontWeight" Value="Heavy" />
         <Setter Property="BorderBrush" Value="Red"></Setter>
         <Setter Property="BorderThickness" Value="5"></Setter>
         <Setter Property="Padding" Value="20,0,20,0" />
-        <Setter Property="Content" >
+        <Setter Property="Content">
             <Setter.Value>
                 <Binding Path="Balance" ></Binding>
             </Setter.Value>
@@ -117,12 +121,7 @@
                 <Binding Path="Balance" Converter="{StaticResource ChipVisibleConverter}"></Binding>
             </Setter.Value>
         </Setter>
-        <!--<Setter Property="Foreground" Value="Red"></Setter>-->
-        <Setter Property="Foreground" >
-            <Setter.Value>
-                <Binding Path="Choose_denomination" Converter="{StaticResource ChipForegroundConverter}"></Binding>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Foreground" Value="MediumBlue"></Setter>
         <Setter Property="Background">
             <Setter.Value>
                 <ImageBrush >
@@ -159,10 +158,10 @@
         </Setter>
     </Style>
     <Style x:Key="BetChipButton" TargetType="Button">
-        <Setter Property="Width" Value="37"/>
+        <Setter Property="MinWidth" Value="52"/>
         <Setter Property="Height" Value="35"/>
         <Setter Property="Foreground" Value="Black"/>
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontSize" Value="17" />
         <Setter Property="FontStretch" Value="Medium" />
         <Setter Property="FontWeight" Value="Black" />
         <Setter Property="Content" >
@@ -188,6 +187,7 @@
                         <Border Background="{TemplateBinding Background}">
                             <!--Margin="{TemplateBinding Content,Converter={StaticResource ChipTextMarginConverter}}"-->
                             <ContentPresenter Name="BtnContent"
+                                              Margin="0,-5,0,0"
 											  VerticalAlignment="Center"
 											  HorizontalAlignment="Center"
 											  Content="{TemplateBinding Content}"/>
@@ -570,6 +570,7 @@
     </Style>
     <Style x:Key="ColorButton" TargetType="Button">
         <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Focusable" Value="False"/>
         <!--<Setter Property="MinHeight" Value="24" />-->
         <!--修改模板属性-->
         <Setter Property="Template">

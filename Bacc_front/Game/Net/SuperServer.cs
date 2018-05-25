@@ -92,6 +92,7 @@ namespace Bacc_front
             try
             {
                 RemoteCommand type = (RemoteCommand)Enum.Parse(typeof(RemoteCommand), requestInfo.Key);
+                LogHelper.WriteLog(typeof(RemoteCommand), "收到消息:" + type.ToString() + requestInfo.Key);
                 switch (type)
                 {
                     case RemoteCommand.Login:
@@ -232,7 +233,6 @@ namespace Bacc_front
             try
             {
                 Game.Instance.Manager.ImportBack(requestInfo, session);
-                SendData(RemoteCommand.ImportBackOK, Game.Instance.CurrentSession, session);
             }
             catch (Exception ex)
             {
@@ -252,23 +252,21 @@ namespace Bacc_front
             {
                 Login = true;
                 SendData(RemoteCommand.Login, "OK", appSession);
-                Thread.Sleep(50);
-                SendFrontPasswordToBack();
-                Thread.Sleep(200);
-                SendFrontSettingToBack();
-                Thread.Sleep(200);
-                SendLiveDataToBack();
                 Thread.Sleep(100);
+                SendFrontPasswordToBack();
+                Thread.Sleep(300);
+                SendFrontSettingToBack();
+                Thread.Sleep(300);
+                SendLiveDataToBack();
+                Thread.Sleep(300);
                 var s1 = DateTime.Now;
                 SendCurSessionToBack();
                 var span1 = (DateTime.Now - s1).TotalMilliseconds;
-                LogHelper.WriteLog(typeof(Object), "SendCurSession:" + span1.ToString());
-                Thread.Sleep(200);
+                Thread.Sleep(500);
                 SendIsGameLockToBack();
                 Thread.Sleep(100);
-                LogHelper.WriteLog(typeof(Object), "开始SendSummationBetRecord:");
                 SendSummationBetRecordToBack();
-                Thread.Sleep(200);
+                Thread.Sleep(800);
                 Game.Instance.CoreTimer.StartWebTimer();
             }
         }
@@ -387,8 +385,9 @@ namespace Bacc_front
         {
             Game.Instance.GamePrinter.PrintWaybill();
         }
-        void SendData(RemoteCommand command, object obj, AppSession session)
+        public void SendData(RemoteCommand command, object obj, AppSession session)
         {
+            LogHelper.WriteLog(typeof(RemoteCommand), "发送消息:" + command.ToString());
             var type = ((int)command).ToString().PadLeft(2, '0');
             byte[] typeByte = Encoding.UTF8.GetBytes(type);
 
@@ -415,7 +414,7 @@ namespace Bacc_front
         }
         public void SendCompressedCommand(RemoteCommand command, object obj, AppSession session)
         {
-
+            LogHelper.WriteLog(typeof(RemoteCommand), "发送消息:" + command.ToString());
             var type = ((int)command).ToString().PadLeft(2, '0');
             byte[] typeByte = Encoding.UTF8.GetBytes(type);
 
@@ -594,6 +593,7 @@ namespace Bacc_front
 
             try
             {
+                //httpClient.Timeout = TimeSpan.FromSeconds(5);
                 //httpClient.SendAsync()
                 httpClient.GetAsync(url).ContinueWith((task) =>
                 {
@@ -609,6 +609,7 @@ namespace Bacc_front
                         });
                     }
                 });
+                //httpClient.Timeout = TimeSpan.FromSeconds(0.5);
             }
             catch (Exception)
             {

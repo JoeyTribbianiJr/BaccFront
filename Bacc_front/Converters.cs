@@ -12,6 +12,32 @@ using System.Windows.Media;
 
 namespace Bacc_front
 {
+    public class ChipFontSizeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var blc = (int)value;
+            if(blc < 1000)
+            {
+                return 28;
+            }
+            if(blc >= 1000 && blc < 10000)
+            {
+                return 24;
+            }
+            if(blc >= 10000)
+            {
+                return 20;
+            }
+            return 26;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ChipVisibleConverter : IValueConverter
     {
         public Object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -38,15 +64,17 @@ namespace Bacc_front
                 {
                     amount = 1;
                 }
-                if (amount > 9)
+                if (amount > 5)
                 {
-                    amount = 9;
+                    amount = 5;
                 }
                 //string img_path;
                 //var choose_denomination = player.Choose_denomination;
                 //if (choose_denomination == BetDenomination.mini)
                 //{
-                  var  img_path = "Img/chips/" + (amount + 9) + ".GIF";
+                //var  img_path = "Img/chips/" + (amount + 9) + ".GIF";
+                var img_path = "Img/chips/" + (amount + 9).ToString() + ".png";
+                //var  img_path = "Img/chips/11.png";
                 //}
                 //else
                 //{
@@ -58,7 +86,8 @@ namespace Bacc_front
             catch (Exception ex)
             {
                 //MessageBox.Show("转换成错" + ex.StackTrace);
-                return "Img/chips/10.GIF";
+                return "Img/chips/10.png";
+                //return "Img/chips/10.GIF";
             }
         }
 
@@ -132,7 +161,8 @@ namespace Bacc_front
                 string img_path;
                 if (values[0].GetType() == DependencyProperty.UnsetValue.GetType())
                 {
-                    img_path= "Img/chips/10.GIF";
+                    //img_path= "Img/chips/10.GIF";
+                    img_path= "Img/chips/10.png";
                     return img_path;
                 }
                 amount = (int)values[0] / 1000;
@@ -148,19 +178,21 @@ namespace Bacc_front
                 var choose = (int)values[1];
                 if (choose == 1)
                 {
-                    img_path = "Img/chips/" + (amount + 9) + ".GIF";
+                    img_path = "Img/chips/" + (amount + 9) + ".png";
+                    //img_path = "Img/chips/" + (amount + 9) + ".GIF";
                     return img_path;
                 }
                 else
                 {
-                    img_path = "Img/chips/X" + (amount + 9) + ".GIF";
+                    img_path = "Img/chips/X" + (amount + 9) + ".png";
+                    //img_path = "Img/chips/X" + (amount + 9) + ".GIF";
                     return img_path;
                 }
             }
             catch (Exception ex)
             {
                 //MessageBox.Show("转换成错" + ex.Message);
-                return "Img/chips/10.GIF";
+                return "Img/chips/10.png";
             }
         }
 
@@ -186,22 +218,22 @@ namespace Bacc_front
             switch (amount)
             {
                 case 1:
-                    top = 22;
+                    top = 16;
                     break;
                 case 2:
-                    top = 20;
-                    break;
-                case 3:
-                    top = 18;
-                    break;
-                case 4:
-                    top = 15;
-                    break;
-                case 5:
                     top = 13;
                     break;
+                case 3:
+                    top = 12;
+                    break;
+                case 4:
+                    top = 10;
+                    break;
+                case 5:
+                    top = 9;
+                    break;
                 case 9:
-                    top = 8;
+                    top = 9;
                     break;
                 default:
                     top = 10;

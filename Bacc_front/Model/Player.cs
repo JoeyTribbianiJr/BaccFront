@@ -80,6 +80,10 @@ namespace Bacc_front
         #region 玩家押注的函数
         public void Bet(BetSide side)
         {
+            if(Balance <= 0)
+            {
+                return;
+            }
             if (Game.Instance._isIn3)
             {
                 var winner = Game.Instance.CurrentRound.Winner.Item1;

@@ -15,6 +15,7 @@
         <local:WayBillContentConverter x:Key="WayBillContentConverter"></local:WayBillContentConverter>
         <local:ChipForegroundConverter x:Key="ChipForegroundConverter"></local:ChipForegroundConverter>
         <local:ConfigButtonBackgroundConverter x:Key="ConfigButtonBackgroundConverter"></local:ConfigButtonBackgroundConverter>
+        <local:ChipFontSizeConverter x:Key="ChipFontSizeConverter"></local:ChipFontSizeConverter>
         <local:PlayerScoreSumConverter x:Key="PlayerScoreSumConverter"></local:PlayerScoreSumConverter>
         <local:TotalSumConverter x:Key="TotalSumConverter" />
 	</Application.Resources>

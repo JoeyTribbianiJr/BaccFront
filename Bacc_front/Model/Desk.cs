@@ -61,7 +61,8 @@ namespace Bacc_front
                     var cancle_score = p.BetScore.Values.Sum();
                     p.Balance += cancle_score;
                     p.ClearBet();
-                    p.Choose_denomination = BetDenomination.mini;
+                    //p.Choose_denomination = BetDenomination.mini;
+                    p.SetDenomination(BetDenomination.mini);
                 }
                 Players = players;
             }
@@ -274,12 +275,14 @@ namespace Bacc_front
 
             foreach (var player in players)
             {
-                //player.Balance += CalcPlayerEarning(winner.Item1, player.BetScore);
                 player.CurEarn = CalcPlayerEarning(winner.Item1, player.BetScore);
-                player.ClearBet();
 
                 //爆机累加
-                Game.Instance.CurrentSession.BoomAcc += player.CurEarn;
+                int player_lose = player.BetScoreOnBank + player.BetScoreOnPlayer + player.BetScoreOnTie;
+                var earn = player.CurEarn - player_lose;
+                Game.Instance.CurrentSession.BoomAcc += earn;
+
+                player.ClearBet();
             }
         }
         public void SettleEarnToBalance()
@@ -296,7 +299,7 @@ namespace Bacc_front
         {
             var cost = p_bets[winner];
 
-            float native_odds;
+            decimal native_odds;
             if (winner == BetSide.banker)
             {
                 native_odds = cost >= 10 ? odds_map[(int)winner] : 1;
@@ -306,7 +309,7 @@ namespace Bacc_front
                 native_odds = odds_map[(int)winner];
             }
 
-            float earning = 0;
+            decimal earning = 0;
             earning = cost + cost * native_odds;
             if(winner == BetSide.tie )
             {
@@ -461,10 +464,10 @@ namespace Bacc_front
         }
         #endregion
         #region 私有变量
-        private const float BANKER_ODDS = 0.95f;
-        private const float PLAYER_ODDS = 1;
-        private const float TIE_ODDS = 8;
-        private float[] odds_map = new float[3] { BANKER_ODDS, TIE_ODDS, PLAYER_ODDS };
+        private const decimal BANKER_ODDS = 0.95M;
+        private const decimal PLAYER_ODDS = 1;
+        private const decimal TIE_ODDS = 8;
+        private decimal[] odds_map = new decimal[3] { BANKER_ODDS, TIE_ODDS, PLAYER_ODDS };
 
         private ObservableCollection<Player> players;
 

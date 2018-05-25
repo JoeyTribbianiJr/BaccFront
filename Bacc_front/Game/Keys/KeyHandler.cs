@@ -152,11 +152,14 @@ namespace Bacc_front
                     }
                 }
             }
-
         }
         public void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Tab)
+            //if(MainWindow.Instance.IsActive != true)
+            //{
+            //    MainWindow.Instance.Activate();
+            //}
+            if ( ControlBoard.Instance.IsActive &&(e.Key == Key.Up || e.Key == Key.Down))
             {
                 //MessageBox.Show("tab");
                 //if (System.Windows.Forms.Screen.AllScreens.Length == 1)
@@ -166,38 +169,69 @@ namespace Bacc_front
                 //    ControlBoard.Instance.Activate();
                 //}
             }
-            else if (Game.Instance._isInBetting)
+            if (Game.Instance._isInBetting)
             {
-                System.Windows.Forms.Keys keycode;
-                keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
-                if(e.SystemKey == Key.F10)
+                System.Windows.Forms.Keys keycode = System.Windows.Forms.Keys.Space;
+
+                if (e.Key == Key.System)
                 {
-                    keycode = System.Windows.Forms.Keys.F10;
-                    e.Handled = true;
+                    if (e.SystemKey == Key.F10)
+                    {
+                        keycode = System.Windows.Forms.Keys.F10;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.F9)
+                    {
+                        keycode = System.Windows.Forms.Keys.F9;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.F8)
+                    {
+                        keycode = System.Windows.Forms.Keys.F8;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.PageUp)
+                    {
+                        keycode = System.Windows.Forms.Keys.PageUp;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.PageDown)
+                    {
+                        keycode = System.Windows.Forms.Keys.PageDown;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.Home)
+                    {
+                        keycode = System.Windows.Forms.Keys.Home;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.Help)
+                    {
+                        keycode = System.Windows.Forms.Keys.Help;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.End)
+                    {
+                        keycode = System.Windows.Forms.Keys.End;
+                        //e.Handled = true;
+                    }
+                    if (e.SystemKey == Key.Insert)
+                    {
+                        keycode = System.Windows.Forms.Keys.Insert;
+                        //e.Handled = true;
+                    }
                 }
-                if(e.SystemKey == Key.F9)
+                else
                 {
-                    keycode = System.Windows.Forms.Keys.F9;
-                    e.Handled = true;
+                    keycode = (System.Windows.Forms.Keys)KeyInterop.VirtualKeyFromKey(e.Key);
                 }
-                if(e.SystemKey == Key.PageUp)
-                {
-                    keycode = System.Windows.Forms.Keys.PageUp;
-                    e.Handled = true;
-                }
-                if(e.SystemKey == Key.PageDown)
-                {
-                    keycode = System.Windows.Forms.Keys.PageDown;
-                    e.Handled = true;
-                }
-                //if (e.Key == Key.System)
-                //{
-                //}
+               
                 var keymodel = _keyMap[(int)keycode];
                 if (keymodel.IsKey)
                 {
                     keymodel.Pressed = true;
                 }
+                e.Handled = true;
             }
 
         }

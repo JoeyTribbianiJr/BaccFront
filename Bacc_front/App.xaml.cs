@@ -20,7 +20,7 @@ namespace Bacc_front
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
-                System.Windows.MessageBox.Show(args.Exception.Message);
+                //System.Windows.MessageBox.Show(args.Exception.Message);
                 LogHelper.WriteLog(typeof(Object), "UnobservedTaskException:" + sender.ToString() + args.Exception.Message + args.Exception.StackTrace);
                 args.SetObserved();
             };
@@ -79,26 +79,35 @@ namespace Bacc_front
 
         private void Setup()
         {
-            
-            MainWindow w1 = new MainWindow();
-            ControlBoard w2 = new ControlBoard();
+            Screen s1 = Screen.AllScreens[0];
+            Screen s2;
 
-            Screen s2 = Screen.AllScreens[0];
-            Screen s1;
-
-            s1 = Screen.AllScreens.Length >= 2 ? Screen.AllScreens[1] : Screen.AllScreens[0];
+            s2 = Screen.AllScreens.Length >= 2 ? Screen.AllScreens[1] : Screen.AllScreens[0];
 
             Rectangle r1 = s1.Bounds;
             Rectangle r2 = s2.Bounds;
 
-            w1.Top = r1.Top;
-            w1.Left = r1.Left;
+            MainWindow w2 = new MainWindow();
+            ControlBoard w1 = new ControlBoard();
+
+            //w1.Top = r1.Top;
+            w1.Top = 0;
+            w1.Left = 0;
+            //w1.Width = s1.Bounds.Width;
+            //w1.Height = s1.Bounds.Height;
+
+            //w2.Width = s2.Bounds.Width;
+            //w2.Height = s2.Bounds.Height;
             w2.Top = r2.Top;
             w2.Left = r2.Left;
-            w1.Show();
+
             w2.Show();
-            //w1.Owner = w2;
-            ClipCurseHelper.SetCursorInScreen(s2);
+            w1.Show();
+            //w2.Owner = w1;
+            w1.WindowState = WindowState.Maximized;
+            w2.WindowState = WindowState.Maximized;
+            w2.Topmost = true;
+            ClipCurseHelper.SetCursorInScreen(s1);
         }
     }
 }

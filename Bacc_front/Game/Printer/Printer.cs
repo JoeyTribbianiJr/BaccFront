@@ -11,6 +11,7 @@ namespace Bacc_front
     public class Printer
     {
         public bool IsInPrinting;
+        public static bool IsTherePrinter = false;
         public static bool HasPaper = true;
         public static bool IsDoorClosed = true;
         private static SerialPort serialPort;   //串口
@@ -41,7 +42,7 @@ namespace Bacc_front
                 serialPort.Parity = System.IO.Ports.Parity.Odd;//奇校验
                 serialPort.StopBits = System.IO.Ports.StopBits.One;//停止位
                 serialPort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
-                //serialPort.PinChanged += SerialPort_PinChanged;
+                serialPort.PinChanged += SerialPort_PinChanged;
                 OpenPort();
             }
             catch (Exception e)
@@ -238,14 +239,14 @@ namespace Bacc_front
         {
             byte[] testbt = { 0x10, 0x04, 0x04 };
             serialPort.Write(testbt, 0, testbt.Length);
-            System.Threading.Thread.Sleep(100);
+            //System.Threading.Thread.Sleep(100);
         }
         //测试打印机是否开门
         public static void DoorTest()
         {
             byte[] testbt = { 0x10, 0x04, 0x02 };
             serialPort.Write(testbt, 0, testbt.Length);
-            System.Threading.Thread.Sleep(100);
+            //System.Threading.Thread.Sleep(100);
         }
         private void SerialPort_PinChanged(object sender, SerialPinChangedEventArgs e)
         {
@@ -253,6 +254,7 @@ namespace Bacc_front
             // 都会引发PinChanged事件。因此，需要判断究竟是哪个
             // 引脚信号变化引发此事件
             bool b;
+            //MessageBox.Show(e.EventType.ToString());
             try
             {
                 switch (e.EventType)
@@ -265,13 +267,17 @@ namespace Bacc_front
                         break;
                     case System.IO.Ports.SerialPinChange.DsrChanged:
                         b = serialPort.DsrHolding;
-                        if (!b && Setting.Instance._is_print_bill == "打印路单" 
-                            && Game.Instance.CurrentState != GameState.Shuffling 
+                        //MessageBox.Show(b.ToString());
+                        if (!b && Setting.Instance._is_print_bill == "打印路单"
+                            && Game.Instance.CurrentState != GameState.Shuffling
                             && Game.Instance.CurrentState != GameState.Printing)
                         {
-                            Game.Instance.CoreTimer.StopTimer();
-                            //ControlBoard.Instance.btnStartGame.IsEnabled = true;
+                            MainWindow.Instance.Dispatcher.Invoke(new Action(() =>
+                            {
+                                Game.Instance.CoreTimer.StopTimer();
+                            }));
                             MessageBox.Show("打印机故障，本局作废");
+                            //ControlBoard.Instance.btnStartGame.IsEnabled = true;
                         }
                         break;
                     default:
@@ -280,6 +286,7 @@ namespace Bacc_front
             }
             catch (Exception ex)
             {
+
             }
         }
         //主要是在从COM端口中接收数据时触发
@@ -289,6 +296,8 @@ namespace Bacc_front
             try
             {
                 serialPort.Read(door, 0, 1);
+                IsTherePrinter = true;
+                //MessageBox.Show(door[0].ToString());
                 if (door[0] == 0x00)
                 {
                     return;
@@ -309,7 +318,7 @@ namespace Bacc_front
                 {
                     IsDoorClosed = false;
                 }
-                if (Setting.Instance._is_print_bill == "打印路单" 
+                if (Setting.Instance._is_print_bill == "打印路单"
                     && Game.Instance._isGameStarting
                     && Game.Instance.CurrentState != GameState.Shuffling
                     && Game.Instance.CurrentState != GameState.Printing)
@@ -317,17 +326,19 @@ namespace Bacc_front
                     if (door[0] == 0x88)
                     {
                         IsDoorClosed = false;
+                        MainWindow.Instance.Dispatcher.Invoke(new Action(() =>
+                        {
+                            Game.Instance.CoreTimer.StopTimer();
+                        }));
                         MessageBox.Show("打印机门开，本局作废");
-                        Game.Instance.CoreTimer.StopTimer();
                     }
                 }
             }
             catch (Exception ex)
             {
 #if DEBUG
-                MessageBox.Show(door[0].ToString() + ex.Message + ex.StackTrace);
+                //MessageBox.Show(door[0].ToString() + ex.Message + ex.StackTrace);
 #endif
-
             }
         }
         public static void OpenEPSONCashBox(int port)//, int a_intBaudRate, int a_intDataBits)
@@ -372,17 +383,17 @@ namespace Bacc_front
         }
         public void PrintAccount()
         {
-            //var account = Desk.Instance.Accounts;
-            //var str = "";
-            //str += "座位   总上分   总下分   总账\n";
-            //for (int i = 0; i < account.Count; i ++)
-            //{
-            //    var a = account[i];
-            //    str += " " + a.PlayerId + "   " + a.TotalAddScore + " " + a.TotalSubScore + " " + a.TotalAccount;
-            //    str += "\n";
-            //}
-            //str = str.TrimEnd('\n');
-            //Printer.PrintString(Setting.Instance._COM_PORT, str);
+            var table = Game.Instance.Manager.SetAccountDataTable();
+            var str = "";
+            str += "座位   总上分   总下分   总账\n";
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var a = table.Rows[i];
+                str += " " + a[0] + "   " + a[1]+ " " + a[2]+ " " + a[3];
+                str += "\n";
+            }
+            str = str.TrimEnd('\n');
+            PrintString(Setting.Instance._COM_PORT, str);
         }
 
     }

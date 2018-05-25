@@ -143,7 +143,8 @@ namespace Bacc_front
             if (Game.Instance.CurrentState == GameState.Preparing)
             {
                 Game.Instance.SessionIndex = CurSessionIndex;   //读取的之前运行时保存的局数
-                Game.Instance.CurrentSession.SessionId = CurSessionIndex;
+                Game.Instance.ResetSession();
+                //Game.Instance.CurrentSession.SessionId = CurSessionIndex;
             }
         }
         private void InitGameSetting()
